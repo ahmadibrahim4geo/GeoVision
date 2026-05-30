@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">GeoVision</string>
+  <!-- Bottom Nav -->
+  <string name="nav_settings">Settings</string>
+  <string name="nav_calculator">Geocalc</string>
+  <string name="nav_details">Details</string>
+  <string name="nav_layers">Layers</string>
+  <string name="nav_map">Map</string>
+  <!-- Layer Manager -->
+  <string name="layer_manager_title">Layer Manager</string>
+  <string name="no_layers">No layers added</string>
+  <string name="add_layer">Add New Layer</string>
+  <string name="unsupported_format">Unsupported file format</string>
+  <string name="files_imported">files imported</string>
+  <string name="files_skipped">files skipped (unsupported)</string>
+  <string name="layer_menu">Layer menu</string>
+  <string name="details">Details</string>
+  <string name="select_layer">Select a layer</string>
+  <string name="show_on_map">Show on map</string>
+  <string name="transparency">Opacity</string>
+  <string name="delete_layer">Delete Layer</string>
+  <string name="apply">Apply</string>
+  <string name="cancel">Cancel</string>
+  <string name="feature_item">item</string>
+  <!-- Layer Details -->
+  <string name="layer_details_title">Layer Details</string>
+  <string name="layer_details_subtitle">Details of layer %s</string>
+  <string name="back">Back</string>
+  <string name="search_attributes">Search attributes…</string>
+  <string name="attribute_table">Attribute Table (%d features)</string>
+  <string name="file_name">File Name</string>
+  <string name="file_path">Path</string>
+  <string name="crs">Coordinate System (CRS)</string>
+  <string name="extent">Extent</string>
+  <string name="attr_id">ID</string>
+  <string name="attr_diameter">Diameter (mm)</string>
+  <string name="attr_material">Material</string>
+  <string name="attr_status">Status</string>
+  <!-- Details Screen -->
+  <string name="details_screen_title">Details</string>
+  <string name="details_placeholder">Details Screen</string>
+  <string name="details_geom_distribution">Geometry Distribution</string>
+  <string name="details_crs_list">Coordinate Reference Systems</string>
+  <string name="details_all_layers">All Layers</string>
+  <string name="details_no_layers">No layers</string>
+  <string name="details_point">Point</string>
+  <string name="details_line">Line</string>
+  <string name="details_polygon">Polygon</string>
+  <!-- Map Screen -->
+  <string name="map_screen_title">Map Browser</string>
+  <string name="locate_me">Locate me</string>
+  <string name="zoom_in">Zoom in</string>
+  <string name="zoom_out">Zoom out</string>
+  <string name="compass">North</string>
+  <string name="measure_distance">Measure Distance</string>
+  <string name="measure_area">Measure Area</string>
+  <string name="clear_measurement">Clear measurement</string>
+  <string name="distance_label">Distance</string>
+  <string name="area_label">Area</string>
+  <string name="km">km</string>
+  <string name="m">m</string>
+  <string name="mile">mi</string>
+  <string name="feet">ft</string>
+  <string name="sq_km">km²</string>
+  <string name="sq_m">m²</string>
+  <string name="acre">ac</string>
+  <string name="sq_ft">ft²</string>
+  <string name="lat_label">Lat</string>
+  <string name="long_label">Long</string>
+  <string name="north">N</string>
+  <string name="south">S</string>
+  <string name="east">E</string>
+  <string name="west">W</string>
+  <string name="feature_info_title">Feature Details #%s</string>
+  <string name="feature_id">ID</string>
+  <string name="feature_diameter">Diameter</string>
+  <string name="feature_material">Material</string>
+  <string name="feature_status">Status</string>
+  <string name="feature_longitude">Longitude</string>
+  <string name="feature_latitude">Latitude</string>
+  <string name="show_in_table">Show in attribute table</string>
+  <string name="feature_details_title">Feature Details</string>
+  <string name="feature_show_on_map">Show on map</string>
+  <string name="feature_copy_coords">Copy coordinates</string>
+  <string name="field_statistics">Field Statistics</string>
+  <string name="unique_values">Unique</string>
+  <string name="null_values">Empty</string>
+  <string name="most_common_value">Most common</string>
+  <string name="feature_unnamed">value</string>
+  <string name="feature_properties">Properties</string>
+  <string name="no_search_results_table">No search results</string>
+  <string name="no_attributes">No attributes</string>
+  <!-- Settings -->
+  <string name="settings_title">Settings</string>
+  <string name="measurement_units">Measurement Units</string>
+  <string name="unit_metric">Metric (meter, kilometer)</string>
+  <string name="unit_imperial">Imperial (foot, mile)</string>
+  <string name="map_settings">Map Settings</string>
+  <string name="tile_cache_size">Tile Cache Size</string>
+  <string name="tile_cache_desc">Helps load maps faster offline</string>
+  <string name="clear_cache">Clear tile cache</string>
+  <string name="clear">Clear</string>
+  <string name="cache_cleared">Tile cache cleared successfully</string>
+  <string name="cache_failed">Failed to clear cache</string>
+  <string name="language">Language</string>
+  <string name="arabic">العربية</string>
+  <string name="english">English</string>
+  <string name="display">Display</string>
+  <string name="dark_mode">Dark mode</string>
+  <string name="about">About</string>
+  <string name="app_version">App version</string>
+  <string name="terms_of_use">Terms of use</string>
+  <string name="user_guide">How to use</string>
+  <string name="default_map_type">Default Map Type</string>
+  <string name="default_coord_format">Default Coordinate Format</string>
+  <string name="coord_dd">Decimal Degrees (DD)</string>
+  <string name="coord_dms">Degrees/Minutes/Seconds (DMS)</string>
+  <string name="coord_utm">UTM</string>
+  <string name="draw_mode_title">Drawing Mode</string>
+  <string name="draw_mode_polar">Polar (Free)</string>
+  <string name="draw_mode_ortho">Ortho (Horizontal/Vertical)</string>
+  <string name="cache_current_size">Current cache size</string>
+  <string name="calculating">Calculating…</string>
+  <string name="keep_screen_on">Keep screen on</string>
+  <string name="show_basemap">Show basemap</string>
+  <string name="show_basemap_summary">Hide to use layers offline without loading map tiles</string>
+  <string name="measurement">Measurement Labels</string>
+  <string name="measure_symbols">Geometric symbols</string>
+  <string name="msr_len">Length</string>
+  <string name="msr_perim">Perimeter</string>
+  <string name="msr_area">Area</string>
+  <string name="msr_radius">Radius</string>
+  <string name="msr_diam">Diameter</string>
+  <string name="msr_circ">Circumference</string>
+  <string name="msr_area_circle">Circle Area</string>
+  <string name="msr_legend_title">Symbol Legend</string>
+  <string name="msr_legend_switch">Switch to text labels</string>
+  <string name="msr_preview">Preview</string>
+  <string name="msr_preview_distance">Distance</string>
+  <string name="msr_preview_area">Area</string>
+  <string name="msr_preview_circle">Circle</string>
+  <string name="reset_settings">Reset to defaults</string>
+  <string name="reset_settings_confirm">Are you sure? This will reset all settings.</string>
+  <string name="settings_reset">Settings reset to defaults</string>
+  <string name="map_name_mapnik">OpenStreetMap</string>
+  <string name="map_name_transport">Transport</string>
+  <string name="map_name_satellite">Satellite + Labels</string>
+  <string name="map_name_satellite_clean">Satellite (bare)</string>
+  <string name="map_name_hybrid">Topo + Labels</string>
+  <string name="map_name_topo">Topographic</string>
+  <string name="map_name_dark">Dark Mode</string>
+  <string name="map_name_hikebike">Hike &amp; Bike</string>
+  <string name="map_name_usgs_sat">USGS Satellite</string>
+  <string name="map_name_usgs_topo">USGS Topographic</string>
+  <string name="map_name_wikimedia">Wikimedia OSM</string>
+  <string name="map_name_natgeo">National Geographic</string>
+  <string name="map_name_ocean">Ocean</string>
+  <string name="map_name_gray">Light Gray Canvas</string>
+  <string name="map_name_dark_gray">Dark Gray Canvas</string>
+  <string name="map_name_relief">Shaded Relief</string>
+  <string name="map_name_google_road">Google Roads</string>
+  <string name="map_name_google_sat">Google Satellite</string>
+  <string name="map_name_google_hybrid">Google Hybrid</string>
+  <string name="map_name_esri_streets">Esri World Street</string>
+  <string name="map_name_google_terrain">Google Terrain</string>
+  <string name="map_name_yandex_sat">Yandex Satellite</string>
+  <string name="map_name_yandex_hybrid">Yandex Hybrid</string>
+  <string name="map_name_bing_road">Bing Roads</string>
+  <string name="map_name_bing_sat">Bing Satellite</string>
+  <string name="map_name_bing_hybrid">Bing Hybrid</string>
+  <string name="map_name_opentopo">OpenTopoMap</string>
+  <string name="map_category_street">Street Maps</string>
+  <string name="map_category_satellite">Satellite</string>
+  <string name="map_category_hybrid">Hybrid</string>
+  <string name="map_category_terrain">Terrain</string>
+  <string name="map_category_marine">Marine</string>
+  <string name="map_group_osm">OpenStreetMap</string>
+  <string name="map_group_esri">Esri</string>
+  <string name="map_group_google">Google</string>
+  <string name="map_group_usgs">USGS</string>
+  <string name="ok">OK</string>
+  <!-- Terms Dialog -->
+  <string name="terms_title">Terms of Use</string>
+  <string name="terms_body">Terms of Use
+
+Please read the following Terms of Use carefully before using the application. By using this application, you agree to comply with these terms.
+
+1. Service Description
+This application provides map viewing services, distance and area measurement tools, geographic layer management, and the use of various map data sources to support geospatial work and spatial data analysis.
+
+2. Use of the Application
+The application may only be used for lawful purposes. It is prohibited to use it for any activity that violates laws, disrupts systems, or infringes upon the rights of others.
+
+3. Data Accuracy
+The application relies on various data sources such as maps and satellite data. We do not guarantee absolute data accuracy, and results may vary depending on the source or device settings.
+
+4. Data Sources
+The application may use external data sources such as ESRI maps or other free mapping services. The use of these sources is subject to the terms and conditions of each respective provider.
+
+5. Measurements
+Distance and area measurement results are approximate and depend on data accuracy and the coordinate system used. They should not be considered precise engineering measurements for official use unless independently verified.
+
+6. Intellectual Property
+All elements of the application, including design, user interface, programming structure, and technical features, are the property of the application developer. They may not be copied or redistributed without permission.
+
+7. Service Modifications
+We reserve the right to update, modify, or discontinue any part of the application at any time without prior notice, in order to improve performance or add new features.
+
+8. Limitation of Liability
+We are not responsible for any losses or damages arising from the use of the application or reliance on its results, whether direct or indirect.
+
+9. Developer Information and Contact
+This application was developed by Engineer/ Ahmed Ibrahim. You can contact via phone number: +20 111 191 5925.
+
+10. Acceptance of Terms and Privacy
+By using the application, you acknowledge that you have read, understood, and agreed to all the above terms. You also acknowledge that your use of the application is entirely voluntary, and that the application does not collect any personal data, perform user tracking, or store any identifying or sensitive information. All data processing within the application is strictly limited to enabling core functionalities and is not shared with any third party.</string>
+  <!-- Privacy Policy -->
+  <string name="privacy_title">Privacy Policy</string>
+  <string name="privacy_body">Privacy Policy
+
+1. Data Collection
+This application does not collect any personal data from users. It does not request any identifying information such as name, email address, location, or any sensitive data.
+
+2. Data Usage
+No personal data is stored or processed outside the device. All operations within the application are performed locally, solely for the purpose of enabling core features such as measurement and map visualization.
+
+3. Data Sharing
+The application does not share any data with any external party or third party under any circumstances.
+
+4. Third-Party Services
+The application may rely on external map services (such as ESRI or free map data sources). These services may have their own privacy policies, and the application has no control over how they handle data.
+
+5. Security
+Users are not tracked, and no user profiles are created. No user behavior analytics tools are used within the application.
+
+6. Policy Changes
+This Privacy Policy may be updated from time to time. Any changes will be published within the application or included in new updates.
+
+7. Consent
+By using this application, you fully agree to this Privacy Policy.</string>
+  <!-- User Guide -->
+  <string name="guide_body">GeoVision is a spatial data browser and GIS application designed for mobile devices. It enables you to view, measure, and manage geographic data directly on your phone or tablet.
+
+What You Can Do with GeoVision
+
+View Maps:
+– OpenStreetMap, satellite imagery (with or without labels), topographic maps, transport maps, and dark mode maps.
+– Switch between map types with one tap.
+
+Import Geographic Data:
+– Open Shapefile (.shp with .dbf, .shx, .prj), GeoJSON (.geojson), KML (.kml), GPX (.gpx), GeoPackage (.gpkg), and geotagged photos.
+– Shapefiles are automatically detected with their companion files and support CRS transformation (UTM, Web Mercator → WGS84). ZIP archives containing shapefiles are extracted automatically.
+– The app handles Arabic DBF encoding (CP1256), UTF-8, and ISO-8859-1.
+
+Measure on the Map:
+– Tap the ruler icon to start measuring.
+– Distance: tap points to draw a line; the app shows the total length.
+– Area: tap points to draw a polygon; the app shows the perimeter and area.
+– Circle: tap the center, then tap a point on the edge; the app shows radius, diameter, circumference, and area.
+– Switch between metric (meter, kilometer, hectare) and imperial (feet, mile, acre) units.
+– Results can be saved as a new layer for future reference.
+
+Manage Layers:
+– Imported data appears in the Layers screen.
+– Toggle visibility, reorder, change colors and symbols (point size, line width, fill).
+– View the attribute table for each layer and search within it.
+– Tap a layer to zoom to its extent on the map.
+– Delete layers when no longer needed.
+
+GPS Location:
+– Tap the GPS button to center the map on your current location.
+– The blue dot moves as you move.
+– Tap again to disable GPS tracking.
+
+Coordinate Display:
+– See your current map center coordinates in Degrees Decimal (DD), Degrees Minutes Seconds (DMS), or UTM format.
+– Change the format in Settings.
+
+Grid Overlay:
+– Enable a coordinate grid on the map for reference.
+
+Screenshot:
+– Capture the current map view as an image.
+
+Bookmarks:
+– Save map locations for quick navigation.
+
+Search:
+– Search for features within your imported layers by name or property value.
+
+Precision Input:
+– In measurement mode, you can precisely position the crosshair and add points manually for accurate placement.
+
+All data processing is done locally on your device. No data is uploaded or shared with any server.</string>
+  <!-- Measure -->
+  <string name="measure_tap_instruction">Tap on the map to add points</string>
+  <string name="measure_complete_tap_instruction">Tap near the first point to close the polygon</string>
+  <string name="measure_points_count">Points: %d</string>
+  <string name="measure_segment">Seg</string>
+  <string name="measure_side">Side</string>
+  <string name="measure_close_segment">Close</string>
+  <string name="measure_new">Measure New</string>
+  <string name="undo">Undo</string>
+  <string name="redo">Redo</string>
+  <string name="precision_instr">Move map to position crosshair, then tap Add Point</string>
+  <string name="add_point">Add Point</string>
+  <string name="measure_complete">Complete</string>
+  <string name="measure_completed">Measurement Completed</string>
+  <string name="ha">ha</string>
+  <string name="unit_auto">Auto</string>
+  <string name="change_color">Change Color</string>
+  <string name="move_up">Move Up</string>
+  <string name="move_down">Move Down</string>
+  <string name="symbol_properties">Symbol Properties</string>
+  <string name="point_size">Point Size</string>
+  <string name="line_width">Line Width</string>
+  <string name="copy_result">Copy Result</string>
+  <string name="copied">Copied</string>
+  <string name="perimeter">Perimeter</string>
+  <string name="details_summary">Summary</string>
+  <string name="file_types">File Types</string>
+  <string name="layer_breakdown">Layer Breakdown</string>
+  <!-- Feature Status -->
+  <string name="status_active">Active</string>
+  <string name="status_maintenance">Maintenance</string>
+  <string name="status_broken">Broken</string>
+  <!-- Splash -->
+  <string name="splash_description">Spatial Data Browser on Mobile</string>
+  <!-- Map Screen Extras -->
+  <string name="map_type">Map type</string>
+  <string name="grid">Grid</string>
+  <string name="screenshot">Screenshot</string>
+  <string name="search">Search features</string>
+  <string name="bookmarks">Bookmarks</string>
+  <string name="search_hint">Search by name or property…</string>
+  <string name="no_search_results">No results</string>
+  <string name="bookmark_name">Bookmark name</string>
+  <string name="save">Save</string>
+  <string name="screenshot_saved">Screenshot saved</string>
+  <string name="loading_tiles">Loading tiles…</string>
+  <string name="draw_mode">Draw</string>
+  <string name="pan_mode">Pan</string>
+  <string name="show_details">Show details</string>
+  <string name="hide_details">Hide details</string>
+  <string name="details_tip">View layer details and properties</string>
+  <!-- Tooltips -->
+  <string name="locate_me_tip">Show your location on the map</string>
+    <string name="zoom_in_tip">Zoom In</string>
+    <string name="zoom_out_tip">Zoom Out</string>
+  <string name="compass_tip">Reset map rotation to north</string>
+    <string name="map_type_tip">Switch Map Style</string>
+  <string name="grid_tip">Show/hide latitude/longitude grid overlay</string>
+  <string name="screenshot_tip">Save current map view as a PNG image</string>
+  <string name="search_tip">Search features by name or attribute value</string>
+  <string name="bookmarks_tip">Save and manage your favorite locations</string>
+  <string name="photos_tip">Show/hide geo-tagged photos on the map</string>
+  <string name="coord_toggle_tip">Switch between DD, DMS, and UTM formats</string>
+  <string name="zoom_level_desc">Zoom level %d</string>
+  <string name="lat_label_large">Lat</string>
+  <string name="lon_label_large">Lon</string>
+  <string name="zone_label">Zone No.</string>
+  <string name="easting_label">Easting</string>
+  <string name="northing_label">Northing</string>
+  <string name="copy_coord">Copy</string>
+  <string name="lon_label_short">LON</string>
+  <string name="lat_label_short">LAT</string>
+  <string name="zone_label_short">ZONE</string>
+  <string name="easting_label_short">EAST</string>
+  <string name="northing_label_short">NRTH</string>
+  <!-- New Measurement Tools -->
+  <string name="measure_distance_short">Distance</string>
+  <string name="measure_area_short">Area</string>
+  <string name="measure_circle_short">Circle</string>
+  <string name="measure_select_short">Select</string>
+  <string name="measure_coord_short">Coord</string>
+  <string name="measure_distance_tip">Measure distance via crosshair</string>
+  <string name="measure_area_tip">Measure area via crosshair</string>
+  <string name="measure_circle_tip">Draw circle to measure circumference and area</string>
+  <string name="measure_select_tip">Select a drawn element to view spatial measurements</string>
+  <string name="measure_coord_tip">Record point coordinates at crosshair</string>
+  <string name="circle_center">Center</string>
+  <string name="circle_radius">Radius</string>
+  <string name="circle_diameter">Diameter</string>
+  <string name="circle_circumference">Circumference</string>
+  <string name="circle_area">Area</string>
+  <string name="select_element">Select Element</string>
+  <string name="select_none">Tap on a drawn element to view its data</string>
+  <string name="coord_readout">Coordinates</string>
+  <string name="distance_instruction">Move crosshair and tap Add Point</string>
+  <string name="area_instruction">Move crosshair and tap Add Point (≥3 points to close)</string>
+  <string name="circle_instr_1">Move crosshair to circle center, tap Add Point</string>
+  <string name="circle_instr_2">Move crosshair to circle edge, tap Add Point</string>
+  <string name="select_instruction">Tap on any drawn element on the map</string>
+  <string name="coord_instruction">Move crosshair and tap Add Point to record coordinates</string>
+  <string name="close">Close</string>
+  <string name="copy_all">Copy All</string>
+  <!-- File Parsing -->
+  <string name="parsing_geojson">Parsing GeoJSON file…</string>
+  <string name="parsing_gdb">Reading File GeoDatabase…</string>
+  <string name="select_gdb">Select GeoDatabase folder (.gdb)</string>
+  <string name="gdb_added">GeoDatabase added</string>
+  <string name="parse_error">Failed to parse file</string>
+  <string name="loading_layer_data">Loading layer data…</string>
+  <string name="add_layer_hint">Browse your device for GIS files to add</string>
+  <string name="deleted_layer">deleted</string>
+  <string name="undo_delete">Undo</string>
+  <string name="refresh">Refresh</string>
+  <string name="zoom_in_fast">Zoom in fast</string>
+    <string name="zoom_out_fast">Zoom out fast</string>
+    <string name="tile_failed">Tile source failed, fell back to OpenStreetMap</string>
+    <string name="zoom_in_fast_tip">Zoom In Fast</string>
+    <string name="zoom_out_fast_tip">Zoom Out Fast</string>
+  <string name="measure_ellipse_short">Ellipse</string>
+  <string name="measure_ellipse_tip">Draw ellipse to measure axes and area</string>
+  <string name="ellipse_instr_1">Move crosshair to ellipse center, tap Add Point</string>
+  <string name="ellipse_instr_2">Move crosshair to major axis edge, tap Add Point</string>
+  <string name="ellipse_instr_3">Move crosshair to minor axis edge, tap Add Point</string>
+  <string name="ellipse_major_axis">Major axis</string>
+  <string name="ellipse_minor_axis">Minor axis</string>
+  <string name="ellipse_perimeter">Perimeter</string>
+  <string name="ellipse_area">Area</string>
+  <string name="ellipse_angle_label">Angle</string>
+  <string name="elevation">Elev</string>
+  <string name="map_classification">Map Classification</string>
+  <string name="map_classification_desc">Choose how basemaps are grouped in menus</string>
+  <string name="map_classification_provider">By Provider</string>
+  <string name="map_classification_category">By Category</string>
+  <string name="snap_distance">Snap to points</string>
+  <string name="snap_distance_desc">Snap crosshair to layer points while measuring</string>
+  <string name="snap_enable">Enable snapping</string>
+  <string name="snap_distance_meters">Snap distance</string>
+  <string name="msr_cat_distance">Distance &amp; Perimeter</string>
+  <string name="msr_cat_area">Area</string>
+  <string name="msr_cat_circle">Circle</string>
+  <string name="msr_cat_ellipse">Ellipse</string>
+  <!-- Geo Calculator -->
+  <string name="calculator_title">Geo Calculator</string>
+  <string name="calculator_input_section">Input</string>
+  <string name="calculator_input_placeholder"></string>
+  <string name="calculator_convert">Convert</string>
+  <string name="calculator_clear">Clear</string>
+  <string name="calculator_copy_all">Copy All</string>
+  <string name="calculator_export_csv">CSV</string>
+  <string name="calculator_export_text">Text</string>
+  <string name="calculator_auto_detect">Auto Detect</string>
+  <string name="calculator_col_original">Original</string>
+  <string name="calculator_col_epsg3857">EPSG:3857</string>
+  <string name="calculator_results_section">Results</string>
+  <string name="calculator_share_title">Share coordinates</string>
+  <string name="calculator_input_formats_title">Supported formats:</string>
+  <string name="calculator_format_dd">DD – Decimal Degrees (e.g. 30.0444, 31.2357)</string>
+  <string name="calculator_format_dms">DMS – Degrees/Minutes/Seconds (e.g. 30°02\'39.8\"N, 31°14\'08.5\"E)</string>
+  <string name="calculator_format_ddm">DDM – Degrees/Decimal Minutes (e.g. 30°02.6667\'N, 31°14.1420\'E)</string>
+  <string name="calculator_format_utm">UTM – Universal Transverse Mercator (e.g. 36N 313248 3324191)</string>
+  <string name="calculator_output_format">Output formats</string>
+  <string name="calculator_format_all">All</string>
+  <string name="calculator_copy_input">Copy</string>
+  <string name="calculator_copy_table">Copy Table</string>
+  <string name="calculator_hemisphere_lat">Latitude hemisphere</string>
+  <string name="calculator_hemisphere_lon">Longitude hemisphere</string>
+  <string name="calculator_map_section">Points on Map</string>
+  <string name="calculator_utm_zone">Zone Number</string>
+  <string name="delete_layer_confirm">Are you sure you want to delete "%s"?</string>
+  <string name="delete">Delete</string>
+  <string name="details_add_layer_hint">Import a GIS file to get started</string>
+  <string name="details_add_layer_action">Import Layer</string>
+  <string name="details_geom_points">Points</string>
+  <string name="details_geom_lines">Lines</string>
+  <string name="details_geom_polygons">Polygons</string>
+</resources>

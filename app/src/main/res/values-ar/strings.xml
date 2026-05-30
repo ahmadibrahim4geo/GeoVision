@@ -1,0 +1,471 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+  <string name="app_name">GeoVision</string>
+  <!-- Bottom Nav -->
+  <string name="nav_settings">الإعدادات</string>
+  <string name="nav_calculator">الآلة الحاسبة</string>
+  <string name="nav_details">التفاصيل</string>
+  <string name="nav_layers">الطبقات</string>
+  <string name="nav_map">الخريطة</string>
+  <!-- Layer Manager -->
+  <string name="layer_manager_title">إدارة الطبقات</string>
+  <string name="no_layers">لا توجد طبقات مضافة</string>
+  <string name="add_layer">إضافة طبقة جديدة</string>
+  <string name="unsupported_format">صيغة ملف غير مدعومة</string>
+  <string name="files_imported">ملف تم استيراده</string>
+  <string name="files_skipped">ملف تم تخطيه (غير مدعوم)</string>
+  <string name="layer_menu">قائمة الطبقة</string>
+  <string name="details">التفاصيل</string>
+  <string name="select_layer">اختر طبقة</string>
+  <string name="show_on_map">عرض على الخريطة</string>
+  <string name="transparency">ضبط الشفافية</string>
+  <string name="delete_layer">حذف الطبقة</string>
+  <string name="apply">تطبيق</string>
+  <string name="cancel">إلغاء</string>
+  <string name="feature_item">عنصر</string>
+  <!-- Layer Details -->
+  <string name="layer_details_title">تفاصيل الطبقات</string>
+  <string name="layer_details_subtitle">تفاصيل طبقة %s</string>
+  <string name="back">رجوع</string>
+  <string name="search_attributes">البحث في السمات…</string>
+  <string name="attribute_table">جدول السمات (%d عنصراً)</string>
+  <string name="file_name">اسم الملف</string>
+  <string name="file_path">اسم المسار</string>
+  <string name="crs">نظام الإحداثيات (CRS)</string>
+  <string name="extent">المدى (Extent)</string>
+  <string name="attr_id">المعرف</string>
+  <string name="attr_diameter">القطر (mm)</string>
+  <string name="attr_material">المادة</string>
+  <string name="attr_status">الحالة</string>
+  <!-- Details Screen -->
+  <string name="details_screen_title">التفاصيل</string>
+  <string name="details_placeholder">شاشة التفاصيل</string>
+  <string name="details_geom_distribution">توزيع الهندسة</string>
+  <string name="details_crs_list">أنظمة الإسناد المكاني</string>
+  <string name="details_all_layers">جميع الطبقات</string>
+  <string name="details_no_layers">لا توجد طبقات</string>
+  <string name="details_point">نقطة</string>
+  <string name="details_line">خط</string>
+  <string name="details_polygon">مضلع</string>
+  <!-- Map Screen -->
+  <string name="map_screen_title">مستعرض الطبقات</string>
+  <string name="locate_me">تحديد موقعي</string>
+  <string name="zoom_in">تكبير</string>
+  <string name="zoom_out">تصغير</string>
+  <string name="compass">اتجاه الشمال</string>
+  <string name="measure_distance">قياس مسافة</string>
+  <string name="measure_area">قياس مساحة</string>
+  <string name="clear_measurement">مسح القياس</string>
+  <string name="distance_label">المسافة</string>
+  <string name="area_label">المساحة</string>
+  <string name="km">كم</string>
+  <string name="m">م</string>
+  <string name="mile">ميل</string>
+  <string name="feet">قدم</string>
+  <string name="sq_km">كم²</string>
+  <string name="sq_m">م²</string>
+  <string name="acre">فدان</string>
+  <string name="sq_ft">قدم²</string>
+  <string name="lat_label">خط العرض</string>
+  <string name="long_label">خط الطول</string>
+  <string name="north">شمالاً</string>
+  <string name="south">جنوباً</string>
+  <string name="east">شرقاً</string>
+  <string name="west">غرباً</string>
+  <string name="feature_info_title">تفاصيل العنصر #%s</string>
+  <string name="feature_id">المعرف</string>
+  <string name="feature_diameter">القطر</string>
+  <string name="feature_material">المادة</string>
+  <string name="feature_status">الحالة</string>
+  <string name="feature_longitude">خط الطول</string>
+  <string name="feature_latitude">خط العرض</string>
+  <string name="show_in_table">عرض في جدول السمات</string>
+  <string name="feature_details_title">تفاصيل المعلم</string>
+  <string name="feature_show_on_map">عرض على الخريطة</string>
+  <string name="feature_copy_coords">نسخ الإحداثيات</string>
+  <string name="field_statistics">إحصاءات الحقول</string>
+  <string name="unique_values">قيم فريدة</string>
+  <string name="null_values">فارغة</string>
+  <string name="most_common_value">الأكثر تكراراً</string>
+  <string name="feature_unnamed">قيمة</string>
+  <string name="feature_properties">الخصائص</string>
+  <string name="no_search_results_table">لا توجد نتائج للبحث</string>
+  <string name="no_attributes">لا توجد سمات</string>
+  <!-- Settings -->
+  <string name="settings_title">الإعدادات</string>
+  <string name="measurement_units">وحدات القياس</string>
+  <string name="unit_metric">نظام متري (متر، كيلومتر)</string>
+  <string name="unit_imperial">نظام إمبراطوري (قدم، ميل)</string>
+  <string name="map_settings">إعدادات الخريطة</string>
+  <string name="tile_cache_size">حجم التخزين المؤقت (Tile Cache)</string>
+  <string name="tile_cache_desc">يساعد في تحميل الخرائط بشكل أسرع دون اتصال</string>
+  <string name="clear_cache">مسح التخزين المؤقت</string>
+  <string name="clear">مسح</string>
+  <string name="cache_cleared">تم مسح التخزين المؤقت بنجاح</string>
+  <string name="cache_failed">فشل المسح</string>
+  <string name="language">اللغة</string>
+  <string name="arabic">العربية</string>
+  <string name="english">English</string>
+  <string name="display">العرض</string>
+  <string name="dark_mode">الوضع الداكن</string>
+  <string name="about">حول التطبيق</string>
+  <string name="app_version">إصدار التطبيق</string>
+  <string name="terms_of_use">شروط الاستخدام</string>
+  <string name="user_guide">طريقة الاستخدام</string>
+  <string name="default_map_type">نوع الخريطة الافتراضي</string>
+  <string name="default_coord_format">تنسيق الإحداثيات الافتراضي</string>
+  <string name="coord_dd">درجات عشرية (DD)</string>
+  <string name="coord_dms">درجات/دقائق/ثوان (DMS)</string>
+  <string name="coord_utm">UTM</string>
+  <string name="draw_mode_title">نمط الرسم</string>
+  <string name="draw_mode_polar">قطبي (حر)</string>
+  <string name="draw_mode_ortho">عمودي (أفقي/رأسي)</string>
+  <string name="cache_current_size">حجم التخزين المؤقت الحالي</string>
+  <string name="calculating">جارٍ الحساب…</string>
+  <string name="keep_screen_on">إبقاء الشاشة مضاءة</string>
+  <string name="show_basemap">إظهار الخريطة الأساسية</string>
+  <string name="show_basemap_summary">إخفاؤها للعمل على الطبقات دون اتصال بدون تحميل بلاطات</string>
+  <string name="measurement">تسميات القياس</string>
+  <string name="measure_symbols">رموز هندسية</string>
+  <string name="msr_len">طول</string>
+  <string name="msr_perim">محيط</string>
+  <string name="msr_area">مساحة</string>
+  <string name="msr_radius">نصف قطر</string>
+  <string name="msr_diam">قطر</string>
+  <string name="msr_circ">محيط الدائرة</string>
+  <string name="msr_area_circle">مساحة الدائرة</string>
+  <string name="msr_legend_title">دليل الرموز</string>
+  <string name="msr_legend_switch">التبديل إلى النص</string>
+  <string name="msr_preview">معاينة</string>
+  <string name="msr_preview_distance">مسافة</string>
+  <string name="msr_preview_area">مساحة</string>
+  <string name="msr_preview_circle">دائرة</string>
+  <string name="reset_settings">إعادة ضبط الإعدادات</string>
+  <string name="reset_settings_confirm">هل أنت متأكد؟ سيتم إعادة جميع الإعدادات إلى الوضع الافتراضي.</string>
+  <string name="settings_reset">تم إعادة ضبط الإعدادات</string>
+  <string name="map_name_mapnik">خريطة الشارع المفتوحة</string>
+  <string name="map_name_transport">النقل</string>
+  <string name="map_name_satellite">قمر صناعي + عناوين</string>
+  <string name="map_name_satellite_clean">قمر صناعي بدون عناوين</string>
+  <string name="map_name_hybrid">طبوغرافي + عناوين</string>
+  <string name="map_name_topo">طبوغرافية</string>
+  <string name="map_name_dark">الوضع الداكن</string>
+  <string name="map_name_hikebike">المشي والدراجات</string>
+  <string name="map_name_usgs_sat">قمر صناعي USGS</string>
+  <string name="map_name_usgs_topo">طبوغرافية USGS</string>
+  <string name="map_name_wikimedia">ويكيميديا OSM</string>
+  <string name="map_name_natgeo">ناشونال جيوغرافيك</string>
+  <string name="map_name_ocean">المحيطات</string>
+  <string name="map_name_gray">رمادي فاتح</string>
+  <string name="map_name_dark_gray">رمادي داكن</string>
+  <string name="map_name_relief">تضاريس مظللة</string>
+  <string name="map_name_google_road">جوجل طرق</string>
+  <string name="map_name_google_sat">جوجل قمر صناعي</string>
+  <string name="map_name_google_hybrid">جوجل هايبرد</string>
+  <string name="map_name_esri_streets">شوارع Esri العالمية</string>
+  <string name="map_name_google_terrain">تضاريس جوجل</string>
+  <string name="map_name_yandex_sat">قمر صناعي ياندكس</string>
+  <string name="map_name_yandex_hybrid">هايبرد ياندكس</string>
+    <string name="map_name_bing_road">بنج طرق</string>
+    <string name="map_name_bing_sat">بنج قمر صناعي</string>
+    <string name="map_name_bing_hybrid">بنج هايبرد</string>
+  <string name="map_name_opentopo">OpenTopoMap</string>
+  <string name="map_category_street">خرائط الشوارع</string>
+  <string name="map_category_satellite">قمر صناعي</string>
+  <string name="map_category_hybrid">هايبرد</string>
+  <string name="map_category_terrain">تضاريس</string>
+  <string name="map_category_marine">بحري</string>
+  <string name="map_group_osm">خريطة الشارع المفتوحة</string>
+  <string name="map_group_esri">Esri</string>
+  <string name="map_group_google">جوجل</string>
+  <string name="map_group_usgs">USGS</string>
+  <string name="ok">موافق</string>
+  <!-- Terms Dialog -->
+  <string name="terms_title">شروط الاستخدام</string>
+  <string name="terms_body">شروط الاستخدام
+
+يرجى قراءة شروط الاستخدام التالية بعناية قبل استخدام التطبيق. باستخدامك للتطبيق فإنك توافق على الالتزام بهذه الشروط.
+
+1. التعريف بالخدمة
+يوفر هذا التطبيق خدمات عرض الخرائط، وقياس المسافات والمساحات، وإدارة الطبقات الجغرافية، واستخدام مصادر بيانات خرائطية مختلفة بهدف دعم الأعمال الجغرافية وتحليل البيانات المكانية.
+
+2. استخدام التطبيق
+يُسمح باستخدام التطبيق للأغراض المشروعة فقط، ويُمنع استخدامه في أي نشاط مخالف للقوانين أو يهدف إلى الإضرار بالنظام أو انتهاك حقوق الآخرين.
+
+3. دقة البيانات
+يعتمد التطبيق على مصادر بيانات مختلفة مثل الخرائط وبيانات الأقمار الصناعية. لا نضمن دقة البيانات بشكل مطلق، وقد تختلف النتائج حسب المصدر أو إعدادات الجهاز.
+
+4. مصادر البيانات
+قد يستخدم التطبيق مصادر بيانات خارجية مثل خرائط ESRI أو مصادر خرائط مجانية أخرى، ويخضع استخدام هذه المصادر لشروط كل مزود خدمة على حدة.
+
+5. القياسات
+نتائج قياس المسافات والمساحات تقريبية وتعتمد على دقة البيانات ونظام الإحداثيات المستخدم، ولا يُعتد بها كقياسات هندسية دقيقة في الحالات الرسمية إلا إذا تم التحقق منها.
+
+6. الملكية الفكرية
+جميع عناصر التطبيق من تصميم وواجهة برمجية وخصائص تقنية هي ملك لمطور التطبيق، ولا يجوز نسخها أو إعادة توزيعها دون إذن.
+
+7. التعديلات على الخدمة
+نحتفظ بالحق في تحديث أو تعديل أو إيقاف أي جزء من التطبيق في أي وقت دون إشعار مسبق بهدف تحسين الأداء أو إضافة ميزات جديدة.
+
+8. حدود المسؤولية
+لا نتحمل أي مسؤولية عن أي خسائر أو أضرار ناتجة عن استخدام التطبيق أو الاعتماد على نتائجه بشكل مباشر أو غير مباشر.
+
+9. معلومات المطور والتواصل
+تم تطوير هذا التطبيق بواسطة المهندس/ أحمد إبراهيم، ويمكن التواصل عبر الرقم: +20 111 191 5925.
+
+10. قبول الشروط والخصوصية
+باستخدامك للتطبيق فإنك تقر بأنك قرأت وفهمت ووافقت على جميع الشروط المذكورة أعلاه. كما تقر بأن استخدامك للتطبيق يتم بمحض إرادتك، وأن التطبيق لا يقوم بجمع أي بيانات شخصية، ولا يقوم بعمليات تتبع للمستخدمين أو تخزين أي معلومات تعريفية أو حساسة تخص المستخدمين، ويتم التعامل مع البيانات داخل التطبيق فقط لغرض تشغيل الميزات الأساسية دون مشاركتها مع أي طرف ثالث.</string>
+  <!-- Privacy Policy -->
+  <string name="privacy_title">سياسة الخصوصية</string>
+  <string name="privacy_body">سياسة الخصوصية
+
+1. جمع البيانات
+هذا التطبيق لا يقوم بجمع أي بيانات شخصية من المستخدمين، ولا يطلب معلومات تعريفية مثل الاسم أو البريد الإلكتروني أو الموقع أو أي بيانات حساسة.
+
+2. استخدام البيانات
+لا يتم تخزين أو معالجة أي بيانات شخصية خارج الجهاز. جميع العمليات داخل التطبيق تتم محليًا بهدف تشغيل الميزات الأساسية فقط مثل القياس وعرض الخرائط.
+
+3. مشاركة البيانات
+لا يقوم التطبيق بمشاركة أي بيانات مع أي جهة خارجية أو طرف ثالث تحت أي ظرف.
+
+4. خدمات الطرف الثالث
+قد يعتمد التطبيق على خدمات خرائط خارجية (مثل ESRI أو مصادر خرائط مجانية)، وهذه الخدمات قد يكون لها سياسات خصوصية خاصة بها، ولا يتحكم التطبيق في طريقة تعاملها مع البيانات.
+
+5. الأمان
+لا يتم تتبع المستخدمين أو إنشاء ملفات تعريف (Profiles)، ولا يتم استخدام أي أدوات تحليل سلوك المستخدم داخل التطبيق.
+
+6. التعديلات على السياسة
+قد يتم تحديث سياسة الخصوصية من وقت لآخر، وسيتم نشر أي تغييرات داخل التطبيق أو ضمن التحديثات الجديدة.
+
+7. الموافقة
+باستخدامك للتطبيق فإنك توافق على هذه السياسة بالكامل.</string>
+  <!-- User Guide -->
+  <string name="guide_body">تطبيق GeoVision هو متصفح بيانات مكانية ونظام معلومات جغرافية (GIS) صمم خصيصاً للأجهزة المحمولة. يتيح لك عرض وقياس وإدارة البيانات الجغرافية مباشرة على هاتفك أو جهازك اللوحي.
+
+ما يمكنك فعله مع GeoVision
+
+عرض الخرائط:
+– OpenStreetMap، صور الأقمار الصناعية (مع أو بدون أسماء)، خرائط طبوغرافية، خرائط النقل، والوضع الليلي.
+– التبديل بين أنواع الخرائط بنقرة واحدة.
+
+استيراد البيانات الجغرافية:
+– فتح ملفات Shapefile (.shp مع .dbf و .shx و .prj)، GeoJSON (.geojson)، KML (.kml)، GPX (.gpx)، GeoPackage (.gpkg)، والصور الجغرافية (GeoPhoto).
+– يتم اكتشاف الملفات المساعدة لـ Shapefile تلقائياً مع دعم تحويل الإسناد (UTM, Web Mercator ← WGS84). يتم استخراج ملفات ZIP التي تحتوي على Shapefiles تلقائياً.
+– يدعم التطبيق ترميز DBF العربي (CP1256) و UTF-8 و ISO-8859-1.
+
+القياس على الخريطة:
+– اضغط على أيقونة المسطرة لبدء القياس.
+– المسافة: انقر على الخريطة لرسم خط؛ يظهر الطول الإجمالي.
+– المساحة: انقر لرسم مضلع؛ يظهر المحيط والمساحة.
+– الدائرة: انقر لتعيين المركز، ثم انقر على حافة الدائرة؛ يظهر نصف القطر والقطر والمحيط والمساحة.
+– التبديل بين الوحدات المترية (متر، كيلومتر، هكتار) والإمبراطورية (قدم، ميل، فدان).
+– يمكن حفظ النتائج كطبقة جديدة للرجوع إليها لاحقاً.
+
+إدارة الطبقات:
+– تظهر البيانات المستوردة في شاشة الطبقات.
+– إظهار/إخفاء الطبقات، تغيير الترتيب، تغيير الألوان والرموز (حجم النقطة، عرض الخط، لون التعبئة).
+– عرض جدول السمات لكل طبقة والبحث داخله.
+– اضغط على طبقة لتكبير الخريطة إلى نطاقها.
+– حذف الطبقات غير المرغوب فيها.
+
+تحديد الموقع (GPS):
+– اضغط على زر GPS لتوسيط الخريطة على موقعك الحالي.
+– تتحرك النقطة الزرقاء مع حركتك.
+– اضغط مرة أخرى لإيقاف تتبع الموقع.
+
+عرض الإحداثيات:
+– رؤية إحداثيات مركز الخريطة الحالي بتنسيق DD أو DMS أو UTM.
+– تغيير التنسيق من الإعدادات.
+
+شبكة الإحداثيات:
+– تفعيل شبكة إحداثيات على الخريطة للمساعدة في التحديد.
+
+لقطة شاشة:
+– التقاط صورة لعرض الخريطة الحالي.
+
+العلامات المرجعية (Bookmarks):
+– حفظ مواقع الخريطة للتنقل السريع إليها.
+
+البحث:
+– البحث عن المعالم داخل الطبقات المستوردة بالاسم أو قيمة الخاصية.
+
+الإدخال الدقيق:
+– في وضع القياس، يمكنك تحريك الخريطة لتحديد موقع العلامة بدقة وإضافة النقاط يدوياً.
+
+جميع معالجة البيانات تتم محلياً على جهازك. لا يتم رفع أو مشاركة أي بيانات مع أي خادم.</string>
+  <!-- Measure -->
+  <string name="measure_tap_instruction">انقر على الخريطة لإضافة نقاط</string>
+  <string name="measure_complete_tap_instruction">انقر قرب أول نقطة لإغلاق المضلع</string>
+  <string name="measure_points_count">النقاط: %d</string>
+  <string name="measure_segment">قطعة</string>
+  <string name="measure_side">ضلع</string>
+  <string name="measure_close_segment">إغلاق</string>
+  <string name="measure_new">قياس جديد</string>
+  <string name="undo">تراجع</string>
+  <string name="redo">إعادة</string>
+  <string name="precision_instr">حرك الخريطة لتحديد موقع العلامة، ثم اضغط إضافة نقطة</string>
+  <string name="add_point">إضافة نقطة</string>
+  <string name="measure_complete">إنهاء</string>
+  <string name="measure_completed">تم إكمال القياس</string>
+  <string name="ha">هكتار</string>
+  <string name="unit_auto">تلقائي</string>
+  <string name="change_color">تغيير اللون</string>
+  <string name="move_up">تحريك لأعلى</string>
+  <string name="move_down">تحريك لأسفل</string>
+  <string name="symbol_properties">خصائص الرمز</string>
+  <string name="point_size">حجم النقطة</string>
+  <string name="line_width">سُمك الخط</string>
+  <string name="copy_result">نسخ النتيجة</string>
+  <string name="copied">تم النسخ</string>
+  <string name="perimeter">محيط</string>
+  <string name="details_summary">ملخص</string>
+  <string name="file_types">أنواع الملفات</string>
+  <string name="layer_breakdown">تفصيل الطبقات</string>
+  <!-- Feature Status -->
+  <string name="status_active">نشط</string>
+  <string name="status_maintenance">صيانة</string>
+  <string name="status_broken">معطل</string>
+  <!-- Splash -->
+  <string name="splash_description">مُستعرِض بيانات مكانية على الموبايل</string>
+  <!-- Map Screen Extras -->
+  <string name="map_type">نوع الخريطة</string>
+  <string name="grid">شبكة إحداثيات</string>
+  <string name="screenshot">لقطة شاشة</string>
+  <string name="search">بحث المعالم</string>
+  <string name="bookmarks">الإشارات المرجعية</string>
+  <string name="search_hint">ابحث بالاسم أو الخاصية…</string>
+  <string name="no_search_results">لا توجد نتائج</string>
+  <string name="bookmark_name">اسم الإشارة</string>
+  <string name="save">حفظ</string>
+  <string name="screenshot_saved">تم حفظ لقطة الشاشة</string>
+  <string name="loading_tiles">جارٍ تحميل البلاطات…</string>
+  <string name="draw_mode">رسم</string>
+  <string name="pan_mode">تحريك</string>
+  <string name="show_details">عرض التفاصيل</string>
+  <string name="hide_details">إخفاء التفاصيل</string>
+  <string name="details_tip">عرض تفاصيل الطبقة وخصائصها</string>
+  <!-- Tooltips -->
+  <string name="locate_me_tip">إظهار موقعك الحالي على الخريطة</string>
+    <string name="zoom_in_tip">تكبير</string>
+    <string name="zoom_out_tip">تصغير</string>
+  <string name="compass_tip">إعادة اتجاه الخريطة إلى الشمال</string>
+    <string name="map_type_tip">التبديل بين أنماط الخريطة</string>
+  <string name="grid_tip">إظهار/إخفاء شبكة خطوط الطول والعرض</string>
+  <string name="screenshot_tip">حفظ منظر الخريطة الحالي كصورة PNG</string>
+  <string name="search_tip">البحث عن معلم بالاسم أو قيمة الخاصية</string>
+  <string name="bookmarks_tip">حفظ وإدارة المواقع المفضلة</string>
+  <string name="photos_tip">إظهار/إخفاء الصور الجغرافية على الخريطة</string>
+  <string name="measure_area_tip">قياس المساحات برسم مضلع على الخريطة</string>
+  <string name="coord_toggle_tip">التبديل بين صيغ الإحداثيات (DD، DMS، UTM)</string>
+  <string name="zoom_level_desc">مستوى التكبير %d</string>
+  <string name="lat_label_large">دائرة العرض</string>
+  <string name="lon_label_large">خط الطول</string>
+  <string name="zone_label">رقم النطاق</string>
+  <string name="easting_label">شرق (Easting)</string>
+  <string name="northing_label">شمال (Northing)</string>
+  <string name="copy_coord">نسخ</string>
+  <string name="lon_label_short">خط الطول</string>
+  <string name="lat_label_short">دائرة العرض</string>
+  <string name="zone_label_short">النطاق</string>
+  <string name="easting_label_short">شرق</string>
+  <string name="northing_label_short">شمال</string>
+  <!-- New Measurement Tools -->
+  <string name="measure_distance_short">مسافة</string>
+  <string name="measure_area_short">مساحة</string>
+  <string name="measure_circle_short">دائرة</string>
+  <string name="measure_ellipse_short">قطع ناقص</string>
+  <string name="measure_select_short">تحديد</string>
+  <string name="measure_coord_short">إحداثيات</string>
+  <string name="measure_distance_tip">قياس المسافة عبر العلامة الوسطية</string>
+  <string name="measure_circle_tip">رسم دائرة لقياس المحيط والمساحة</string>
+  <string name="measure_select_tip">تحديد عنصر مرسوم لعرض القياسات المكانية</string>
+  <string name="measure_coord_tip">تسجيل إحداثيات نقطة عند العلامة الوسطية</string>
+  <string name="circle_center">المركز</string>
+  <string name="circle_radius">نصف القطر</string>
+  <string name="circle_diameter">القطر</string>
+  <string name="circle_circumference">المحيط</string>
+  <string name="circle_area">المساحة</string>
+  <string name="select_element">تحديد عنصر</string>
+  <string name="select_none">انقر على عنصر مرسوم لعرض بياناته</string>
+  <string name="coord_readout">الإحداثيات</string>
+  <string name="distance_instruction">حرك الخريطة لتحديد موقع العلامة، ثم اضغط إضافة نقطة</string>
+  <string name="area_instruction">حرك الخريطة لتحديد نقاط المساحة (≥3 نقاط)</string>
+  <string name="circle_instr_1">حرك الخريطة لمركز الدائرة، ثم اضغط إضافة نقطة</string>
+  <string name="circle_instr_2">حرك الخريطة لحافة الدائرة، ثم اضغط إضافة نقطة</string>
+  <string name="select_instruction">انقر على أي عنصر مرسوم على الخريطة</string>
+  <string name="coord_instruction">حرّك العلامة الوسطية ثم اضغط إضافة نقطة لتسجيل الإحداثيات</string>
+  <string name="close">إغلاق</string>
+  <string name="copy_all">نسخ الكل</string>
+  <!-- File Parsing -->
+  <string name="parsing_geojson">جارٍ تحليل ملف GeoJSON…</string>
+  <string name="parsing_gdb">جارٍ قراءة GeoDatabase…</string>
+  <string name="select_gdb">اختر مجلد GeoDatabase (.gdb)</string>
+  <string name="gdb_added">تم إضافة GeoDatabase</string>
+  <string name="parse_error">فشل تحليل الملف</string>
+  <string name="loading_layer_data">جارٍ تحميل بيانات الطبقة…</string>
+  <string name="add_layer_hint">تصفّح جهازك لإضافة ملفات GIS</string>
+  <string name="deleted_layer">تم الحذف</string>
+  <string name="undo_delete">تراجع</string>
+  <string name="refresh">تحديث</string>
+  <string name="zoom_in_fast">تكبير سريع</string>
+    <string name="zoom_out_fast">تصغير سريع</string>
+    <string name="tile_failed">فشلت خدمة الخريطة، تم التبديل إلى خريطة الشارع المفتوحة</string>
+    <string name="zoom_in_fast_tip">تكبير سريع</string>
+    <string name="zoom_out_fast_tip">تصغير سريع</string>
+  <string name="measure_ellipse_tip">ارسـم قطعًا ناقصًا لقياس المحاور والمساحة</string>
+  <string name="ellipse_instr_1">حرّك المؤشر إلى مركز القطع الناقص، ثم أضف نقطة</string>
+  <string name="ellipse_instr_2">حرّك المؤشر إلى نهاية المحور الرئيسي، ثم أضف نقطة</string>
+  <string name="ellipse_instr_3">حرّك المؤشر إلى نهاية المحور الثانوي، ثم أضف نقطة</string>
+  <string name="ellipse_major_axis">المحور الأكبر</string>
+  <string name="ellipse_minor_axis">المحور الأصغر</string>
+  <string name="ellipse_perimeter">المحيط</string>
+  <string name="ellipse_area">المساحة</string>
+  <string name="ellipse_angle_label">الزاوية</string>
+  <string name="elevation">الارتفاع</string>
+  <string name="map_classification">تصنيف الخرائط</string>
+  <string name="map_classification_desc">اختيار طريقة تجميع الخرائط في القوائم</string>
+  <string name="map_classification_provider">حسب المصدر</string>
+  <string name="map_classification_category">حسب النوع</string>
+  <string name="snap_distance">التقاط النقاط</string>
+  <string name="snap_distance_desc">التقاط مؤشر القياس لنقاط الطبقات تلقائيًا</string>
+  <string name="snap_enable">تفعيل الالتقاط</string>
+  <string name="snap_distance_meters">مسافة الالتقاط</string>
+  <string name="msr_cat_distance">المسافة والمحيط</string>
+  <string name="msr_cat_area">المساحة</string>
+  <string name="msr_cat_circle">الدائرة</string>
+  <string name="msr_cat_ellipse">القطع الناقص</string>
+  <!-- Geo Calculator -->
+  <string name="calculator_title">الآلة الحاسبة الجغرافية</string>
+  <string name="calculator_input_section">الإدخال</string>
+  <string name="calculator_input_placeholder"></string>
+  <string name="calculator_convert">تحويل</string>
+  <string name="calculator_clear">مسح</string>
+  <string name="calculator_copy_all">نسخ الكل</string>
+  <string name="calculator_export_csv">CSV</string>
+  <string name="calculator_export_text">نص</string>
+  <string name="calculator_auto_detect">اكتشاف تلقائي</string>
+  <string name="calculator_col_original">الإدخال الأصلي</string>
+  <string name="calculator_col_epsg3857">EPSG:3857</string>
+  <string name="calculator_results_section">النتائج</string>
+  <string name="calculator_share_title">مشاركة الإحداثيات</string>
+  <string name="calculator_input_formats_title">الصيغ المدعومة:</string>
+  <string name="calculator_format_dd">DD – درجات عشرية (مثال: 30.0444, 31.2357)</string>
+  <string name="calculator_format_dms">DMS – درجات/دقائق/ثوان (مثال: 30°02\'39.8\"N, 31°14\'08.5\"E)</string>
+  <string name="calculator_format_ddm">DDM – درجات/دقائق عشرية (مثال: 30°02.6667\'N, 31°14.1420\'E)</string>
+  <string name="calculator_format_utm">UTM – العالمي المستعرض (مثال: 36N 313248 3324191)</string>
+  <string name="calculator_output_format">صيغ الإخراج</string>
+  <string name="calculator_format_all">الكل</string>
+  <string name="calculator_copy_input">نسخ</string>
+  <string name="calculator_copy_table">نسخ الجدول</string>
+  <string name="calculator_hemisphere_lat">جهة دائرة العرض</string>
+  <string name="calculator_hemisphere_lon">جهة خط الطول</string>
+  <string name="calculator_map_section">معاينة النقاط على الخريطة</string>
+  <string name="calculator_utm_zone">رقم النطاق</string>
+  <string name="delete_layer_confirm">هل أنت متأكد من حذف "%s"؟</string>
+  <string name="delete">حذف</string>
+  <string name="details_add_layer_hint">استورد ملف GIS للبدء</string>
+  <string name="details_add_layer_action">استيراد طبقة</string>
+  <string name="details_geom_points">نقاط</string>
+  <string name="details_geom_lines">خطوط</string>
+  <string name="details_geom_polygons">مضلعات</string>
+</resources>

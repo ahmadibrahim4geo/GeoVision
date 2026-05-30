@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- Domain Configuration: OSM (OpenStreetMap) - HTTPS Only                    -->
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">tile.openstreetmap.org</domain>
+        <domain includeSubdomains="true">a.tile.openstreetmap.org</domain>
+        <domain includeSubdomains="true">b.tile.openstreetmap.org</domain>
+        <domain includeSubdomains="true">c.tile.openstreetmap.org</domain>
+        <domain includeSubdomains="true">tiles.openstreetmap.fr</domain>
+    </domain-config>
+
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- Domain Configuration: Mapbox/MapLibre - HTTPS Only                       -->
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">api.mapbox.com</domain>
+        <domain includeSubdomains="true">tiles.mapbox.com</domain>
+        <domain includeSubdomains="true">a.tiles.mapbox.com</domain>
+        <domain includeSubdomains="true">b.tiles.mapbox.com</domain>
+    </domain-config>
+
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- Default Configuration: HTTPS Only (Cleartext Not Permitted)              -->
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <domain-config cleartextTrafficPermitted="false">
+        <domain includeSubdomains="true">geovision.com</domain>
+        <domain includeSubdomains="true">api.geovision.com</domain>
+        <domain includeSubdomains="true">cdn.geovision.com</domain>
+    </domain-config>
+
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- Certificate Pinning (Optional - Uncomment if using backend)              -->
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- 
+    <pin-set expiration="2026-12-31">
+        <pin digest="SHA-256">YOUR_PIN_HERE</pin>
+    </pin-set>
+    -->
+
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <!-- Trust Anchors: System CA certificates only in production                 -->
+    <!-- ───────────────────────────────────────────────────────────────────────── -->
+    <trust-anchors>
+        <certificates src="system" />
+    </trust-anchors>
+</network-security-config>
