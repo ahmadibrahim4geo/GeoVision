@@ -11,20 +11,29 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import com.geovision.mobile.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayerSelectionDialog(
     title: String,
     layers: List<String>,
+    displayNames: Map<String, String> = emptyMap(),
+    subtitles: Map<String, String> = emptyMap(),
     onDismiss: () -> Unit,
     onConfirm: (List<String>) -> Unit
 ) {
     var selectedLayers by remember(layers) { mutableStateOf(layers.toSet()) }
     var selectAll by remember(layers) { mutableStateOf(true) }
+    val layersFoundText = stringResource(R.string.layers_found, layers.size)
+    val selectAllText = stringResource(R.string.select_all)
+    val deselectAllText = stringResource(R.string.deselect_all)
+    val importCountText = stringResource(R.string.import_count, selectedLayers.size)
+    val cancelText = stringResource(R.string.cancel)
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -38,7 +47,7 @@ fun LayerSelectionDialog(
         text = {
             Column {
                 Text(
-                    "${layers.size} layers found. Select layers to import:",
+                    layersFoundText,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -56,7 +65,7 @@ fun LayerSelectionDialog(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        if (selectAll) "Deselect All" else "Select All",
+                        if (selectAll) deselectAllText else selectAllText,
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.W600
                     )
@@ -81,6 +90,8 @@ fun LayerSelectionDialog(
                 ) {
                     items(layers, key = { it }) { layerName ->
                         val isSelected = layerName in selectedLayers
+                        val displayName = displayNames[layerName] ?: layerName
+                        val subtitle = subtitles[layerName]?.takeIf { it.isNotBlank() }
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -112,14 +123,25 @@ fun LayerSelectionDialog(
                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Spacer(Modifier.width(8.dp))
-                                Text(
-                                    layerName,
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    fontWeight = if (isSelected) FontWeight.W600 else FontWeight.Normal,
-                                    color = MaterialTheme.colorScheme.onSurface,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
+                                Column(Modifier.weight(1f)) {
+                                    Text(
+                                        displayName,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        fontWeight = if (isSelected) FontWeight.W600 else FontWeight.Normal,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                    if (subtitle != null) {
+                                        Text(
+                                            subtitle,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
@@ -134,12 +156,12 @@ fun LayerSelectionDialog(
             ) {
                 Icon(Icons.Default.Download, null, Modifier.size(18.dp))
                 Spacer(Modifier.width(6.dp))
-                Text("Import (${selectedLayers.size})")
+                Text(importCountText)
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(cancelText)
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceContainer,

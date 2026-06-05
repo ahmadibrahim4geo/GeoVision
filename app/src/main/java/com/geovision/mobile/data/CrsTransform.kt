@@ -1,13 +1,23 @@
 package com.geovision.mobile.data
 
 import com.geovision.mobile.core.AppLogger
+import org.locationtech.proj4j.CRSFactory
+import org.locationtech.proj4j.CoordinateReferenceSystem
+import org.locationtech.proj4j.CoordinateTransform
+import org.locationtech.proj4j.CoordinateTransformFactory
+import org.locationtech.proj4j.ProjCoordinate
+import java.util.concurrent.ConcurrentHashMap
 
 /**
  * CRS transformation helper.
- * Provides basic WGS84 ↔ Web Mercator conversions and WKT CRS parsing.
- * Can be extended with proj4j for full EPSG database support.
+ * Uses Proj4J for EPSG reprojection, with lightweight fallbacks for common systems.
  */
 object CrsTransform {
+    private val crsFactory = CRSFactory()
+    private val transformFactory = CoordinateTransformFactory()
+    private val crsCache = ConcurrentHashMap<Int, CoordinateReferenceSystem>()
+    private val transformCache = ConcurrentHashMap<Int, CoordinateTransform>()
+
     /**
      * Information about a CRS (Coordinate Reference System).
      */
@@ -26,8 +36,11 @@ object CrsTransform {
      * Convert a single coordinate from source CRS to WGS84 (lon, lat).
      */
     fun toWgs84(x: Double, y: Double, source: CrsInfo): Pair<Double, Double> {
+        if (source.epsg == 4326 || (source.isWgs84 && source.isGeographic)) return Pair(x, y)
+
+        transformWithProj4j(x, y, source)?.let { return it }
+
         return when (source.epsg) {
-            4326 -> Pair(x, y)
             3857 -> webMercatorToWgs84(x, y)
             in 32601..32660 -> utmToWgs84(x, y, source.utmZone, north = true)
             in 32701..32760 -> utmToWgs84(x, y, source.utmZone, north = false)
@@ -38,6 +51,55 @@ object CrsTransform {
                     Pair(x, y)
                 }
             }
+        }
+    }
+
+    private fun transformWithProj4j(x: Double, y: Double, source: CrsInfo): Pair<Double, Double>? {
+        val transform = transformCache[source.epsg] ?: run {
+            try {
+                val src = crsFor(source) ?: return null
+                val dst = crsFactory.createFromName("EPSG:4326")
+                transformFactory.createTransform(src, dst).also { transformCache[source.epsg] = it }
+            } catch (e: Exception) {
+                AppLogger.w(AppLogger.Tags.PARSER, "Proj4J CRS ${source.epsg} unavailable: ${e.message}")
+                return null
+            }
+        }
+
+        return try {
+            val srcCoord = ProjCoordinate(x, y)
+            val dstCoord = ProjCoordinate()
+            transform.transform(srcCoord, dstCoord)
+            if (dstCoord.x.isFinite() && dstCoord.y.isFinite()) {
+                Pair(dstCoord.x.coerceIn(-180.0, 180.0), dstCoord.y.coerceIn(-90.0, 90.0))
+            } else {
+                null
+            }
+        } catch (e: Exception) {
+            AppLogger.w(AppLogger.Tags.PARSER, "Proj4J transform failed for EPSG:${source.epsg}: ${e.message}")
+            null
+        }
+    }
+
+    private fun crsFor(source: CrsInfo): CoordinateReferenceSystem? {
+        crsCache[source.epsg]?.let { return it }
+        return try {
+            val crs = when {
+                source.epsg > 0 -> crsFactory.createFromName("EPSG:${source.epsg}")
+                source.isUtm && source.utmZone in 1..60 -> {
+                    val southFlag = if (source.utmNorth) "" else " +south"
+                    crsFactory.createFromParameters(
+                        "UTM:${source.utmZone}${if (source.utmNorth) "N" else "S"}",
+                        "+proj=utm +zone=${source.utmZone}$southFlag +datum=WGS84 +units=m +no_defs"
+                    )
+                }
+                else -> null
+            }
+            if (crs != null) crsCache[source.epsg] = crs
+            crs
+        } catch (e: Exception) {
+            AppLogger.w(AppLogger.Tags.PARSER, "Failed to create Proj4J CRS for ${source.name}: ${e.message}")
+            null
         }
     }
 
@@ -61,7 +123,7 @@ object CrsTransform {
 
     /**
      * Approximate UTM to WGS84 conversion using formulas.
-     * For production, use proj4j library for higher accuracy.
+     * Kept as a fallback when Proj4J cannot resolve a CRS on the device.
      */
     fun utmToWgs84(x: Double, y: Double, zone: Int, north: Boolean): Pair<Double, Double> {
         val eqr = 6378137.0          // WGS84 equatorial radius
@@ -81,9 +143,9 @@ object CrsTransform {
         val e1Cu = e1Sq * e1
         val e1Qu = e1Cu * e1
 
-        val phi1 = m + (3 * e1 / 2 - 27 * e1Cu / 32) * Math.sin(2 * m)
+        val phi1 = (m + (3 * e1 / 2 - 27 * e1Cu / 32) * Math.sin(2 * m)
             + (21 * e1Sq / 16 - 55 * e1Qu / 32) * Math.sin(4 * m)
-            + (151 * e1Cu / 96) * Math.sin(6 * m) + (1097 * e1Qu / 512) * Math.sin(8 * m)
+            + (151 * e1Cu / 96) * Math.sin(6 * m) + (1097 * e1Qu / 512) * Math.sin(8 * m))
 
         val sin1 = Math.sin(phi1)
         val cos1 = Math.cos(phi1)
@@ -132,15 +194,15 @@ object CrsTransform {
             )
         }
 
-        // Try to extract UTM zone from name: "UTM ZONE 38N" or "UTM ZONE 56S"
-        val utmMatch = Regex("""UTM\s+ZONE\s+(\d{1,2})\s*([NS])""", RegexOption.IGNORE_CASE).find(upper)
+        // Try to extract UTM zone from names such as "UTM ZONE 38N" or "WGS_1984_UTM_Zone_36N".
+        val utmMatch = Regex("""UTM[\s_]+ZONE[\s_]+(\d{1,2})\s*([NS])""", RegexOption.IGNORE_CASE).find(upper)
         if (utmMatch != null) {
             val zone = utmMatch.groupValues[1].toIntOrNull() ?: 0
             val north = utmMatch.groupValues[2] != "S"
             return CrsInfo(
                 name = "UTM",
                 epsg = if (north) 32600 + zone else 32700 + zone,
-                isWgs84 = hasWgs84,
+                isWgs84 = false,
                 isGeographic = false,
                 isUtm = true,
                 utmZone = zone,
@@ -149,8 +211,10 @@ object CrsTransform {
         }
 
         // If projected with Mercator in name and WGS84, assume EPSG:3857
-        val hasMercator = upper.contains("MERCATOR") || upper.contains("MERCATOR_1SP") || upper.contains("PSEUDO-MERCATOR")
-        if (isProjected && hasMercator && hasWgs84) {
+        val hasWebMercator = upper.contains("PSEUDO-MERCATOR") ||
+            upper.contains("MERCATOR_1SP") ||
+            (upper.contains("MERCATOR") && !upper.contains("TRANSVERSE_MERCATOR"))
+        if (isProjected && hasWebMercator && hasWgs84) {
             return CrsInfo(
                 name = "EPSG:3857",
                 epsg = 3857,
@@ -171,6 +235,6 @@ object CrsTransform {
             )
         }
 
-        return CrsInfo(name = "WKT", isGeographic = isGeographic)
+        return CrsInfo(name = "WKT", epsg = 0, isGeographic = isGeographic)
     }
 }

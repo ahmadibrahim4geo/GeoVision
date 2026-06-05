@@ -113,10 +113,10 @@ object CoordinateConverter {
         val m = y / K0
         val mu = m / (A * (1.0 - E2/4.0 - 3.0*E4/64.0 - 5.0*E6/256.0))
 
-        val phi1 = mu
+        val phi1 = (mu
             + (3.0*e1/2.0 - 27.0*e1*e1*e1/32.0) * sin(2.0*mu)
             + (21.0*e1*e1/16.0 - 55.0*e1*e1*e1*e1/32.0) * sin(4.0*mu)
-            + (151.0*e1*e1*e1/96.0) * sin(6.0*mu)
+            + (151.0*e1*e1*e1/96.0) * sin(6.0*mu))
 
         val sPhi1 = sin(phi1)
         val cPhi1 = cos(phi1)

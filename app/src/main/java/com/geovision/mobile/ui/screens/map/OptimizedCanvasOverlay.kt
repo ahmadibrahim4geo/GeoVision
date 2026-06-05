@@ -35,7 +35,8 @@ class OptimizedCanvasOverlay(
     private val fillColor: Int,
     private val pointSize: Float = 8f,
     private val lineWidth: Float = 4f,
-    private val skipFeatureTaps: () -> Boolean = { false }
+    private val skipFeatureTaps: () -> Boolean = { false },
+    preparedSpatialIndex: SpatialIndex<OverlayFeature>? = null
 ) : Overlay() {
 
     data class OverlayFeature(
@@ -46,7 +47,13 @@ class OptimizedCanvasOverlay(
     )
 
     private val pathPool = PathPool()
-    private val spatialIndex = SpatialIndex<OverlayFeature>()
+    private val spatialIndex = preparedSpatialIndex ?: SpatialIndex<OverlayFeature>().also { index ->
+        features.forEach { of ->
+            val allPts = of.geoPoints.flatten()
+            index.insert(of, allPts)
+        }
+        index.build()
+    }
     private val reusePt = Point()
     private var lastZoomLevel = -1.0
     private var zoomLevel = 0.0
@@ -67,11 +74,6 @@ class OptimizedCanvasOverlay(
 
     init {
         // بناء الـ Spatial Index
-        features.forEach { of ->
-            val allPts = of.geoPoints.flatten()
-            spatialIndex.insert(of, allPts)
-        }
-        spatialIndex.build()
         AppLogger.d(AppLogger.Tags.MAP, "SpatialIndex built: ${spatialIndex.size} entries for layer $layerId")
     }
 
@@ -92,8 +94,11 @@ class OptimizedCanvasOverlay(
             val of = entry.data
             val geomType = of.geometryType
 
-            // LOD filter
-            if (!LodManager.shouldRender(lodLevel, geomType)) continue
+            // LOD filter — compute bounds area from index entry for polygon culling
+            val boundsArea = if (geomType == "Polygon" || geomType == "MultiPolygon") {
+                (entry.maxLat - entry.minLat) * (entry.maxLon - entry.minLon)
+            } else 0.0
+            if (!LodManager.shouldRender(lodLevel, geomType, boundsArea)) continue
 
             when {
                 geomType in arrayOf("Point", "MultiPoint") -> drawPoints(canvas, proj, of)
@@ -134,6 +139,7 @@ class OptimizedCanvasOverlay(
     private fun drawPolygon(canvas: Canvas, proj: org.osmdroid.views.Projection, of: OverlayFeature) {
         if (of.geoPoints.isEmpty()) return
         val path = pathPool.obtainPath()
+        path.fillType = Path.FillType.EVEN_ODD  // enables polygon holes (inner rings)
 
         for ((ringIdx, ring) in of.geoPoints.withIndex()) {
             if (ring.size < 3) continue

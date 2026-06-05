@@ -57,8 +57,15 @@ fun LayerDetailsScreen(
     var currentPage by remember { mutableIntStateOf(0) }
     var pageSize by remember { mutableIntStateOf(50) }
 
-    LaunchedEffect(layerId) {
-        viewModel.loadDetailForLayer(layerId)
+    val detailVersion by viewModel.layerDetailsVersionFlow.collectAsState()
+    val layerExists = viewModel.getLayerById(layerId) != null
+
+    LaunchedEffect(layerId, detailVersion, layerExists) {
+        if (!layerExists) {
+            onNavigateBack()
+        } else {
+            viewModel.loadDetailForLayer(layerId)
+        }
     }
 
     val detailInfo = viewModel.layerDetail
@@ -93,6 +100,7 @@ fun LayerDetailsScreen(
             }
         } else {
             val allKeys = detailInfo.features.flatMap { it.properties.keys }.distinct()
+                .filter { !it.startsWith("_") && it != "description_parsed" }
 
             val filtered = detailInfo.features.filter { feature ->
                 searchQuery.isBlank() ||

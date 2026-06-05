@@ -165,6 +165,16 @@ class LayerViewModelTest {
     }
 
     @Test
+    fun removeLayer_clearsPendingZoomForRemovedLayer() {
+        val id = viewModel.addLayer("test", FileType.GEOJSON)
+        viewModel.requestZoomToLayer(id)
+
+        viewModel.removeLayer(id)
+
+        assertNull(viewModel.requestedZoomLayerId)
+    }
+
+    @Test
     fun loadState_initialValues() {
         val state = viewModel.loadState.value
         assertFalse(state.isLoading)

@@ -129,4 +129,28 @@
 
 # Optimize aggressive
 -optimizationpasses 5
--optimization !code/simplification/cast,!field/*,!class/merging/*
+-optimizations !code/simplification/cast,!field/*,!class/merging/*
+
+# Optional annotation and desktop-only APIs referenced by transitive libraries.
+-dontwarn com.google.errorprone.annotations.CanIgnoreReturnValue
+-dontwarn com.google.errorprone.annotations.CheckReturnValue
+-dontwarn com.google.errorprone.annotations.Immutable
+-dontwarn com.google.errorprone.annotations.RestrictedApi
+-dontwarn java.awt.Color
+-dontwarn java.awt.Font
+-dontwarn java.awt.Rectangle
+-dontwarn java.awt.Shape
+-dontwarn java.awt.font.FontRenderContext
+-dontwarn java.awt.font.GlyphVector
+-dontwarn java.awt.geom.AffineTransform
+-dontwarn java.awt.geom.Ellipse2D$Double
+-dontwarn java.awt.geom.GeneralPath
+-dontwarn java.awt.geom.Line2D$Double
+-dontwarn java.awt.geom.PathIterator
+-dontwarn java.awt.geom.Point2D$Double
+-dontwarn java.awt.geom.Point2D
+-dontwarn java.awt.geom.Rectangle2D$Double
+-dontwarn java.awt.geom.Rectangle2D
+-dontwarn javax.xml.stream.XMLInputFactory
+-dontwarn javax.xml.stream.XMLStreamException
+-dontwarn javax.xml.stream.XMLStreamReader

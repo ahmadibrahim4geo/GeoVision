@@ -1,0 +1,15 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-feature android:glEsVersion="0x00020000" android:required="true" />
+
+    <application>
+        <activity
+            android:name=".EsriViewerActivity"
+            android:exported="true"
+            android:label="Esri Local Viewer">
+            <intent-filter>
+                <action android:name="com.geovision.esri.viewer.OPEN" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

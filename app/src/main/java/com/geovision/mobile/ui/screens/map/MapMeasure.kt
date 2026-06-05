@@ -707,20 +707,22 @@ private fun ExpandedMeasureSheet(
     val accent = state.accent
 
     Surface(
-        shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
+        shape = RoundedCornerShape(24.dp),  // زوايا منحنية من جميع الجهات الأربع — مظهر بطاقة عائمة
         color = MaterialTheme.colorScheme.surfaceContainer,
         tonalElevation = 4.dp,
-        shadowElevation = 8.dp
+        shadowElevation = 12.dp  // ظل أعمق لتمييز النافذة عن الخريطة
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .animateContentSize(animationSpec = spring())
         ) {
+            // شريط اللون العلوي مع زوايا منحنية لتتطابق مع شكل البطاقة
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(3.dp)
+                    .clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp))
                     .background(accent)
             )
 

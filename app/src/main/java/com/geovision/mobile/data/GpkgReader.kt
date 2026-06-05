@@ -87,12 +87,15 @@ object GpkgReader {
             if (bbox != null) extent = bbox
             allFeatures.addAll(readFeatures(dbh, layer))
         }
+        // Project features to WGS84 if the source CRS is not already geographic WGS84
+        val projectedFeatures = CoordinateConverter.convertFeaturesToWgs84(allFeatures, crs)
+
         return LayerDetailInfo(
             fileName = fileName,
             filePath = filePath,
-            crs = crs,
+            crs = if (projectedFeatures !== allFeatures) "EPSG:4326" else crs,
             extent = extent,
-            features = allFeatures
+            features = projectedFeatures
         )
     }
 

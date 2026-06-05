@@ -93,8 +93,19 @@ fun LayerCard(
     if (!isTransparencyDragging && localTransparency != layer.transparency) {
         localTransparency = layer.transparency
     }
+    var deleteRequested by remember(layer.id) { mutableStateOf(false) }
     val dismissState = rememberSwipeToDismissBoxState(
-        confirmValueChange = { if (it == SwipeToDismissBoxValue.EndToStart) { onDelete(layer.id); true } else false }
+        confirmValueChange = {
+            if (it == SwipeToDismissBoxValue.EndToStart) {
+                if (!deleteRequested) {
+                    deleteRequested = true
+                    onDelete(layer.id)
+                }
+                false
+            } else {
+                false
+            }
+        }
     )
     val typeColor = fileTypeBgColor(layer.fileType, MaterialTheme.colorScheme)
 

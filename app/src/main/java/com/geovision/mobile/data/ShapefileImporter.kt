@@ -196,7 +196,7 @@ object ShapefileImporter {
                         features = transformed,
                         fileName = baseName,
                         crs = if (crsInfo.isWgs84) "EPSG:4326 (WGS84)" else "محوّل من $crsStr",
-                        extent = parseResult.extent,
+                        extent = computeExtent(transformed),
                         parseTimeMs = elapsedMs
                     )
                 } else {
@@ -220,6 +220,29 @@ object ShapefileImporter {
             val newCoords = transformCoordinates(feature.geometryCoordinates, crsInfo)
             feature.copy(geometryCoordinates = newCoords)
         }
+    }
+
+    private fun computeExtent(features: List<FeatureRow>): String {
+        if (features.isEmpty()) return "\u2014"
+        var minLat = Double.MAX_VALUE
+        var maxLat = -Double.MAX_VALUE
+        var minLon = Double.MAX_VALUE
+        var maxLon = -Double.MAX_VALUE
+
+        for (feature in features) {
+            for ((lon, lat) in GeoJsonParser.extractCoordinates(feature.geometryCoordinates)) {
+                if (lat < minLat) minLat = lat
+                if (lat > maxLat) maxLat = lat
+                if (lon < minLon) minLon = lon
+                if (lon > maxLon) maxLon = lon
+            }
+        }
+
+        return if (minLat == Double.MAX_VALUE) "\u2014"
+        else java.lang.String.format(java.util.Locale.US, "%.4f", minLat) + "\u00B0 \u2014 " +
+            java.lang.String.format(java.util.Locale.US, "%.4f", maxLat) + "\u00B0 | " +
+            java.lang.String.format(java.util.Locale.US, "%.4f", minLon) + "\u00B0 \u2014 " +
+            java.lang.String.format(java.util.Locale.US, "%.4f", maxLon) + "\u00B0"
     }
 
     /** تحويل سلسلة JSON للإحداثيات — يعالج Point, LineString, Polygon, MultiPoint */

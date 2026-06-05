@@ -468,4 +468,32 @@
   <string name="details_geom_points">نقاط</string>
   <string name="details_geom_lines">خطوط</string>
   <string name="details_geom_polygons">مضلعات</string>
+  <!-- Onboarding Screen -->
+  <string name="onboarding_title_1">إدارة الطبقات الجغرافية</string>
+  <string name="onboarding_desc_1">استورد ملفات GIS مثل Shapefile وGeoJSON وKML وGPX وGeoPackage. اعرضها على الخريطة ورتبها حسب الحاجة.</string>
+  <string name="onboarding_title_2">خريطة تفاعلية متعددة المصادر</string>
+  <string name="onboarding_desc_2">تصفح الخريطة مع دعم مصادر متعددة (OpenStreetMap وMapLibre وغيرها). قياس المسافات والمساحات بدقة.</string>
+  <string name="onboarding_title_3">تحويل الإحداثيات</string>
+  <string name="onboarding_desc_3">حوّل بين صيغ الإحداثيات: DD وDMS وDDM وUTM. دعم للغة العربية والإنجليزية مع واجهة سهلة.</string>
+  <string name="onboarding_title_4">صور جغرافية</string>
+  <string name="onboarding_desc_4">استورد الصور الملتقطة بإحداثيات GPS. اعرضها مباشرة على الخريطة مع معلومات EXIF الكاملة.</string>
+  <string name="onboarding_skip">تخطي</string>
+  <string name="onboarding_next">التالي</string>
+  <string name="onboarding_start">ابدأ الاستخدام</string>
+  <string name="show_intro_screen">إظهار شاشة التعريف</string>
+  <!-- Map Bookmarks -->
+  <string name="bookmark_add">إضافة علامة مرجعية</string>
+  <string name="bookmark_name_hint">اسم العلامة المرجعية</string>
+  <string name="bookmark_saved">تم حفظ العلامة المرجعية</string>
+  <string name="layers_found">تم العثور على %1$d طبقة. اختر الطبقات التي تريد استيرادها:</string>
+  <string name="select_all">تحديد الكل</string>
+  <string name="deselect_all">إلغاء تحديد الكل</string>
+  <string name="import_count">استيراد (%1$d)</string>
+  <string name="esri_local_viewer_title">عارض Esri المحلي</string>
+  <string name="esri_local_viewer_summary">عارض اختياري للقراءة فقط لحزم .mmpk و .geodatabase المحلية. التعديل والمزامنة والخدمات السحابية معطلة.</string>
+  <string name="esri_local_viewer_open">فتح عارض Esri المحلي</string>
+  <string name="esri_local_viewer_not_included">عارض Esri المحلي غير مضمن في هذا الإصدار من التطبيق.</string>
+  <string name="open_gis_file">ملف GIS</string>
+  <string name="open_esri_geodatabase">Mobile Geodatabase (.geodatabase)</string>
+  <string name="open_filegdb_experimental">مجلد FileGDB (.gdb) تجريبي</string>
 </resources>

@@ -194,8 +194,12 @@ fun MapScreen(
         val v = mv ?: return null
         if (locOv == null) {
             locOv = MyLocationNewOverlay(GpsMyLocationProvider(ctx), v).also { ov ->
-                blueDot(v)?.let { ov.setPersonIcon(it) }
+                blueDot(v)?.let {
+                    ov.setPersonIcon(it)
+                    ov.setDirectionIcon(it)
+                }
                 ov.setPersonAnchor(0.5f, 0.5f)
+                ov.setDirectionAnchor(0.5f, 0.5f)
                 ov.setDrawAccuracyEnabled(true)
                 v.overlays.add(0, ov); v.invalidate()
             }
@@ -452,13 +456,19 @@ fun MapScreen(
 
             // أ¢â€‌â‚¬أ¢â€‌â‚¬ ط·آ´ط·آ±ط¸ظ¹ط·آ· ط·آ§ط¸â€‍ط¸â€ڑط¸ظ¹ط·آ§ط·آ³ (ط·آ£ط·آ³ط¸ظ¾ط¸â€‍ ط·آ§ط¸â€‍ط·آ´ط·آ§ط·آ´ط·آ©ط·إ’ ط¸ظ¾ط¸ث†ط¸â€ڑ ط·آ£ط·آ²ط·آ±ط·آ§ط·آ± ط·آ§ط¸â€‍ط·ع¾ط·آ­ط¸ئ’ط¸â€¦ ط·آ§ط¸â€‍ط¸ظ¹ط¸â€¦ط¸â€ ط¸â€°) أ¢â€‌â‚¬أ¢â€‌â‚¬
             AnimatedVisibility(
+                modifier = Modifier
+                    .align(Alignment.BottomStart)
+                    .padding(start = 12.dp, end = 72.dp, bottom = 52.dp)
+                    .widthIn(max = 360.dp)
+                    .fillMaxWidth(),
                 visible = mm != MeasureMode.NONE,
-                enter = slideInVertically(animationSpec = tween(300)) + fadeIn(tween(300)),
-                exit = slideOutVertically(animationSpec = tween(300)) + fadeOut(tween(300))
+                // يدخل من الأسفل ويخرج للأسفل — مناسب لعنصر مثبّت في أسفل الشاشة
+                enter = slideInVertically(initialOffsetY = { it }, animationSpec = tween(300)) + fadeIn(tween(300)),
+                exit = slideOutVertically(targetOffsetY = { it }, animationSpec = tween(300)) + fadeOut(tween(300))
             ) {
                 MeasureBar(mm, mPts, if (mm == MeasureMode.CIRCLE) mCircleResult else if (mm == MeasureMode.ELLIPSE) mEllipseResult else mRes, mDone, mDistUnit, mAreaUnit,
                     mCircleCenter, mCircleEdge, mCircleRadius,
-                    onUndo = { if (mRedoStack.isNotEmpty()) { val cur = mPts; mPts = mRedoStack.last(); mRedoStack.removeLast(); mRedone = cur } else { val last = mPts.lastOrNull(); if (last != null) { mRedoStack.add(mPts); mPts = mPts.dropLast(1); mRedone = mPts; if (mPts.size < 2) mRes = null } } },
+                    onUndo = { if (mRedoStack.isNotEmpty()) { val cur = mPts; mPts = mRedoStack.last(); mRedoStack.removeAt(mRedoStack.lastIndex); mRedone = cur } else { val last = mPts.lastOrNull(); if (last != null) { mRedoStack.add(mPts); mPts = mPts.dropLast(1); mRedone = mPts; if (mPts.size < 2) mRes = null } } },
                     onRedo = { if (mRedone != null) { mRedoStack.add(mPts); mPts = mRedone!!; mRedone = null } },
                     canRedo = mRedone != null,
                     onClear = { mPts = emptyList(); mRes = null; mDone = false; mRedoStack.clear(); mRedone = null; mCircleCenter = null; mCircleEdge = null; mCircleRadius = 0.0; mCircleResult = null; mEllipseCenter = null; mEllipseMajor = null; mEllipseMinor = null; mEllipseResult = null; mSelectTitle = null; mSelectInfo = null; mSelectRawData = null; mCoordPoints = emptyList(); mCoordPositions = emptyList() },
@@ -522,7 +532,7 @@ fun MapScreen(
                         clipMgr?.setPrimaryClip(android.content.ClipData.newPlainText("element", "$mSelectTitle: $mSelectInfo"))
                         snackScope.launch { snackHost.showSnackbar(copiedStr) }
                     },
-                    modifier = Modifier.align(Alignment.BottomStart).padding(start = 12.dp, end = 64.dp, bottom = 84.dp).widthIn(max = 360.dp).fillMaxWidth()
+                    modifier = Modifier  // التموضع والحجم معالَجان من AnimatedVisibility الخارجية
                 )
             }
 
@@ -568,7 +578,7 @@ fun MapScreen(
                 ctx = ctx,
                 modifier = Modifier.align(Alignment.BottomEnd).padding(end = 8.dp, bottom = 12.dp)
             )
- 
+
             MapZoomControls(mv = mv, modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 8.dp))
         }
      }
@@ -630,5 +640,3 @@ fun MapScreen(
     )
 
 }
-
-

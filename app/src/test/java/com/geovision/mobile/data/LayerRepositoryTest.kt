@@ -147,4 +147,32 @@ class LayerRepositoryTest {
         assertEquals(GeoJsonParser.ParseErrorType.CORRUPTED, result.errorType)
         assertEquals("warn", result.warning)
     }
+
+    @Test
+    fun kmlLoadResult_hasImportReport() {
+        val parse = KmlParser.parse(
+            """
+            <kml>
+              <Document>
+                <Placemark id="ID_1">
+                  <name>Test</name>
+                  <Point><coordinates>31.2,30.0</coordinates></Point>
+                </Placemark>
+              </Document>
+            </kml>
+            """.trimIndent(),
+            "test.kml"
+        )
+
+        val method = LayerRepository::class.java.getDeclaredMethod(
+            "toLoadResult",
+            GeoJsonParser.ParseResult::class.java,
+            String::class.java
+        ).apply { isAccessible = true }
+        val result = method.invoke(LayerRepository, parse, "test.kml") as LayerRepository.LoadResult
+
+        assertNotNull(result.importReport)
+        assertEquals("KML", result.importReport?.sourceType)
+        assertEquals(ImportStatus.IMPORTED, result.importReport?.layers?.first()?.status)
+    }
 }

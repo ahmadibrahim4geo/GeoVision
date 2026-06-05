@@ -108,6 +108,13 @@
   <string name="english">English</string>
   <string name="display">Display</string>
   <string name="dark_mode">Dark mode</string>
+  <string name="esri_local_viewer_title">Esri Local Viewer</string>
+  <string name="esri_local_viewer_summary">Optional read-only viewer for local .mmpk and .geodatabase packages. Editing, sync, and online services are disabled.</string>
+  <string name="esri_local_viewer_open">Open Esri Local Viewer</string>
+  <string name="esri_local_viewer_not_included">Esri Local Viewer is not included in this app variant.</string>
+  <string name="open_gis_file">GIS file</string>
+  <string name="open_esri_geodatabase">Mobile Geodatabase (.geodatabase)</string>
+  <string name="open_filegdb_experimental">FileGDB folder (.gdb) experimental</string>
   <string name="about">About</string>
   <string name="app_version">App version</string>
   <string name="terms_of_use">Terms of use</string>
@@ -468,4 +475,25 @@ All data processing is done locally on your device. No data is uploaded or share
   <string name="details_geom_points">Points</string>
   <string name="details_geom_lines">Lines</string>
   <string name="details_geom_polygons">Polygons</string>
+  <!-- Onboarding Screen -->
+  <string name="onboarding_title_1">Manage Geographic Layers</string>
+  <string name="onboarding_desc_1">Import GIS files such as Shapefile, GeoJSON, KML, GPX, and GeoPackage. Display them on the map and organize them as needed.</string>
+  <string name="onboarding_title_2">Interactive Multi-Source Map</string>
+  <string name="onboarding_desc_2">Browse the map with support for multiple sources (OpenStreetMap, MapLibre, and more). Measure distances and areas with precision.</string>
+  <string name="onboarding_title_3">Coordinate Conversion</string>
+  <string name="onboarding_desc_3">Convert between coordinate formats: DD, DMS, DDM, and UTM. Full support for Arabic and English with an easy-to-use interface.</string>
+  <string name="onboarding_title_4">Geotagged Photos</string>
+  <string name="onboarding_desc_4">Import photos taken with GPS coordinates. Display them directly on the map with full EXIF metadata support.</string>
+  <string name="onboarding_skip">Skip</string>
+  <string name="onboarding_next">Next</string>
+  <string name="onboarding_start">Get Started</string>
+  <string name="show_intro_screen">Show introduction screen</string>
+  <!-- Map Bookmarks -->
+  <string name="bookmark_add">Add Bookmark</string>
+  <string name="bookmark_name_hint">Bookmark name</string>
+  <string name="bookmark_saved">Bookmark saved</string>
+  <string name="layers_found">%1$d layers found. Select layers to import:</string>
+  <string name="select_all">Select All</string>
+  <string name="deselect_all">Deselect All</string>
+  <string name="import_count">Import (%1$d)</string>
 </resources>

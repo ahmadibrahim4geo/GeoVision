@@ -184,6 +184,29 @@ class PreferencesManager(context: Context) {
             .apply()
     }
 
+    // ── العلامات المرجعية للخريطة (Bookmarks) ──
+    var bookmarksJson: String
+        get() = prefs.getString(KEY_BOOKMARKS, "[]") ?: "[]"
+        set(value) = prefs.edit().putString(KEY_BOOKMARKS, value).apply()
+
+    fun getBookmarks(): List<Triple<String, Double, Double>> = try {
+        val arr = org.json.JSONArray(bookmarksJson)
+        (0 until arr.length()).map { i ->
+            val obj = arr.getJSONObject(i)
+            Triple(obj.getString("name"), obj.getDouble("lat"), obj.getDouble("lon"))
+        }
+    } catch (_: Exception) { emptyList() }
+
+    fun saveBookmarks(bookmarks: List<Triple<String, Double, Double>>) {
+        val arr = org.json.JSONArray()
+        bookmarks.forEach { (name, lat, lon) ->
+            val obj = org.json.JSONObject()
+            obj.put("name", name); obj.put("lat", lat); obj.put("lon", lon)
+            arr.put(obj)
+        }
+        bookmarksJson = arr.toString()
+    }
+
     fun registerListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
         prefs.registerOnSharedPreferenceChangeListener(listener)
     }
@@ -211,8 +234,8 @@ class PreferencesManager(context: Context) {
         private const val KEY_SHOW_BASEMAP = "show_basemap"           // مفتاح إظهار البيز ماب
         private const val KEY_SNAP_ENABLED = "snap_enabled"            // مفتاح تفعيل الالتقاط
         private const val KEY_SNAP_DISTANCE_METERS = "snap_distance_meters" // مفتاح مسافة الالتقاط بالأمتار
-        private const val KEY_SNAP_DISTANCE = "snap_distance"          // قديم – لم يعد مستخدماً
         private const val KEY_DRAW_MODE = "draw_mode"                  // مفتاح نمط الرسم (polar/ortho)
         private const val KEY_ONBOARDING_SHOWN = "onboarding_shown"   // مفتاح شاشة التعريف
+        private const val KEY_BOOKMARKS = "bookmarks_json"              // مفتاح قائمة العلامات المرجعية
     }
 }

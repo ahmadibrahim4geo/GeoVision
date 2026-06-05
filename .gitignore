@@ -19,3 +19,25 @@ out/
 .navigation/
 captures/
 .externalNativeBuild/
+
+# Build and local files
+build/
+**/build/
+.gradle/
+**/.gradle/
+.idea/
+.vscode/
+local.properties
+*.apk
+*.aab
+
+# Build and local files
+build/
+**/build/
+.gradle/
+**/.gradle/
+.idea/
+.vscode/
+local.properties
+*.apk
+*.aab

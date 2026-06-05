@@ -39,10 +39,6 @@
     </pin-set>
     -->
 
-    <!-- ───────────────────────────────────────────────────────────────────────── -->
-    <!-- Trust Anchors: System CA certificates only in production                 -->
-    <!-- ───────────────────────────────────────────────────────────────────────── -->
-    <trust-anchors>
-        <certificates src="system" />
-    </trust-anchors>
+    <!-- System CA certificates are trusted by default. Add trust-anchors inside
+         a base-config or domain-config only when custom anchors are needed. -->
 </network-security-config>

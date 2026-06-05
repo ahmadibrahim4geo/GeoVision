@@ -1,5 +1,7 @@
 package com.geovision.mobile.ui.screens.map
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -27,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.geovision.mobile.R
 import com.geovision.mobile.core.AppLogger
 import com.geovision.mobile.ui.screens.layers.FeatureRow
@@ -120,16 +123,25 @@ fun MapSideToolbar(
             val ov = onEnsureLocOv() ?: return@CtrlBtn
             val mapView = mv ?: return@CtrlBtn
             fun lastKnown(): GeoPoint? {
+                val fineGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                val coarseGranted = ContextCompat.checkSelfPermission(ctx, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                if (!fineGranted && !coarseGranted) return null
                 val lm = ctx.getSystemService(android.content.Context.LOCATION_SERVICE) as android.location.LocationManager
-                val last = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
-                    ?: lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
-                    ?: lm.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER)
-                return last?.let { GeoPoint(it.latitude, it.longitude) }
+                return try {
+                    val last = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER)
+                        ?: lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER)
+                        ?: lm.getLastKnownLocation(android.location.LocationManager.PASSIVE_PROVIDER)
+                    last?.let { GeoPoint(it.latitude, it.longitude) }
+                } catch (_: SecurityException) {
+                    null
+                }
             }
             if (locOn) {
-                ov.enableFollowLocation()
-                val loc = ov.myLocation ?: lastKnown()
-                if (loc != null) mapView.controller.animateTo(loc, 18.0, 800L)
+                ov.disableFollowLocation()
+                ov.disableMyLocation()
+                mapView.overlays.remove(ov)
+                mapView.invalidate()
+                onToggleLocOn(false)
             } else {
                 if (ov !in (mapView.overlays ?: emptyList())) mapView.overlays.add(0, ov)
                 ov.enableMyLocation(); ov.enableFollowLocation()

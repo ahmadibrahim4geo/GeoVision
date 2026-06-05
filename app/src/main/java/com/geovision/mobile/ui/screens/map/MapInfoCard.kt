@@ -63,8 +63,8 @@ fun InfoCard(lat: Double, lon: Double, z: Double, fmt: String = "DD", elevation:
                     targetState = animTarget,
                     transitionSpec = { fadeIn() togetherWith fadeOut() using SizeTransform(clip = false) },
                     label = "coord_anim"
-                ) {
-                    val isUtmState = fmt == "UTM"
+                ) { targetState ->
+                    val isUtmState = targetState.startsWith("UTM")
                     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
                         if (isUtmState && utm != null) {
                             UTMItem(MaterialTheme.colorScheme.tertiary, stringResource(R.string.zone_label_short), "${utm.zone}${utm.hemisphere}")

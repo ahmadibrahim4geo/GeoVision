@@ -33,7 +33,7 @@ object CoordinateConverter {
         if (sourceCrs == "EPSG:4326" || sourceCrs.startsWith("EPSG:4326")) return features
 
         val crsInfo = parseCrs(sourceCrs)
-        if (crsInfo.isWgs84) return features
+        if (crsInfo.isWgs84 && crsInfo.isGeographic) return features
 
         AppLogger.d(AppLogger.Tags.PARSER, "Converting ${features.size} features from $sourceCrs to WGS84")
         return features.map { feature ->
@@ -46,7 +46,7 @@ object CoordinateConverter {
      * تحويل سلسلة إحداثيات JSON من CRS معين إلى WGS84.
      */
     fun convertCoords(coordsJson: String?, crsInfo: CrsTransform.CrsInfo): String? {
-        if (coordsJson.isNullOrBlank() || crsInfo.isWgs84) return coordsJson
+        if (coordsJson.isNullOrBlank() || (crsInfo.isWgs84 && crsInfo.isGeographic)) return coordsJson
         return try {
             val arr = org.json.JSONArray(coordsJson)
             val result = transformRecursive(arr, crsInfo)

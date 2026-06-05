@@ -14,18 +14,41 @@ import java.nio.ByteOrder
 import kotlin.coroutines.coroutineContext
 
 // =============================================================================
-// محلل ملفات Shapefile (SHP + DBF)
+// Shapefile Format Parser (.shp + .dbf)
+// محلل تنسيق Shapefile (ملفات .shp و .dbf)
 // =============================================================================
-// Shapefile هو تنسيق بيانات جغرافية متجهة (Vector) شائع، يتكون من عدة ملفات:
-//   - .shp : الهندسة الجغرافية بتنسيق ثنائي
-//   - .dbf : جدول الخصائص (تنسيق xBase)
-// =============================================================================
-// تحسينات الأداء (v2):
-//   1. قراءة متدفقة (Streaming) بدلاً من readBytes() — لم يعد الملف يُحمّل بالكامل
-//      في الذاكرة. نقرأ الرأس (100 بايت) ثم كل سجل على حدة من BufferedInputStream.
-//   2. دعم مسارات content:// URI لملف DBF — بدلاً من الاعتماد على مسار ملف نظامي فقط.
-//   3. رسائل خطأ محدّدة لكل حالة (ملف تالف، DBF مفقود، تنسيق غير مدعوم).
-//   4. دعم إلغاء العملية (Cancellation) عبر ensureActive().
+//
+// DESCRIPTION / الوصف:
+// Shapefile is a popular geospatial vector data format consisting of multiple files:
+// Shapefile هو تنسيق بيانات جغرافية متجهة شائع يتكون من عدة ملفات:
+//   - .shp : Geometric data in binary format
+//            البيانات الهندسية بتنسيق ثنائي
+//   - .dbf : Attribute table (xBase format)
+//            جدول الخصائص (تنسيق xBase)
+//   - .shx : Shape index (optional but recommended)
+//            مؤشر الأشكال (اختياري لكن موصى به)
+//   - .prj : Projection information (optional)
+//            معلومات الإسقاط (اختياري)
+//
+// PERFORMANCE OPTIMIZATIONS (v2) / تحسينات الأداء (v2):
+//   - Streaming mode replaces readBytes() - file no longer fully loaded into RAM
+//     الوضع المتدفق بدلاً من readBytes() - الملف لا يُحمّل بالكامل في الذاكرة
+//   - Support for content:// URI paths for DBF files
+//     دعم مسارات URI من نوع content:// لملفات DBF
+//   - Charset auto-detection (UTF-8, CP1256, etc.)
+//     الكشف التلقائي للترميز (UTF-8, CP1256, إلخ)
+//   - Structured error messages for diagnosis
+//     رسائل أخطاء منظمة للتشخيص
+//   - Supports cancellation via ensureActive()
+//     دعم إلغاء العملية عبر ensureActive()
+//
+// KNOWN LIMITATIONS / القيود المعروفة:
+//   - Some complex geometry types may not be fully supported
+//     بعض أنواع الهندسة المعقدة قد لا تكون مدعومة بالكامل
+//   - DBF encoding detection is heuristic-based
+//     الكشف عن ترميز DBF يعتمد على الحدس
+//   - Very large shapefiles (>500MB) require high-end devices
+//     الملفات الكبيرة جداً (>500 ميجابايت) تتطلب أجهزة قوية
 // =============================================================================
 object ShapefileParser {
     private const val TAG = "ShapefileParser"
@@ -161,7 +184,9 @@ object ShapefileParser {
                 val properties = if (featureIdx < dbfRecords.size) dbfRecords[featureIdx] else emptyMap()
                 featureIdx++
 
-                val fid = properties["id"] ?: properties["ID"] ?: properties["name"] ?: properties["Name"] ?: "F-${features.size + 1}"
+                val fid = propertyValueIgnoreCase(properties, "id")
+                    ?: propertyValueIgnoreCase(properties, "name")
+                    ?: "F-${features.size + 1}"
 
                 // حد أقصى للمعالم لتجنب OOM
                 if (features.size >= GeoJsonParser.MAX_FEATURES) {
@@ -439,6 +464,10 @@ object ShapefileParser {
         val length: Int
     )
 
+    private fun propertyValueIgnoreCase(properties: Map<String, String>, key: String): String? {
+        return properties.entries.firstOrNull { it.key.equals(key, ignoreCase = true) }?.value
+    }
+
     /**
      * يحوّل محتوى DBF (بايتات) إلى سجلات خصائص.
      * يدعم ترميزات متعددة: ShapefileImporter يجرب UTF-8 → CP1256 (عربي) → ISO-8859-1.
@@ -462,8 +491,8 @@ object ShapefileParser {
     private fun readDbfHeader(bytes: ByteArray): DbfHeader? {
         if (bytes.size < 32 || bytes[0] != 0x03.toByte() && bytes[0] != 0x83.toByte()) return null
         val numRecords = ByteBuffer.wrap(bytes, 4, 4).order(ByteOrder.LITTLE_ENDIAN).getInt()
-        val headerLength = bytes[8].toInt() and 0xFF
-        val recordLength = bytes[9].toInt() and 0xFF
+        val headerLength = ByteBuffer.wrap(bytes, 8, 2).order(ByteOrder.LITTLE_ENDIAN).getShort().toInt() and 0xFFFF
+        val recordLength = ByteBuffer.wrap(bytes, 10, 2).order(ByteOrder.LITTLE_ENDIAN).getShort().toInt() and 0xFFFF
         if (headerLength < 32 || recordLength <= 0) return null
         return DbfHeader(numRecords, headerLength, recordLength)
     }
@@ -505,7 +534,7 @@ object ShapefileParser {
                 val value = String(bytes, pos, field.length, charset).trim { it <= ' ' }
                 pos += field.length
                 if (!deleted) {
-                    props[field.name.lowercase()] = value
+                    props[field.name] = value
                 }
             }
             if (!deleted) records.add(props)

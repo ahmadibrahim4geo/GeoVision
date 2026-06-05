@@ -48,6 +48,12 @@ fun DetailsScreen(
     val detailsMap = layers.associate { it.id to viewModel.getCachedDetail(it.id) }
 
     var deleteConfirmLayerId by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(layers.map { it.id }) {
+        val pendingId = deleteConfirmLayerId
+        if (pendingId != null && layers.none { it.id == pendingId }) {
+            deleteConfirmLayerId = null
+        }
+    }
 
     Scaffold(
         topBar = {

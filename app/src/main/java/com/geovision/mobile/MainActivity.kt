@@ -34,9 +34,41 @@ import com.geovision.mobile.ui.theme.GeoVisionMobileTheme
 import java.util.Locale
 
 /**
- * النشاط الرئيسي للتطبيق.
- * يدير دورة حياة التطبيق، ويطبق اللغة المحفوظة،
- * ويعرض شاشة البداية (Splash) ثم واجهة التنقل الرئيسية.
+ * Main Application Entry Point
+ * نقطة دخول التطبيق الرئيسية
+ *
+ * FUNCTIONALITY / الوظائف:
+ * - Manages application lifecycle and initialization
+ *   إدارة دورة حياة التطبيق والتهيئة
+ * - Applies saved language preference (Arabic/English)
+ *   تطبيق تفضيل اللغة المحفوظ (عربي/إنجليزي)
+ * - Handles RTL/LTR layout direction automatically
+ *   معالجة اتجاه التخطيط من اليمين لليسار تلقائياً
+ * - Displays Splash screen on app start
+ *   عرض شاشة البداية عند تشغيل التطبيق
+ * - Manages onboarding experience for first-time users
+ *   إدارة تجربة التعريف للمستخدمين لأول مرة
+ * - Provides theme switching (Light/Dark mode)
+ *   توفير تبديل المظهر (الوضع الفاتح/الليلي)
+ *
+ * ARCHITECTURE / العمارة:
+ * - Uses Jetpack Compose for modern UI
+ *   يستخدم Jetpack Compose للواجهة الحديثة
+ * - Manages UI state with mutable state variables
+ *   إدارة حالة الواجهة باستخدام متغيرات الحالة
+ * - Integrates with PreferencesManager for persistent storage
+ *   يتكامل مع PreferencesManager للتخزين الدائم
+ *
+ * LANGUAGE SUPPORT / دعم اللغة:
+ * - Default language: Arabic (ar)
+ *   اللغة الافتراضية: العربية
+ * - Supported languages: Arabic, English
+ *   اللغات المدعومة: العربية، الإنجليزية
+ * - RTL layout for Arabic, LTR for English
+ *   تخطيط من اليمين لليسار للعربية، من اليسار لليمين للإنجليزية
+ *
+ * @see PreferencesManager for storing user preferences
+ * @see GeoVisionMobileApp for main content navigation
  */
 class MainActivity : ComponentActivity() {
 

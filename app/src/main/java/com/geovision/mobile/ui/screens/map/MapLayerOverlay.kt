@@ -16,15 +16,21 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.snapshotFlow
 import com.geovision.mobile.data.GeoPhoto
 import com.geovision.mobile.data.GeometryParser
+import com.geovision.mobile.data.SpatialIndex
+import com.geovision.mobile.data.ViewportFeatureQueryService
 import com.geovision.mobile.ui.screens.layers.FileType
 import com.geovision.mobile.ui.screens.layers.FeatureRow
+import com.geovision.mobile.ui.screens.layers.Layer
+import com.geovision.mobile.ui.screens.layers.LayerDetailInfo
 import com.geovision.mobile.ui.screens.layers.LayerViewModel
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.currentCoroutineContext
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.debounce
 import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.launch
@@ -93,6 +99,135 @@ private fun thumbSize(zoom: Double): Int = (60 + zoom * 6).toInt().coerceIn(150,
 
 private class PhotoMarkerHolder(val marker: Marker, val photo: GeoPhoto, val accent: Int)
 
+private data class PreparedVectorLayer(
+    val layerId: String,
+    val signature: String,
+    val features: List<OptimizedCanvasOverlay.OverlayFeature>,
+    val spatialIndex: SpatialIndex<OptimizedCanvasOverlay.OverlayFeature>,
+    val points: List<GeoPoint>
+)
+
+private fun renderSignature(layer: Layer, detail: LayerDetailInfo): String {
+    return listOf(
+        layer.id,
+        layer.color.value.toString(),
+        layer.transparency.toString(),
+        layer.pointSize.toString(),
+        layer.lineWidth.toString(),
+        detail.features.size.toString(),
+        System.identityHashCode(detail).toString()
+    ).joinToString(":")
+}
+
+private fun renderDatabaseSignature(layer: Layer, mapView: MapView): String {
+    val bb = mapView.boundingBox
+    fun Double.roundForSignature(): String = String.format(java.util.Locale.US, "%.5f", this)
+    return listOf(
+        "db",
+        layer.id,
+        layer.color.value.toString(),
+        layer.transparency.toString(),
+        layer.pointSize.toString(),
+        layer.lineWidth.toString(),
+        mapView.zoomLevelDouble.toInt().toString(),
+        bb.lonWest.roundForSignature(),
+        bb.latSouth.roundForSignature(),
+        bb.lonEast.roundForSignature(),
+        bb.latNorth.roundForSignature()
+    ).joinToString(":")
+}
+
+private fun currentViewportBbox(mapView: MapView): ViewportFeatureQueryService.BoundingBox {
+    val bb = mapView.boundingBox
+    return ViewportFeatureQueryService.BoundingBox(
+        minX = bb.lonWest,
+        minY = bb.latSouth,
+        maxX = bb.lonEast,
+        maxY = bb.latNorth
+    )
+}
+
+private suspend fun prepareVectorLayer(
+    layer: Layer,
+    detail: LayerDetailInfo,
+    signature: String,
+    onFeatureClick: (String, FeatureRow) -> Unit
+): PreparedVectorLayer = withContext(Dispatchers.Default) {
+    val overlayFeatures = mutableListOf<OptimizedCanvasOverlay.OverlayFeature>()
+    val spatialIndex = SpatialIndex<OptimizedCanvasOverlay.OverlayFeature>()
+    val layerPoints = mutableListOf<GeoPoint>()
+
+    detail.features.forEachIndexed { index, feature ->
+        if (index % 256 == 0) currentCoroutineContext().ensureActive()
+
+        when (feature.geometryType) {
+            "Point", "MultiPoint" -> {
+                val rings = GeometryParser.parseRings(feature.geometryType, feature.geometryCoordinates)
+                if (rings.isEmpty()) return@forEachIndexed
+                val geoPts = listOf(rings.flatten())
+                val overlayFeature = OptimizedCanvasOverlay.OverlayFeature(
+                    feature,
+                    feature.geometryType ?: "Point",
+                    geoPts
+                ) { onFeatureClick(layer.id, feature) }
+                overlayFeatures.add(overlayFeature)
+                spatialIndex.insert(overlayFeature, geoPts.flatten())
+                rings.forEach { layerPoints.addAll(it) }
+            }
+            "LineString", "MultiLineString" -> {
+                val rings = GeometryParser.parseRings(feature.geometryType, feature.geometryCoordinates)
+                if (rings.isEmpty()) return@forEachIndexed
+                val overlayFeature = OptimizedCanvasOverlay.OverlayFeature(
+                    feature,
+                    feature.geometryType ?: "LineString",
+                    rings
+                ) { onFeatureClick(layer.id, feature) }
+                overlayFeatures.add(overlayFeature)
+                spatialIndex.insert(overlayFeature, rings.flatten())
+                rings.forEach { layerPoints.addAll(it) }
+            }
+            "Polygon", "MultiPolygon" -> {
+                val polyRings = GeometryParser.parsePolygonSets(feature.geometryType, feature.geometryCoordinates)
+                if (polyRings.isEmpty()) return@forEachIndexed
+                polyRings.forEach { polygonRings ->
+                    val overlayFeature = OptimizedCanvasOverlay.OverlayFeature(
+                        feature,
+                        feature.geometryType ?: "Polygon",
+                        polygonRings
+                    ) { onFeatureClick(layer.id, feature) }
+                    overlayFeatures.add(overlayFeature)
+                    spatialIndex.insert(overlayFeature, polygonRings.flatten())
+                    polygonRings.forEach { layerPoints.addAll(it) }
+                }
+            }
+        }
+    }
+    spatialIndex.build()
+    AppLogger.d(AppLogger.Tags.MAP, "Prepared ${overlayFeatures.size} overlay features for ${layer.id} on background thread")
+    PreparedVectorLayer(layer.id, signature, overlayFeatures, spatialIndex, layerPoints)
+}
+
+private fun zoomToPreparedLayer(mapView: MapView, points: List<GeoPoint>) {
+    try {
+        when {
+            points.size >= 2 -> {
+                val north = points.maxOf { it.latitude }
+                val south = points.minOf { it.latitude }
+                val east = points.maxOf { it.longitude }
+                val west = points.minOf { it.longitude }
+                if (north != south && east != west) {
+                    mapView.zoomToBoundingBox(
+                        org.osmdroid.util.BoundingBox(north, east, south, west).increaseByScale(1.3f),
+                        true
+                    )
+                }
+            }
+            points.size == 1 -> mapView.controller.animateTo(points[0], 16.0, 800L)
+        }
+    } catch (_: Exception) {
+    }
+}
+
 @OptIn(FlowPreview::class)
 @Composable
 fun LayerOverlays(
@@ -105,25 +240,59 @@ fun LayerOverlays(
     onSelectLayerFeature: (String, FeatureRow, List<GeoPoint>) -> Unit = { _, _, _ -> },
     skipFeatureTaps: () -> Boolean = { false }
 ) {
-    val layerOverlays = remember { mutableListOf<Overlay>() }
+    val vectorOverlays = remember { mutableMapOf<String, Overlay>() }
+    val vectorSignatures = remember { mutableMapOf<String, String>() }
+    val vectorJobs = remember { mutableMapOf<String, Job>() }
+    val vectorPoints = remember { mutableMapOf<String, List<GeoPoint>>() }
     val photoHolders = remember { mutableListOf<PhotoMarkerHolder>() }
     val selectModeState = remember { mutableStateOf(false) }; selectModeState.value = selectActive
+    val viewportRefreshTick = remember { mutableStateOf(0L) }
+
+    DisposableEffect(mv) {
+        val m = mv ?: return@DisposableEffect onDispose {}
+        val listener = object : MapListener {
+            override fun onScroll(e: ScrollEvent): Boolean {
+                viewportRefreshTick.value = System.nanoTime()
+                return false
+            }
+
+            override fun onZoom(e: ZoomEvent): Boolean {
+                viewportRefreshTick.value = System.nanoTime()
+                return false
+            }
+        }
+        m.addMapListener(listener)
+        onDispose { m.removeMapListener(listener) }
+    }
 
     LaunchedEffect(mv, showGeoPhotos, onFeatureClick, onPhotoClick) {
         val m = mv ?: return@LaunchedEffect
         snapshotFlow {
             viewModel.requestedZoomLayerId
             viewModel.layerDetailsVersionFlow.value
+            viewportRefreshTick.value
             showGeoPhotos
             val layers = viewModel.layers.toList()
             val details = layers.map { it.id to viewModel.getCachedDetail(it.id) }
             layers to details
         }.debounce(200).collect { (layers, _) ->
+            val visibleVectorLayers = layers.filter {
+                it.isVisible && it.fileType != FileType.PHOTO &&
+                    (viewModel.getCachedDetail(it.id) != null || it.filePath?.startsWith("geovision://project/") == true)
+            }
+            val visibleVectorIds = visibleVectorLayers.map { it.id }.toSet()
+
+            val vectorIdsToRemove = (vectorOverlays.keys + vectorJobs.keys + vectorSignatures.keys + vectorPoints.keys) - visibleVectorIds
+            vectorIdsToRemove.forEach { layerId ->
+                vectorJobs.remove(layerId)?.cancel()
+                vectorOverlays.remove(layerId)?.let { m.overlays.remove(it) }
+                vectorSignatures.remove(layerId)
+                vectorPoints.remove(layerId)
+            }
+
             val oldHolders = photoHolders.toList()
             photoHolders.clear()
             if (oldHolders.isNotEmpty()) m.overlays.removeAll(oldHolders.map { it.marker })
-            m.overlays.removeAll(layerOverlays); layerOverlays.clear()
-            val layerPointsMap = mutableMapOf<String, MutableList<GeoPoint>>()
 
             layers.forEach { layer ->
                 if (!layer.isVisible) return@forEach
@@ -131,7 +300,7 @@ fun LayerOverlays(
                 if (layer.fileType == FileType.PHOTO) {
                     if (!showGeoPhotos) return@forEach
                     val photos = viewModel.getPhotos(layer.id)
-                    val layerPts = mutableListOf<GeoPoint>(); layerPointsMap[layer.id] = layerPts
+                    val layerPts = mutableListOf<GeoPoint>(); vectorPoints[layer.id] = layerPts
                     val alpha = (layer.color.alpha * layer.transparency * 255).toInt().coerceIn(0, 255)
                     val lc = AColor.argb(alpha, (layer.color.red * 255).toInt(), (layer.color.green * 255).toInt(), (layer.color.blue * 255).toInt())
 
@@ -175,57 +344,83 @@ fun LayerOverlays(
                                 }
                                 true
                             }
-                            layerOverlays.add(this); m.overlays.add(this)
+                            m.overlays.add(this)
                             if (count == 1) photoHolders.add(PhotoMarkerHolder(this, cluster[0], lc))
                         }
                     }
                     return@forEach
                 }
 
-                val detail = viewModel.getCachedDetail(layer.id) ?: return@forEach
-                val layerPts = mutableListOf<GeoPoint>(); layerPointsMap[layer.id] = layerPts
-                val alpha = (layer.color.alpha * layer.transparency * 255).toInt().coerceIn(0, 255)
-                val lc = AColor.argb(alpha, (layer.color.red * 255).toInt(), (layer.color.green * 255).toInt(), (layer.color.blue * 255).toInt())
+                val detail = viewModel.getCachedDetail(layer.id)
+                val isDatabaseLayer = detail == null && layer.filePath?.startsWith("geovision://project/") == true
+                val signature = if (detail != null) renderSignature(layer, detail) else renderDatabaseSignature(layer, m)
+                if (vectorSignatures[layer.id] == signature && vectorOverlays.containsKey(layer.id)) return@forEach
+                if (vectorJobs[layer.id]?.isActive == true) return@forEach
 
-                val overlayFeatures = mutableListOf<OptimizedCanvasOverlay.OverlayFeature>()
+                vectorJobs[layer.id] = launch {
+                    try {
+                        val effectiveDetail = detail ?: if (isDatabaseLayer) {
+                            val features = viewModel.getFeaturesInViewport(
+                                context = m.context,
+                                layerId = layer.id,
+                                bbox = currentViewportBbox(m),
+                                zoom = m.zoomLevelDouble,
+                                limit = 1_200,
+                                offset = 0
+                            )
+                            LayerDetailInfo(
+                                fileName = layer.name,
+                                filePath = layer.filePath ?: "",
+                                crs = layer.crs,
+                                extent = "",
+                                features = features
+                            )
+                        } else {
+                            return@launch
+                        }
+                        val prepared = prepareVectorLayer(layer, effectiveDetail, signature, onFeatureClick)
+                        val currentLayer = viewModel.getLayerById(prepared.layerId)
+                        if (currentLayer == null || !currentLayer.isVisible) return@launch
+                        val currentDetail = viewModel.getCachedDetail(prepared.layerId)
+                        val currentSignature = if (currentDetail != null) renderSignature(currentLayer, currentDetail) else renderDatabaseSignature(currentLayer, m)
+                        if (currentSignature != prepared.signature) return@launch
 
-                detail.features.forEach { feature ->
-                    val rings = GeometryParser.parseRings(feature.geometryType, feature.geometryCoordinates)
-                    if (rings.isEmpty()) {
-                        AppLogger.w(AppLogger.Tags.MAP, "Empty rings for feature ${feature.id} type=${feature.geometryType}")
-                        return@forEach
-                    }
-                    val cb = { onFeatureClick(layer.id, feature) }
-                    when (feature.geometryType) {
-                        "Point", "MultiPoint" -> {
-                            val geoPts = listOf(rings.flatten())
-                            overlayFeatures.add(OptimizedCanvasOverlay.OverlayFeature(feature, feature.geometryType ?: "Point", geoPts, cb))
-                            rings.forEach { ring -> layerPts.addAll(ring) }
+                        val alpha = (currentLayer.color.alpha * currentLayer.transparency * 255).toInt().coerceIn(0, 255)
+                        val lc = AColor.argb(alpha, (currentLayer.color.red * 255).toInt(), (currentLayer.color.green * 255).toInt(), (currentLayer.color.blue * 255).toInt())
+                        val overlay = OptimizedCanvasOverlay(
+                            prepared.layerId,
+                            prepared.features,
+                            selectModeState,
+                            { layId, feature, geoPts -> onSelectLayerFeature(layId, feature, geoPts) },
+                            lc,
+                            lc,
+                            lc,
+                            currentLayer.pointSize,
+                            currentLayer.lineWidth,
+                            skipFeatureTaps = skipFeatureTaps,
+                            preparedSpatialIndex = prepared.spatialIndex
+                        )
+
+                        vectorOverlays.remove(prepared.layerId)?.let { m.overlays.remove(it) }
+                        vectorOverlays[prepared.layerId] = overlay
+                        vectorSignatures[prepared.layerId] = prepared.signature
+                        vectorPoints[prepared.layerId] = prepared.points
+                        m.overlays.add(overlay)
+
+                        if (viewModel.requestedZoomLayerId == prepared.layerId) {
+                            zoomToPreparedLayer(m, prepared.points)
+                            viewModel.requestedZoomLayerId = null
                         }
-                        "LineString", "MultiLineString" -> {
-                            overlayFeatures.add(OptimizedCanvasOverlay.OverlayFeature(feature, feature.geometryType ?: "LineString", rings, cb))
-                            rings.forEach { ring -> layerPts.addAll(ring) }
-                        }
-                        "Polygon", "MultiPolygon" -> {
-                            val polyRings = GeometryParser.parsePolygonSets(feature.geometryType, feature.geometryCoordinates)
-                            polyRings.forEach { polygonRings ->
-                                polygonRings.forEach { ring -> layerPts.addAll(ring) }
-                                overlayFeatures.add(OptimizedCanvasOverlay.OverlayFeature(feature, feature.geometryType ?: "Polygon", polygonRings, cb))
-                            }
-                        }
+                        m.invalidate()
+                    } finally {
+                        vectorJobs.remove(layer.id)
                     }
                 }
-                val fillColor = lc
-                OptimizedCanvasOverlay(layer.id, overlayFeatures, selectModeState,
-                    { layId, feature, geoPts -> onSelectLayerFeature(layId, feature, geoPts) },
-                    lc, lc, fillColor, layer.pointSize, layer.lineWidth,
-                    skipFeatureTaps = skipFeatureTaps)
-                    .let { layerOverlays.add(it); m.overlays.add(it) }
             }
 
             val zoomTarget = viewModel.requestedZoomLayerId
             if (zoomTarget != null) {
-                val pts = layerPointsMap[zoomTarget]
+                val pts = vectorPoints[zoomTarget]
                 if (pts != null && pts.size >= 2) {
                     try {
                         val north = pts.maxOf { it.latitude }; val south = pts.minOf { it.latitude }
@@ -248,7 +443,22 @@ fun LayerOverlays(
         }
     }
 
-    val photoScope = remember { CoroutineScope(SupervisorJob()) }
+    DisposableEffect(mv) {
+        val m = mv ?: return@DisposableEffect onDispose {}
+        onDispose {
+            vectorJobs.values.forEach { it.cancel() }
+            vectorJobs.clear()
+            vectorOverlays.values.forEach { m.overlays.remove(it) }
+            vectorOverlays.clear()
+            vectorSignatures.clear()
+            vectorPoints.clear()
+            photoHolders.forEach { m.overlays.remove(it.marker) }
+            photoHolders.clear()
+            m.invalidate()
+        }
+    }
+
+    val photoScope = rememberCoroutineScope()
     DisposableEffect(mv, showGeoPhotos) {
         val m = mv ?: return@DisposableEffect onDispose {}
         if (!showGeoPhotos) return@DisposableEffect onDispose {}
@@ -264,11 +474,11 @@ fun LayerOverlays(
                             val bmp = loadPhotoThumbnailSync(m.context, ref.photo.uri, newSize * 2)
                             if (bmp != null) {
                                 val icon = makeThumbnailDrawable(bmp, newSize, ref.accent, ref.photo.fileName)
-                                android.os.Handler(m.context.mainLooper).post { ref.marker.icon = icon }
+                                withContext(Dispatchers.Main) { ref.marker.icon = icon }
                             }
                         } catch (_: Exception) {}
                     }
-                    android.os.Handler(m.context.mainLooper).post { m.invalidate() }
+                    withContext(Dispatchers.Main) { m.invalidate() }
                 }
                 return false
             }

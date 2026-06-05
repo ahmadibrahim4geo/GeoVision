@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="esri_local_viewer_title">Esri Local Viewer</string>
+    <string name="esri_local_viewer_mode_description">This optional mode displays local Esri packages only. Editing, sync, and cloud services are disabled. Some layers inside a package may not work under a Lite license if they require a higher level.</string>
+    <string name="esri_open_package">Open .mmpk / .geodatabase</string>
+    <string name="esri_clear_cache">Clear Esri cache</string>
+    <string name="esri_storage_cache_settings">Storage &amp; Cache Settings</string>
+    <string name="esri_cache_limit">Cache limit: %1$s</string>
+    <string name="esri_custom_cache_limit">Custom cache limit (GB)</string>
+    <string name="esri_used_cache">Used cache: %1$s</string>
+    <string name="esri_packages_size">Packages: %1$s</string>
+    <string name="esri_temp_size">Temp: %1$s</string>
+    <string name="esri_reports_size">Reports: %1$s</string>
+    <string name="esri_available_storage">Available: %1$s</string>
+    <string name="esri_recent_packages">Recent local packages</string>
+    <string name="esri_open">Open</string>
+    <string name="esri_remove_recent">Remove from recent</string>
+    <string name="esri_loaded_count">%1$d loaded</string>
+    <string name="esri_failed_count">%1$d failed</string>
+    <string name="esri_skipped_count">%1$d skipped</string>
+    <string name="esri_layer_status_type">%1$s - %2$s</string>
+    <string name="esri_large_package_title">Large local package</string>
+    <string name="esri_large_package_message">%1$s is %2$s. It will be copied into GeoVision_Project/esri_viewer/packages before opening.</string>
+    <string name="esri_copy_and_open">Copy and open</string>
+    <string name="esri_cancel">Cancel</string>
+</resources>

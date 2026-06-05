@@ -17,8 +17,8 @@ object WkbParser {
         // GeoPackage extended WKB: skip "GP" header + envelope if present
         if (wkb.size >= 4 && wkb[0] == GP_MAGIC_0 && wkb[1] == GP_MAGIC_1) {
             val flags = wkb[3].toInt() and 0xFF
-            val envType = flags and 0x07
-            val headerLen = 4 + when (envType) {
+            val envType = (flags shr 1) and 0x07
+            val headerLen = 8 + when (envType) {
                 0 -> 0
                 1 -> 4 * 8  // 2D envelope: minX,maxX,minY,maxY
                 2 -> 6 * 8  // 3D envelope: + minZ,maxZ

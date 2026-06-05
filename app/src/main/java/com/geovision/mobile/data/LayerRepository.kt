@@ -58,12 +58,60 @@ object LayerRepository {
         }
     }
 
+    suspend fun loadGpkgLayers(
+        context: Context,
+        uri: Uri,
+        fileName: String,
+        selectedLayerNames: List<String>
+    ): List<LoadResult> {
+        return withTimeout(PARSE_TIMEOUT_MS) {
+            withContext(Dispatchers.IO) {
+                selectedLayerNames.map { layerName ->
+                    val layerFileName = "$fileName / $layerName"
+                    val detail = GpkgReader.readSelected(context, uri, fileName, listOf(layerName))
+                    if (detail != null) {
+                        GeoJsonParser.ParseResult(
+                            features = detail.features,
+                            fileName = layerFileName,
+                            crs = detail.crs,
+                            extent = detail.extent
+                        ).toLoadResult(layerFileName)
+                    } else {
+                        LoadResult(
+                            fileName = layerFileName,
+                            error = "تعذّر فتح طبقة GeoPackage: $layerName",
+                            errorType = GeoJsonParser.ParseErrorType.CORRUPTED,
+                            importReport = ImportReport(
+                                sourceName = layerFileName,
+                                sourceType = "GeoPackage",
+                                layers = listOf(
+                                    ImportLayerInfo(
+                                        id = layerName,
+                                        name = layerName,
+                                        geometryType = null,
+                                        featureCount = null,
+                                        crs = null,
+                                        status = ImportStatus.FAILED,
+                                        message = "تعذّر فتح الطبقة"
+                                    )
+                                ),
+                                errors = listOf(ImportError("GPKG_LAYER_OPEN_FAILED", "تعذّر فتح الطبقة", layerName))
+                            )
+                        )
+                    }
+                }
+            }
+        }
+    }
+
     private suspend fun loadGpkg(context: Context, uri: Uri, fileName: String): LoadResult {
         val detail = GpkgReader.read(context, uri, fileName)
-        return if (detail != null) LoadResult(
-            features = detail.features, crs = detail.crs,
-            extent = detail.extent, fileName = fileName
-        ) else LoadResult(
+        return if (detail != null) GeoJsonParser.ParseResult(
+            features = detail.features,
+            fileName = fileName,
+            crs = detail.crs,
+            extent = detail.extent
+        ).toLoadResult(fileName) else LoadResult(
             error = "تعذّر فتح ملف GeoPackage أو أنه غير صالح",
             errorType = GeoJsonParser.ParseErrorType.CORRUPTED
         )
@@ -86,8 +134,22 @@ object LayerRepository {
             val selected = entries.find { (name, _) -> name.equals("doc.kml", ignoreCase = true) }
                 ?: entries.firstOrNull()
             if (selected != null) {
-                val text = selected.second.toString(java.nio.charset.StandardCharsets.UTF_8)
-                val result = KmlParser.streamParse(java.io.StringReader(text), fileName)
+                // محاولة فك ترميز البيانات بـ UTF-8 بشكل صحيح
+                val text = try {
+                    selected.second.toString(java.nio.charset.StandardCharsets.UTF_8)
+                } catch (_: Exception) {
+                    // في حالة الفشل، حاول بـ ISO-8859-1
+                    selected.second.toString(java.nio.charset.StandardCharsets.ISO_8859_1)
+                }
+                
+                // التأكد من عدم وجود BOM في النص
+                val cleanedText = if (text.startsWith('\uFEFF')) {
+                    text.substring(1)
+                } else {
+                    text
+                }
+                
+                val result = KmlParser.streamParse(java.io.StringReader(cleanedText), fileName)
                 result.toLoadResult(fileName)
             } else LoadResult(error = "لم يتم العثور على ملف KML صالح داخل KMZ", errorType = GeoJsonParser.ParseErrorType.CORRUPTED)
         } catch (e: java.util.zip.ZipException) {
@@ -239,13 +301,78 @@ object LayerRepository {
         val parseTimeMs: Long = 0L,
         val error: String? = null,
         val errorType: GeoJsonParser.ParseErrorType? = null,
-        val warning: String? = null
+        val warning: String? = null,
+        val importReport: ImportReport? = null
     )
 
     private fun GeoJsonParser.ParseResult.toLoadResult(fileName: String) = LoadResult(
         features = features, crs = crs, extent = extent,
         fileName = fileName.ifEmpty { this.fileName },
         parseTimeMs = parseTimeMs, error = error,
-        errorType = errorType, warning = warning
+        errorType = errorType,
+        warning = CrsValidator.appendWarning(warning, crs),
+        importReport = toImportReport(fileName.ifEmpty { this.fileName })
     )
+
+    private fun GeoJsonParser.ParseResult.toImportReport(sourceName: String): ImportReport {
+        val sourceType = inferReportSourceType(sourceName)
+        val crsInfo = CrsValidator.inspect(crs)
+        val warnings = listOfNotNull(CrsValidator.warningFor(crs))
+        val errors = listOfNotNull(
+            error?.let {
+                ImportError(
+                    code = errorType?.name ?: "PARSER_ERROR",
+                    message = it
+                )
+            }
+        )
+        val geometryType = deriveReportGeometryType(features)
+        val status = when {
+            error != null -> ImportStatus.FAILED
+            warnings.isNotEmpty() -> ImportStatus.WARNING
+            else -> ImportStatus.IMPORTED
+        }
+        val layer = ImportLayerInfo(
+            id = sourceName.ifBlank { "layer" },
+            name = sourceName.ifBlank { fileName.ifBlank { "Layer" } },
+            geometryType = geometryType,
+            featureCount = features.size.toLong(),
+            crs = crsInfo,
+            status = status,
+            message = warning ?: error
+        )
+        return ImportReport(
+            sourceName = sourceName.ifBlank { fileName },
+            sourceType = sourceType,
+            layers = listOf(layer),
+            warnings = warnings,
+            errors = errors
+        )
+    }
+
+    private fun inferReportSourceType(sourceName: String): String {
+        val lower = sourceName.lowercase()
+        return when {
+            lower.endsWith(".kmz") -> "KMZ"
+            lower.endsWith(".kml") -> "KML"
+            lower.endsWith(".gpkg") -> "GeoPackage"
+            lower.endsWith(".gpx") -> "GPX"
+            lower.endsWith(".geojson") || lower.endsWith(".json") -> "GeoJSON"
+            lower.endsWith(".shp") || lower.endsWith(".zip") -> "Shapefile"
+            lower.endsWith(".gdb") || lower.contains(".gdb/") -> "FileGDB"
+            else -> "GIS"
+        }
+    }
+
+    private fun deriveReportGeometryType(features: List<FeatureRow>): String? {
+        if (features.isEmpty()) return null
+        return features.groupingBy { feature ->
+            when (feature.geometryType) {
+                "Point", "MultiPoint" -> "Point"
+                "LineString", "MultiLineString" -> "LineString"
+                "Polygon", "MultiPolygon" -> "Polygon"
+                else -> feature.geometryType
+            }
+        }.eachCount().maxByOrNull { it.value }?.key
+    }
 }

@@ -27,10 +27,23 @@ import androidx.compose.ui.unit.dp
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.geovision.mobile.R
+import com.geovision.mobile.data.GdbParser
 import com.geovision.mobile.ui.navigation.BottomNavBar
 import com.geovision.mobile.ui.navigation.BottomNavTab
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+
+private val GIS_DOCUMENT_MIME_TYPES = arrayOf(
+    "application/octet-stream",
+    "application/geo+json",
+    "application/vnd.google-earth.kml+xml",
+    "application/x-qgis",
+    "application/geopackage+sqlite3",
+    "image/jpeg",
+    "image/png",
+    "image/webp",
+    "*/*"
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -66,6 +79,7 @@ fun LayerManagerScreen(
     var pendingGdbUri by remember { mutableStateOf<Uri?>(null) }
     var pendingGdbName by remember { mutableStateOf("") }
     var gdbTableNames by remember { mutableStateOf<List<String>>(emptyList()) }
+    var gdbTableInfos by remember { mutableStateOf<List<GdbParser.GdbTableInfo>>(emptyList()) }
 
     val gdbFolderPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
@@ -80,11 +94,13 @@ fun LayerManagerScreen(
         pendingGdbName = folderName
         isLoadingLayers = true
         scope.launch {
-            val tables = com.geovision.mobile.data.GdbParser.listTableNames(context, uri, folderName)
-            gdbTableNames = tables.map { it.tableName }
+            val tables = GdbParser.listTableNames(context, uri, folderName)
+            gdbTableInfos = tables
+            gdbTableNames = tables.map { it.fileName }
             isLoadingLayers = false
+            viewModel.scanImportReport(context, uri, folderName)
             if (tables.isNotEmpty()) showGdbSelection = true
-            else snackbarHostState.showSnackbar("No tables found in $folderName")
+            else snackbarHostState.showSnackbar("لم يتم العثور على جداول في $folderName")
         }
     }
 
@@ -128,15 +144,15 @@ fun LayerManagerScreen(
         val processedBases = mutableSetOf<String>()
 
         for (uri in uris) {
+            val fileName = viewModel.getFileName(context, uri) ?: uri.lastPathSegment?.substringAfterLast('/') ?: ""
             val fileType = viewModel.inferFileType(uri, context)
             if (fileType != null) {
-                val fileName = viewModel.getFileName(context, uri) ?: uri.lastPathSegment?.substringAfterLast('/') ?: ""
-
                 if (fileType == FileType.SHAPEFILE) {
                     val nameLower = fileName.lowercase()
 
                     // ZIP مباشرة دون تجميع
                     if (nameLower.endsWith(".zip")) {
+                        viewModel.scanImportReport(context, uri, fileName)
                         val layerId = viewModel.addLayer(fileName, fileType, uri.toString())
                         viewModel.loadAndCacheLayer(context, layerId, uri, fileName)
                         added++; continue
@@ -159,6 +175,7 @@ fun LayerManagerScreen(
                     val companionPrj = prjByBase[base] ?: viewModel.findCompanionUri(shpUri, ".prj", context)
 
                     val layerId = viewModel.addLayer(shpName, fileType, shpUri.toString())
+                    viewModel.scanImportReport(context, shpUri, shpName)
                     viewModel.loadAndCacheLayer(context, layerId, shpUri, shpName, companionDbf, companionPrj)
                     added++
                 } else if (fileType == FileType.PHOTO) {
@@ -172,11 +189,13 @@ fun LayerManagerScreen(
                         val names = com.geovision.mobile.data.GpkgReader.listLayerNames(context, uri)
                         gpkgLayerNames = names
                         isLoadingLayers = false
+                        viewModel.scanImportReport(context, uri, fileName)
                         if (names.isNotEmpty()) showLayerSelection = true
-                        else snackbarHostState.showSnackbar("No layers found in $fileName")
+                        else snackbarHostState.showSnackbar("لم يتم العثور على طبقات في $fileName")
                     }
                     added++
                 } else {
+                    viewModel.scanImportReport(context, uri, fileName)
                     val layerId = viewModel.addLayer(fileName, fileType, uri.toString())
                     viewModel.loadAndCacheLayer(context, layerId, uri, fileName)
                     added++
@@ -231,12 +250,12 @@ fun LayerManagerScreen(
                             text = { Text("ملف GIS") },
                             onClick = {
                                 showFabMenu = false
-                                filePickerLauncher.launch(arrayOf("application/octet-stream", "application/geo+json", "application/vnd.google-earth.kml+xml", "application/x-qgis", "application/geopackage+sqlite3", "image/jpeg", "image/png", "image/webp", "*/*"))
+                                filePickerLauncher.launch(GIS_DOCUMENT_MIME_TYPES)
                             },
                             leadingIcon = { Icon(Icons.Default.InsertDriveFile, "استيراد ملفات GIS") }
                         )
                         DropdownMenuItem(
-                            text = { Text("GeoDatabase (.gdb)") },
+                            text = { Text(stringResource(R.string.open_filegdb_experimental)) },
                             onClick = {
                                 showFabMenu = false
                                 gdbFolderPickerLauncher.launch(null)
@@ -260,14 +279,16 @@ fun LayerManagerScreen(
                     Spacer(Modifier.height(8.dp))
                     Text(stringResource(R.string.add_layer_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 48.dp))
                     Spacer(Modifier.height(28.dp))
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        FilledTonalButton(onClick = { filePickerLauncher.launch(arrayOf("application/octet-stream", "application/geo+json", "application/vnd.google-earth.kml+xml", "application/x-qgis", "application/geopackage+sqlite3", "image/jpeg", "image/png", "image/webp", "*/*")) },
-                            shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
-                            Icon(Icons.Default.InsertDriveFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("GIS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
-                        }
-                        FilledTonalButton(onClick = { gdbFolderPickerLauncher.launch(null) },
-                            shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
-                            Icon(Icons.Default.FolderOpen, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("GDB", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                            FilledTonalButton(onClick = { filePickerLauncher.launch(GIS_DOCUMENT_MIME_TYPES) },
+                                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
+                                Icon(Icons.Default.InsertDriveFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("GIS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
+                            }
+                            FilledTonalButton(onClick = { gdbFolderPickerLauncher.launch(null) },
+                                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
+                                Icon(Icons.Default.FolderOpen, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("FileGDB", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
+                            }
                         }
                     }
                 }
@@ -410,12 +431,7 @@ fun LayerManagerScreen(
                 onConfirm = { selectedNames ->
                     showLayerSelection = false
                     if (uri != null) {
-                        // إنشاء طبقة لكل layer مختارة
-                        selectedNames.forEach { layerTableName ->
-                            val layerFileName = "${name} / $layerTableName"
-                            val layerId = viewModel.addLayer(layerFileName, FileType.GEOPACKAGE, uri.toString())
-                            viewModel.loadAndCacheLayer(context, layerId, uri, layerFileName)
-                        }
+                        viewModel.parseAndCacheGpkgSelected(context, uri, name, selectedNames)
                     }
                     pendingGpkgUri = null
                     gpkgLayerNames = emptyList()
@@ -427,13 +443,25 @@ fun LayerManagerScreen(
         if (showGdbSelection && gdbTableNames.isNotEmpty()) {
             val uri = pendingGdbUri
             val name = pendingGdbName
+            val displayNames = gdbTableInfos.associate { it.fileName to it.tableName }
+            val subtitles = gdbTableInfos.associate { info ->
+                val parts = listOfNotNull(
+                    info.geometryType,
+                    info.estimatedCount.takeIf { it >= 0 }?.let { "$it عنصر" },
+                    info.catalogPath
+                )
+                info.fileName to parts.joinToString(" - ")
+            }
             LayerSelectionDialog(
                 title = "GeoDatabase: $name",
                 layers = gdbTableNames,
+                displayNames = displayNames,
+                subtitles = subtitles,
                 onDismiss = {
                     showGdbSelection = false
                     pendingGdbUri = null
                     gdbTableNames = emptyList()
+                    gdbTableInfos = emptyList()
                 },
                 onConfirm = { selectedNames ->
                     showGdbSelection = false
@@ -442,7 +470,15 @@ fun LayerManagerScreen(
                     }
                     pendingGdbUri = null
                     gdbTableNames = emptyList()
+                    gdbTableInfos = emptyList()
                 }
+            )
+        }
+
+        viewModel.latestImportReport?.let { report ->
+            ImportReportDialog(
+                report = report,
+                onDismiss = { viewModel.clearLatestImportReport() }
             )
         }
 
@@ -451,7 +487,7 @@ fun LayerManagerScreen(
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
                     Spacer(Modifier.height(8.dp))
-                    Text("Reading layers...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("جار قراءة الطبقات...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
