@@ -624,7 +624,7 @@ A: Open a [Discussion](https://github.com/YOUR-USERNAME/GEO-Vision/discussions) 
 
 ## 📞 Support & Contact
 
-- 📧 **Email**: [Your email]
+- 📧 **Email**: ahmadibrahim.geo@gmail.com
 - 💬 **GitHub Discussions**: For Q&A and feature requests
 - 🐛 **Issues**: For bug reports
 - 🌐 **Website**: [Your website if available]
