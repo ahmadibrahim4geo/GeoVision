@@ -25,24 +25,20 @@
 
 ## Screenshots
 
-### Splash Screen
-![Splash Screen](assets/screenshots/SplashScreen.png)
+<p align="center">
+  <img src="assets/screenshots/SplashScreen.png" width="45%" />
+  <img src="assets/screenshots/MapScreen.png" width="45%" />
+</p>
 
-### Map Screen
-![Map Screen](assets/screenshots/MapScreen.png)
+<p align="center">
+  <img src="assets/screenshots/LayersScreen.png" width="45%" />
+  <img src="assets/screenshots/DetailsScreen.png" width="45%" />
+</p>
 
-### Layers Screen
-![Layers Screen](assets/screenshots/LayersScreen.png)
-
-### Details Screen
-![Details Screen](assets/screenshots/DetailsScreen.png)
-
-### Calculator Screen
-![Calculator Screen](assets/screenshots/CalcScreen.png)
-
-### Settings Screen
-![Settings Screen](assets/screenshots/SettingScreen.png)
-
+<p align="center">
+  <img src="assets/screenshots/CalcScreen.png" width="45%" />
+  <img src="assets/screenshots/SettingScreen.png" width="45%" />
+</p>
 ---
 
 ## 🎯 Supported GIS Formats
