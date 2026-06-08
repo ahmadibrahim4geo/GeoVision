@@ -23,6 +23,28 @@
 
 ---
 
+## Screenshots
+
+### Splash Screen
+![Splash Screen](assets/screenshots/SplashScreen.png)
+
+### Map Screen
+![Map Screen](assets/screenshots/MapScreen.png)
+
+### Layers Screen
+![Layers Screen](assets/screenshots/LayersScreen.png)
+
+### Details Screen
+![Details Screen](assets/screenshots/DetailsScreen.png)
+
+### Calculator Screen
+![Calculator Screen](assets/screenshots/CalcScreen.png)
+
+### Settings Screen
+![Settings Screen](assets/screenshots/SettingScreen.png)
+
+---
+
 ## 🎯 Supported GIS Formats
 
 | Format | Status | Capabilities | Notes |
