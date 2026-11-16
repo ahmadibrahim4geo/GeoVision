@@ -16,6 +16,56 @@ import java.io.Reader
 object LayerRepository {
     private const val PARSE_TIMEOUT_MS = 60_000L
 
+    enum class ZipArchiveType {
+        SHAPEFILE,
+        FILE_GDB,
+        GEOPACKAGE,
+        KML,
+        PERSONAL_GDB,
+        UNKNOWN
+    }
+
+    fun inspectZipType(context: Context, uri: Uri): ZipArchiveType {
+        return try {
+            val isStream = context.contentResolver.openInputStream(uri) ?: return ZipArchiveType.UNKNOWN
+            java.util.zip.ZipInputStream(isStream).use { zis ->
+                var entry = zis.nextEntry
+                var hasShp = false
+                var hasGdb = false
+                var hasGpkg = false
+                var hasKml = false
+                var hasMdb = false
+                var count = 0
+                while (entry != null && count < 250) {
+                    count++
+                    val name = entry.name.lowercase()
+                    when {
+                        name.endsWith(".gdbtable") || name.contains(".gdb/") || name.endsWith(".gdb") -> hasGdb = true
+                        name.endsWith(".geodatabase") -> hasGdb = true
+                        name.endsWith(".shp") -> hasShp = true
+                        name.endsWith(".gpkg") -> hasGpkg = true
+                        name.endsWith(".kml") -> hasKml = true
+                        name.endsWith(".mdb") -> hasMdb = true
+                    }
+                    if (hasGdb) return@use ZipArchiveType.FILE_GDB
+                    if (hasGpkg) return@use ZipArchiveType.GEOPACKAGE
+                    entry = zis.nextEntry
+                }
+                when {
+                    hasGdb -> ZipArchiveType.FILE_GDB
+                    hasGpkg -> ZipArchiveType.GEOPACKAGE
+                    hasShp -> ZipArchiveType.SHAPEFILE
+                    hasKml -> ZipArchiveType.KML
+                    hasMdb -> ZipArchiveType.PERSONAL_GDB
+                    else -> ZipArchiveType.UNKNOWN
+                }
+            }
+        } catch (e: Exception) {
+            AppLogger.w(AppLogger.Tags.PARSER, "inspectZipType error: ${e.message}")
+            ZipArchiveType.UNKNOWN
+        }
+    }
+
     suspend fun loadFromUri(
         context: Context,
         uri: Uri,
@@ -27,16 +77,132 @@ object LayerRepository {
             withContext(Dispatchers.IO) {
                 ensureActive()
                 val uriStr = uri.toString().lowercase()
+                val nameLower = fileName.lowercase()
 
                 when {
-                    uriStr.endsWith(".shp") || uriStr.endsWith(".zip") -> {
+                    nameLower.endsWith(".zip") || uriStr.endsWith(".zip") -> {
+                        when (inspectZipType(context, uri)) {
+                            ZipArchiveType.FILE_GDB -> loadGdb(context, uri, fileName)
+                            ZipArchiveType.GEOPACKAGE -> loadGpkgFromZip(context, uri, fileName)
+                            ZipArchiveType.KML -> loadKmz(context, uri, fileName)
+                            ZipArchiveType.PERSONAL_GDB -> LoadResult(
+                                fileName = fileName,
+                                error = "ملف Personal Geodatabase (.mdb) يعتمد على محرك Microsoft Access 32-bit غير المدعوم على Android. يُرجى تحويله إلى GeoPackage (.gpkg) أو FileGDB (.gdb) عبر ArcGIS أو QGIS.",
+                                errorType = GeoJsonParser.ParseErrorType.UNSUPPORTED_FORMAT
+                            )
+                            else -> {
+                                val result = ShapefileImporter.importFromUri(uri, context, fileName, companionDbf, companionPrj)
+                                result.toLoadResult(fileName)
+                            }
+                        }
+                    }
+                    nameLower.endsWith(".shp") || uriStr.endsWith(".shp") -> {
                         val result = ShapefileImporter.importFromUri(uri, context, fileName, companionDbf, companionPrj)
                         result.toLoadResult(fileName)
                     }
-                    uriStr.endsWith(".gpkg") -> loadGpkg(context, uri, fileName)
-                    uriStr.endsWith(".kmz") -> loadKmz(context, uri, fileName)
-                    uriStr.contains(".gdb") || fileName.lowercase().endsWith(".gdb") -> loadGdb(context, uri, fileName)
+                    nameLower.endsWith(".gpkg") || uriStr.endsWith(".gpkg") -> loadGpkg(context, uri, fileName)
+                    nameLower.endsWith(".kmz") || uriStr.endsWith(".kmz") -> loadKmz(context, uri, fileName)
+                    nameLower.endsWith(".gdb") || uriStr.contains(".gdb") -> loadGdb(context, uri, fileName)
+                    nameLower.endsWith(".geodatabase") || uriStr.endsWith(".geodatabase") -> loadMobileGdb(context, uri, fileName)
+                    nameLower.endsWith(".mdb") || uriStr.endsWith(".mdb") -> LoadResult(
+                        fileName = fileName,
+                        error = "قاعدة بيانات Personal Geodatabase (.mdb) غير مدعومة مباشرة على أندرويد لأنها تعتمد على Microsoft Access. يُنصح بتحويلها إلى GeoPackage (.gpkg) أو File Geodatabase (.gdb).",
+                        errorType = GeoJsonParser.ParseErrorType.UNSUPPORTED_FORMAT
+                    )
+                    nameLower.endsWith(".csv") || nameLower.endsWith(".tsv") || nameLower.endsWith(".txt") || uriStr.endsWith(".csv") ->
+                        loadCsv(context, uri, fileName)
+                    nameLower.endsWith(".xlsx") || nameLower.endsWith(".xls") || uriStr.endsWith(".xlsx") || uriStr.endsWith(".xls") ->
+                        loadExcel(context, uri, fileName)
                     else -> loadGeneric(context, uri, uriStr, fileName)
+                }
+            }
+        }
+    }
+
+    private suspend fun loadGpkgFromZip(context: Context, uri: Uri, fileName: String): LoadResult {
+        val stream = context.contentResolver.openInputStream(uri)
+            ?: return LoadResult(error = "لا يمكن فتح الملف المضغوط", errorType = GeoJsonParser.ParseErrorType.ACCESS_DENIED)
+        val tempFile = java.io.File(context.cacheDir, "unzipped_${System.nanoTime()}.gpkg")
+        return try {
+            java.util.zip.ZipInputStream(stream).use { zis ->
+                var entry = zis.nextEntry
+                while (entry != null) {
+                    if (!entry.isDirectory && entry.name.lowercase().endsWith(".gpkg")) {
+                        tempFile.outputStream().use { zis.copyTo(it) }
+                        break
+                    }
+                    entry = zis.nextEntry
+                }
+            }
+            if (tempFile.exists() && tempFile.length() > 0) {
+                loadGpkg(context, Uri.fromFile(tempFile), fileName)
+            } else {
+                LoadResult(error = "لم يتم العثور على ملف GeoPackage داخل الأرشيف", errorType = GeoJsonParser.ParseErrorType.CORRUPTED)
+            }
+        } catch (e: Exception) {
+            LoadResult(error = "فشل استخراج GeoPackage: ${e.message}", errorType = GeoJsonParser.ParseErrorType.CORRUPTED)
+        } finally {
+            try { tempFile.delete() } catch (_: Exception) {}
+        }
+    }
+
+    private suspend fun loadCsv(context: Context, uri: Uri, fileName: String): LoadResult {
+        val stream = context.contentResolver.openInputStream(uri)
+            ?: return LoadResult(error = "لا يمكن فتح ملف CSV", errorType = GeoJsonParser.ParseErrorType.ACCESS_DENIED)
+        return try {
+            val reader = java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)
+            val result = CsvParser.streamParse(reader, fileName)
+            reader.close()
+            result.toLoadResult(fileName)
+        } finally {
+            try { stream.close() } catch (_: Exception) {}
+        }
+    }
+
+    private suspend fun loadExcel(context: Context, uri: Uri, fileName: String): LoadResult {
+        val inspection = ExcelParser.inspect(context, uri)
+        val defaultMapping = ExcelParser.CoordinateMapping(
+            xColumnIndex = if (inspection.suggestedXIndex >= 0) inspection.suggestedXIndex else 0,
+            yColumnIndex = if (inspection.suggestedYIndex >= 0) inspection.suggestedYIndex else 1,
+            zColumnIndex = inspection.suggestedZIndex,
+            labelColumnIndex = inspection.suggestedLabelIndex,
+            epsgCode = 4326
+        )
+        val result = ExcelParser.parseWithMapping(context, uri, fileName, defaultMapping)
+        return result.toLoadResult(fileName)
+    }
+
+    suspend fun loadExcelWithMapping(
+        context: Context,
+        uri: Uri,
+        fileName: String,
+        mapping: ExcelParser.CoordinateMapping
+    ): LoadResult {
+        return withTimeout(PARSE_TIMEOUT_MS) {
+            withContext(Dispatchers.IO) {
+                val result = ExcelParser.parseWithMapping(context, uri, fileName, mapping)
+                result.toLoadResult(fileName)
+            }
+        }
+    }
+
+    suspend fun loadCsvWithMapping(
+        context: Context,
+        uri: Uri,
+        fileName: String,
+        mapping: ExcelParser.CoordinateMapping
+    ): LoadResult {
+        return withTimeout(PARSE_TIMEOUT_MS) {
+            withContext(Dispatchers.IO) {
+                val stream = context.contentResolver.openInputStream(uri)
+                    ?: return@withContext LoadResult(error = "لا يمكن فتح ملف CSV", errorType = GeoJsonParser.ParseErrorType.ACCESS_DENIED)
+                try {
+                    val reader = java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)
+                    val result = CsvParser.parseWithMapping(reader, fileName, mapping)
+                    reader.close()
+                    result.toLoadResult(fileName)
+                } finally {
+                    try { stream.close() } catch (_: Exception) {}
                 }
             }
         }
@@ -66,38 +232,51 @@ object LayerRepository {
     ): List<LoadResult> {
         return withTimeout(PARSE_TIMEOUT_MS) {
             withContext(Dispatchers.IO) {
-                selectedLayerNames.map { layerName ->
-                    val layerFileName = "$fileName / $layerName"
-                    val detail = GpkgReader.readSelected(context, uri, fileName, listOf(layerName))
-                    if (detail != null) {
+                val layerDetails = GpkgReader.readEachSelected(context, uri, fileName, selectedLayerNames)
+                if (layerDetails.isNotEmpty()) {
+                    layerDetails.map { (layerName, detail) ->
+                        val layerFileName = "$fileName / $layerName"
                         GeoJsonParser.ParseResult(
                             features = detail.features,
                             fileName = layerFileName,
                             crs = detail.crs,
                             extent = detail.extent
                         ).toLoadResult(layerFileName)
-                    } else {
-                        LoadResult(
-                            fileName = layerFileName,
-                            error = "تعذّر فتح طبقة GeoPackage: $layerName",
-                            errorType = GeoJsonParser.ParseErrorType.CORRUPTED,
-                            importReport = ImportReport(
-                                sourceName = layerFileName,
-                                sourceType = "GeoPackage",
-                                layers = listOf(
-                                    ImportLayerInfo(
-                                        id = layerName,
-                                        name = layerName,
-                                        geometryType = null,
-                                        featureCount = null,
-                                        crs = null,
-                                        status = ImportStatus.FAILED,
-                                        message = "تعذّر فتح الطبقة"
-                                    )
-                                ),
-                                errors = listOf(ImportError("GPKG_LAYER_OPEN_FAILED", "تعذّر فتح الطبقة", layerName))
+                    }
+                } else {
+                    selectedLayerNames.map { layerName ->
+                        val layerFileName = "$fileName / $layerName"
+                        val detail = GpkgReader.readSelected(context, uri, fileName, listOf(layerName))
+                        if (detail != null) {
+                            GeoJsonParser.ParseResult(
+                                features = detail.features,
+                                fileName = layerFileName,
+                                crs = detail.crs,
+                                extent = detail.extent
+                            ).toLoadResult(layerFileName)
+                        } else {
+                            LoadResult(
+                                fileName = layerFileName,
+                                error = "تعذّر فتح طبقة GeoPackage: $layerName",
+                                errorType = GeoJsonParser.ParseErrorType.CORRUPTED,
+                                importReport = ImportReport(
+                                    sourceName = layerFileName,
+                                    sourceType = "GeoPackage",
+                                    layers = listOf(
+                                        ImportLayerInfo(
+                                            id = layerName,
+                                            name = layerName,
+                                            geometryType = null,
+                                            featureCount = null,
+                                            crs = null,
+                                            status = ImportStatus.FAILED,
+                                            message = "تعذّر فتح الطبقة"
+                                        )
+                                    ),
+                                    errors = listOf(ImportError("GPKG_LAYER_OPEN_FAILED", "تعذّر فتح الطبقة", layerName))
+                                )
                             )
-                        )
+                        }
                     }
                 }
             }
@@ -122,11 +301,24 @@ object LayerRepository {
             ?: return LoadResult(error = "لا يمكن فتح ملف KMZ", errorType = GeoJsonParser.ParseErrorType.ACCESS_DENIED)
         return try {
             val entries = mutableListOf<Pair<String, ByteArray>>()
+            val kmzAssetDir = java.io.File(context.cacheDir, "kmz_assets_${System.nanoTime()}").also { it.mkdirs() }
             java.util.zip.ZipInputStream(zipStream).use { zis ->
                 var entry = zis.nextEntry
                 while (entry != null) {
-                    if (!entry.isDirectory && entry.name.lowercase().endsWith(".kml")) {
-                        entries.add(entry.name to zis.readBytes())
+                    if (!entry.isDirectory) {
+                        val bytes = zis.readBytes()
+                        if (entry.name.lowercase().endsWith(".kml")) {
+                            entries.add(entry.name to bytes)
+                        } else {
+                            // Extract icons / images for marker styling
+                            try {
+                                val outFile = java.io.File(kmzAssetDir, entry.name)
+                                if (outFile.canonicalPath.startsWith(kmzAssetDir.canonicalPath)) {
+                                    outFile.parentFile?.mkdirs()
+                                    outFile.writeBytes(bytes)
+                                }
+                            } catch (_: Exception) {}
+                        }
                     }
                     entry = zis.nextEntry
                 }
@@ -160,6 +352,63 @@ object LayerRepository {
     private suspend fun loadGdb(context: Context, uri: Uri, fileName: String): LoadResult {
         val result = GdbParser.read(context, uri, fileName)
         return result.toLoadResult(fileName)
+    }
+
+    private suspend fun loadMobileGdb(context: Context, uri: Uri, fileName: String): LoadResult {
+        val detail = MobileGdbReader.read(context, uri, fileName)
+        return if (detail != null) GeoJsonParser.ParseResult(
+            features = detail.features,
+            fileName = fileName,
+            crs = detail.crs,
+            extent = detail.extent
+        ).toLoadResult(fileName) else LoadResult(
+            fileName = fileName,
+            error = "تعذّر فتح ملف ArcGIS Mobile Geodatabase أو أنه غير صالح",
+            errorType = GeoJsonParser.ParseErrorType.CORRUPTED
+        )
+    }
+
+    suspend fun loadMobileGdbLayers(
+        context: Context,
+        uri: Uri,
+        fileName: String,
+        selectedLayerNames: List<String>
+    ): List<LoadResult> {
+        return withTimeout(PARSE_TIMEOUT_MS) {
+            withContext(Dispatchers.IO) {
+                val layerDetails = MobileGdbReader.readEachSelected(context, uri, fileName, selectedLayerNames)
+                if (layerDetails.isNotEmpty()) {
+                    layerDetails.map { (layerName, detail) ->
+                        val layerFileName = "$fileName / $layerName"
+                        GeoJsonParser.ParseResult(
+                            features = detail.features,
+                            fileName = layerFileName,
+                            crs = detail.crs,
+                            extent = detail.extent
+                        ).toLoadResult(layerFileName)
+                    }
+                } else {
+                    selectedLayerNames.map { layerName ->
+                        val layerFileName = "$fileName / $layerName"
+                        val detail = MobileGdbReader.readSelected(context, uri, fileName, listOf(layerName))
+                        if (detail != null) {
+                            GeoJsonParser.ParseResult(
+                                features = detail.features,
+                                fileName = layerFileName,
+                                crs = detail.crs,
+                                extent = detail.extent
+                            ).toLoadResult(layerFileName)
+                        } else {
+                            LoadResult(
+                                fileName = layerFileName,
+                                error = "تعذّر فتح طبقة Mobile Geodatabase: $layerName",
+                                errorType = GeoJsonParser.ParseErrorType.CORRUPTED
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 
     private suspend fun loadGeneric(context: Context, uri: Uri, uriStr: String, fileName: String): LoadResult {
@@ -199,7 +448,23 @@ object LayerRepository {
     }
 
     fun inferFileType(uri: Uri, context: Context? = null): com.geovision.mobile.ui.screens.layers.FileType? {
-        return inferFileTypeFromPath(uri.toString(), if (context != null) { context.contentResolver.getType(uri) } else null)
+        val path = uri.toString()
+        val mime = if (context != null) context.contentResolver.getType(uri) else null
+        val fileName = if (context != null) getFileName(context, uri) else null
+        val checkName = (fileName ?: path).lowercase()
+
+        if (context != null && checkName.endsWith(".zip")) {
+            return when (inspectZipType(context, uri)) {
+                ZipArchiveType.FILE_GDB -> com.geovision.mobile.ui.screens.layers.FileType.GEODATABASE
+                ZipArchiveType.GEOPACKAGE -> com.geovision.mobile.ui.screens.layers.FileType.GEOPACKAGE
+                ZipArchiveType.KML -> com.geovision.mobile.ui.screens.layers.FileType.KML
+                ZipArchiveType.SHAPEFILE -> com.geovision.mobile.ui.screens.layers.FileType.SHAPEFILE
+                ZipArchiveType.PERSONAL_GDB -> null
+                ZipArchiveType.UNKNOWN -> com.geovision.mobile.ui.screens.layers.FileType.SHAPEFILE
+                else -> com.geovision.mobile.ui.screens.layers.FileType.SHAPEFILE
+            }
+        }
+        return inferFileTypeFromPath(fileName ?: path, mime)
     }
 
     fun inferFileTypeFromPath(path: String, mime: String? = null): com.geovision.mobile.ui.screens.layers.FileType? {
@@ -210,17 +475,21 @@ object LayerRepository {
             p.endsWith(".geojson") || p.endsWith(".geo.json") || p.endsWith(".json") -> return com.geovision.mobile.ui.screens.layers.FileType.GEOJSON
             p.endsWith(".kml") || p.endsWith(".kmz") -> return com.geovision.mobile.ui.screens.layers.FileType.KML
             p.endsWith(".gpx") -> return com.geovision.mobile.ui.screens.layers.FileType.GPX
-            p.endsWith(".gdb") || p.contains("%2Egdb") || p.contains(".gdb/") -> return com.geovision.mobile.ui.screens.layers.FileType.GEODATABASE
+            p.endsWith(".gdb") || p.contains("%2Egdb") || p.contains(".gdb/") || p.endsWith(".geodatabase") -> return com.geovision.mobile.ui.screens.layers.FileType.GEODATABASE
             p.endsWith(".gpkg") -> return com.geovision.mobile.ui.screens.layers.FileType.GEOPACKAGE
+            p.endsWith(".xlsx") || p.endsWith(".xls") -> return com.geovision.mobile.ui.screens.layers.FileType.EXCEL
+            p.endsWith(".csv") || p.endsWith(".tsv") || p.endsWith(".txt") -> return com.geovision.mobile.ui.screens.layers.FileType.CSV
             p.endsWith(".jpg") || p.endsWith(".jpeg") || p.endsWith(".png") || p.endsWith(".webp") -> return com.geovision.mobile.ui.screens.layers.FileType.PHOTO
         }
         if (mime != null) {
             val m = mime.lowercase()
+            if (m.contains("spreadsheet") || m.contains("excel") || m.contains("openxmlformats-officedocument.spreadsheetml")) return com.geovision.mobile.ui.screens.layers.FileType.EXCEL
             if (m.contains("geo+json") || m.contains("json")) return com.geovision.mobile.ui.screens.layers.FileType.GEOJSON
             if (m.contains("kml")) return com.geovision.mobile.ui.screens.layers.FileType.KML
             if (m.contains("gpx")) return com.geovision.mobile.ui.screens.layers.FileType.GPX
             if (m.contains("geopackage")) return com.geovision.mobile.ui.screens.layers.FileType.GEOPACKAGE
             if (m.contains("shape") || m.contains("shp")) return com.geovision.mobile.ui.screens.layers.FileType.SHAPEFILE
+            if (m.contains("csv") || m.contains("comma-separated")) return com.geovision.mobile.ui.screens.layers.FileType.CSV
             if (m.contains("jpeg") || m.contains("png") || m.contains("webp")) return com.geovision.mobile.ui.screens.layers.FileType.PHOTO
         }
         return null
@@ -360,6 +629,7 @@ object LayerRepository {
             lower.endsWith(".geojson") || lower.endsWith(".json") -> "GeoJSON"
             lower.endsWith(".shp") || lower.endsWith(".zip") -> "Shapefile"
             lower.endsWith(".gdb") || lower.contains(".gdb/") -> "FileGDB"
+            lower.endsWith(".csv") || lower.endsWith(".tsv") || lower.endsWith(".txt") -> "CSV"
             else -> "GIS"
         }
     }

@@ -500,6 +500,7 @@ object ShapefileParser {
     private fun readDbfFields(bytes: ByteArray, headerLength: Int): List<FieldDescriptor> {
         val fields = mutableListOf<FieldDescriptor>()
         var pos = 32
+        val validTypes = setOf('C', 'N', 'F', 'L', 'D', 'I', 'M', 'T', 'O', 'B', 'G', '@', '+', 'Y')
         while (pos + 32 <= headerLength) {
             val terminator = bytes[pos].toInt() and 0xFF
             if (terminator == 0x0D) break
@@ -510,9 +511,9 @@ object ShapefileParser {
                 nameBytes.add(b)
             }
             val name = String(nameBytes.toByteArray(), Charsets.UTF_8).trim()
-            val type = bytes[pos + 11].toInt().toChar()
+            val type = bytes[pos + 11].toInt().toChar().uppercaseChar()
             val length = bytes[pos + 16].toInt() and 0xFF
-            if (name.isNotEmpty() && (type == 'C' || type == 'N' || type == 'F' || type == 'L' || type == 'D') && length > 0) {
+            if (name.isNotEmpty() && type in validTypes && length > 0) {
                 fields.add(FieldDescriptor(name, type, length))
             }
             pos += 32
@@ -522,7 +523,8 @@ object ShapefileParser {
 
     private fun readDbfRecords(bytes: ByteArray, header: DbfHeader, fields: List<FieldDescriptor>, charsetName: String = "UTF-8"): List<Map<String, String>> {
         val records = mutableListOf<Map<String, String>>()
-        val charset = java.nio.charset.Charset.forName(charsetName)
+        val primaryCharset = try { java.nio.charset.Charset.forName(charsetName) } catch (_: Exception) { java.nio.charset.StandardCharsets.UTF_8 }
+        val fallbackCharset = try { java.nio.charset.Charset.forName("windows-1256") } catch (_: Exception) { primaryCharset }
         var pos = header.headerLength
         for (i in 0 until header.numRecords) {
             if (pos + header.recordLength > bytes.size) break
@@ -531,7 +533,25 @@ object ShapefileParser {
             val props = mutableMapOf<String, String>()
             for (field in fields) {
                 if (pos + field.length > bytes.size) { pos = bytes.size; break }
-                val value = String(bytes, pos, field.length, charset).trim { it <= ' ' }
+                var value = when (field.type) {
+                    'I' -> {
+                        if (field.length >= 4) {
+                            try { ByteBuffer.wrap(bytes, pos, 4).order(ByteOrder.LITTLE_ENDIAN).int.toString() } catch (_: Exception) { "" }
+                        } else String(bytes, pos, field.length, primaryCharset).trim()
+                    }
+                    'O' -> {
+                        if (field.length >= 8) {
+                            try { ByteBuffer.wrap(bytes, pos, 8).order(ByteOrder.LITTLE_ENDIAN).double.toString() } catch (_: Exception) { "" }
+                        } else String(bytes, pos, field.length, primaryCharset).trim()
+                    }
+                    else -> String(bytes, pos, field.length, primaryCharset).trim()
+                }
+                if (value.contains('\uFFFD') && primaryCharset == java.nio.charset.StandardCharsets.UTF_8) {
+                    val fallbackValue = String(bytes, pos, field.length, fallbackCharset).trim()
+                    if (!fallbackValue.contains('\uFFFD')) {
+                        value = fallbackValue
+                    }
+                }
                 pos += field.length
                 if (!deleted) {
                     props[field.name] = value

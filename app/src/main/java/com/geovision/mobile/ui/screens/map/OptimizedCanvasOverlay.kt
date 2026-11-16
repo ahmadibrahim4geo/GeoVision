@@ -2,6 +2,7 @@ package com.geovision.mobile.ui.screens.map
 
 import android.graphics.Canvas
 import android.graphics.Color as AColor
+import android.graphics.DashPathEffect
 import android.graphics.Paint
 import android.graphics.Path
 import android.graphics.Point
@@ -13,6 +14,9 @@ import com.geovision.mobile.data.LodManager
 import com.geovision.mobile.data.PathPool
 import com.geovision.mobile.data.SpatialIndex
 import com.geovision.mobile.ui.screens.layers.FeatureRow
+import com.geovision.mobile.ui.screens.layers.LayerStyle
+import com.geovision.mobile.ui.screens.layers.PointSymbol
+import com.geovision.mobile.ui.screens.layers.StrokeStyle
 import org.osmdroid.util.GeoPoint
 import org.osmdroid.views.MapView
 import org.osmdroid.views.overlay.Overlay
@@ -36,6 +40,7 @@ class OptimizedCanvasOverlay(
     private val pointSize: Float = 8f,
     private val lineWidth: Float = 4f,
     private val skipFeatureTaps: () -> Boolean = { false },
+    private val layerStyle: LayerStyle? = null,
     preparedSpatialIndex: SpatialIndex<OverlayFeature>? = null
 ) : Overlay() {
 
@@ -70,6 +75,12 @@ class OptimizedCanvasOverlay(
     }
     private val ptInnerPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         style = Paint.Style.FILL; isAntiAlias = true
+    }
+    private val labelPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.FILL; textAlign = Paint.Align.CENTER; isFakeBoldText = true
+    }
+    private val haloPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        style = Paint.Style.STROKE; textAlign = Paint.Align.CENTER; isFakeBoldText = true
     }
 
     init {
@@ -108,18 +119,115 @@ class OptimizedCanvasOverlay(
         }
     }
 
+    private fun parseHexColor(colorStr: String?, defaultColor: Int): Int {
+        if (colorStr.isNullOrBlank()) return defaultColor
+        return try {
+            AColor.parseColor(colorStr.trim())
+        } catch (_: Exception) {
+            defaultColor
+        }
+    }
+
     private fun drawPoints(canvas: Canvas, proj: org.osmdroid.views.Projection, of: OverlayFeature) {
+        val specificPtColor = parseHexColor(of.feature.properties["kml_icon_color"] ?: of.feature.properties["kml_line_color"], pointColor)
+        val symbol = layerStyle?.pointSymbol ?: PointSymbol.CIRCLE
+        val effectiveSize = layerStyle?.pointSize ?: pointSize
+
         for (ring in of.geoPoints) {
             for (pt in ring) {
                 proj.toPixels(pt, reusePt)
-                canvas.drawCircle(reusePt.x.toFloat(), reusePt.y.toFloat(), pointSize, ptOuterPaint)
-                ptInnerPaint.color = pointColor
-                canvas.drawCircle(reusePt.x.toFloat(), reusePt.y.toFloat(), pointSize * 0.625f, ptInnerPaint)
+                val cx = reusePt.x.toFloat()
+                val cy = reusePt.y.toFloat()
+
+                ptInnerPaint.color = specificPtColor
+                when (symbol) {
+                    PointSymbol.CIRCLE -> {
+                        canvas.drawCircle(cx, cy, effectiveSize, ptOuterPaint)
+                        canvas.drawCircle(cx, cy, effectiveSize * 0.7f, ptInnerPaint)
+                    }
+                    PointSymbol.SQUARE -> {
+                        canvas.drawRect(cx - effectiveSize, cy - effectiveSize, cx + effectiveSize, cy + effectiveSize, ptOuterPaint)
+                        canvas.drawRect(cx - effectiveSize * 0.7f, cy - effectiveSize * 0.7f, cx + effectiveSize * 0.7f, cy + effectiveSize * 0.7f, ptInnerPaint)
+                    }
+                    PointSymbol.TRIANGLE -> {
+                        val path = pathPool.obtainPath()
+                        path.moveTo(cx, cy - effectiveSize * 1.2f)
+                        path.lineTo(cx + effectiveSize, cy + effectiveSize * 0.8f)
+                        path.lineTo(cx - effectiveSize, cy + effectiveSize * 0.8f)
+                        path.close()
+                        canvas.drawPath(path, ptInnerPaint)
+                        pathPool.recyclePath(path)
+                    }
+                    PointSymbol.DIAMOND -> {
+                        val path = pathPool.obtainPath()
+                        path.moveTo(cx, cy - effectiveSize * 1.2f)
+                        path.lineTo(cx + effectiveSize * 1.1f, cy)
+                        path.lineTo(cx, cy + effectiveSize * 1.2f)
+                        path.lineTo(cx - effectiveSize * 1.1f, cy)
+                        path.close()
+                        canvas.drawPath(path, ptInnerPaint)
+                        pathPool.recyclePath(path)
+                    }
+                    PointSymbol.CROSS -> {
+                        strokePaint.color = specificPtColor
+                        strokePaint.strokeWidth = 3f
+                        canvas.drawLine(cx - effectiveSize, cy, cx + effectiveSize, cy, strokePaint)
+                        canvas.drawLine(cx, cy - effectiveSize, cx, cy + effectiveSize, strokePaint)
+                    }
+                    PointSymbol.PIN -> {
+                        canvas.drawCircle(cx, cy - effectiveSize, effectiveSize * 0.8f, ptInnerPaint)
+                        val path = pathPool.obtainPath()
+                        path.moveTo(cx - effectiveSize * 0.6f, cy - effectiveSize * 0.6f)
+                        path.lineTo(cx, cy)
+                        path.lineTo(cx + effectiveSize * 0.6f, cy - effectiveSize * 0.6f)
+                        path.close()
+                        canvas.drawPath(path, ptInnerPaint)
+                        pathPool.recyclePath(path)
+                        canvas.drawCircle(cx, cy - effectiveSize, effectiveSize * 0.35f, ptOuterPaint)
+                    }
+                }
+
+                // رسم التسميات Labeling
+                if (layerStyle?.showLabels == true) {
+                    val labelText = layerStyle.labelField?.let { of.feature.properties[it] }
+                        ?: of.feature.properties["name"]
+                        ?: of.feature.id
+
+                    if (labelText.isNotBlank()) {
+                        val lSize = (layerStyle.labelSize * 2.5f).coerceIn(20f, 48f)
+                        labelPaint.textSize = lSize
+                        haloPaint.textSize = lSize
+                        haloPaint.strokeWidth = 4f
+                        haloPaint.color = AColor.BLACK
+                        labelPaint.color = AColor.argb(
+                            255,
+                            (layerStyle.labelColor.red * 255).toInt(),
+                            (layerStyle.labelColor.green * 255).toInt(),
+                            (layerStyle.labelColor.blue * 255).toInt()
+                        )
+
+                        val textY = cy - effectiveSize - 8f
+                        canvas.drawText(labelText, cx, textY, haloPaint)
+                        canvas.drawText(labelText, cx, textY, labelPaint)
+                    }
+                }
             }
         }
     }
 
     private fun drawPolyline(canvas: Canvas, proj: org.osmdroid.views.Projection, of: OverlayFeature) {
+        val specificStrokeColor = parseHexColor(of.feature.properties["kml_line_color"], strokeColor)
+        val specificLineWidth = of.feature.properties["kml_line_width"]?.toFloatOrNull() ?: lineWidth
+        strokePaint.color = specificStrokeColor
+        strokePaint.strokeWidth = specificLineWidth
+
+        val sStyle = layerStyle?.strokeStyle ?: StrokeStyle.SOLID
+        strokePaint.pathEffect = when (sStyle) {
+            StrokeStyle.DASHED -> DashPathEffect(floatArrayOf(24f, 12f), 0f)
+            StrokeStyle.DOTTED -> DashPathEffect(floatArrayOf(6f, 10f), 0f)
+            StrokeStyle.SOLID -> null
+        }
+
         for (ring in of.geoPoints) {
             if (ring.size < 2) continue
             val path = pathPool.obtainPath()
@@ -129,8 +237,6 @@ class OptimizedCanvasOverlay(
                 proj.toPixels(ring[i], reusePt)
                 path.lineTo(reusePt.x.toFloat(), reusePt.y.toFloat())
             }
-            strokePaint.color = strokeColor
-            strokePaint.strokeWidth = lineWidth
             canvas.drawPath(path, strokePaint)
             pathPool.recyclePath(path)
         }
@@ -152,10 +258,21 @@ class OptimizedCanvasOverlay(
             path.close()
         }
 
-        fillPaint.color = fillColor
+        val specificFillColor = parseHexColor(of.feature.properties["kml_poly_color"], fillColor)
+        val specificStrokeColor = parseHexColor(of.feature.properties["kml_line_color"], strokeColor)
+        val specificLineWidth = of.feature.properties["kml_line_width"]?.toFloatOrNull() ?: lineWidth
+
+        fillPaint.color = specificFillColor
         canvas.drawPath(path, fillPaint)
-        strokePaint.color = strokeColor
-        strokePaint.strokeWidth = lineWidth
+
+        val sStyle = layerStyle?.strokeStyle ?: StrokeStyle.SOLID
+        strokePaint.pathEffect = when (sStyle) {
+            StrokeStyle.DASHED -> DashPathEffect(floatArrayOf(24f, 12f), 0f)
+            StrokeStyle.DOTTED -> DashPathEffect(floatArrayOf(6f, 10f), 0f)
+            StrokeStyle.SOLID -> null
+        }
+        strokePaint.color = specificStrokeColor
+        strokePaint.strokeWidth = specificLineWidth
         canvas.drawPath(path, strokePaint)
         pathPool.recyclePath(path)
     }

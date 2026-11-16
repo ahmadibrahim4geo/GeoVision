@@ -1,0 +1,51 @@
+{
+  "schema_version": "1.0",
+  "request_id": "ARCHIFY-EXAMPLE-001",
+  "revision": "r1",
+  "original_request": "وضّحلي مين مسؤول عن مين في نظام المهارات في مخطط تفاعلي",
+  "language": "ar",
+  "status": "draft",
+  "approval": {
+    "approved_by_user": false,
+    "approved_revision": null,
+    "high_risk_approved": false
+  },
+  "assumptions": [
+    "Declared workflow only; no live agent execution"
+  ],
+  "open_questions": [],
+  "goal": "Explain declared skill responsibilities in an interactive workflow",
+  "target": "GIS Development Skills documentation",
+  "desired_outcomes": [
+    "A readable interactive diagram"
+  ],
+  "success_criteria": [
+    "Diagram distinguishes declared roles from observed execution"
+  ],
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Explain skill responsibilities",
+      "description": "Create an interactive workflow from reviewed documentation, with explicit evidence limits.",
+      "priority": "must",
+      "kind": "visual-explanation",
+      "owner_skill": "gis-architecture-visualization",
+      "skills": [
+        "gis-architecture-visualization",
+        "gis-security-guardian"
+      ],
+      "depends_on": [],
+      "risk": "low",
+      "acceptance_criteria": [
+        "Diagram distinguishes declared roles from observed execution"
+      ],
+      "tools": [],
+      "visualization": {
+        "purpose": "architecture-explanation",
+        "diagram_type": "workflow",
+        "evidence_basis": "source-reviewed",
+        "language": "en"
+      }
+    }
+  ]
+}

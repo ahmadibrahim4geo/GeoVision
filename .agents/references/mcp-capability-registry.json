@@ -1,0 +1,78 @@
+{
+  "schema_version": "1.0",
+  "note": "Capability taxonomy only. Entries do not establish installation, permission, trust, or service availability.",
+  "capabilities": [
+    {
+      "id": "github.repository.read",
+      "side_effects": [
+        "read"
+      ],
+      "examples": [
+        "Inspect repository source, branches and CI status"
+      ]
+    },
+    {
+      "id": "github.repository.write",
+      "side_effects": [
+        "write"
+      ],
+      "examples": [
+        "Open PR or commit authorized changes"
+      ]
+    },
+    {
+      "id": "workspace.files.read",
+      "side_effects": [
+        "read"
+      ],
+      "examples": [
+        "Inspect permitted project files"
+      ]
+    },
+    {
+      "id": "workspace.files.write",
+      "side_effects": [
+        "write"
+      ],
+      "examples": [
+        "Edit authorized project files"
+      ]
+    },
+    {
+      "id": "runtime.tests.execute",
+      "side_effects": [
+        "execute"
+      ],
+      "examples": [
+        "Run approved test command in isolated runtime"
+      ]
+    },
+    {
+      "id": "desktop.ui.test",
+      "side_effects": [
+        "execute"
+      ],
+      "examples": [
+        "Inspect real Windows/Qt user interactions"
+      ]
+    },
+    {
+      "id": "gis.data.process",
+      "side_effects": [
+        "execute"
+      ],
+      "examples": [
+        "Run a declared PyQGIS/GDAL processing operation"
+      ]
+    },
+    {
+      "id": "gis.output.readback",
+      "side_effects": [
+        "read"
+      ],
+      "examples": [
+        "Independently re-open and validate GIS outputs"
+      ]
+    }
+  ]
+}

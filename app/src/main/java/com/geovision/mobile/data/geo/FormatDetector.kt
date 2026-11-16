@@ -96,7 +96,7 @@ object FormatDetector {
                     val northing = vals[2].first
                     if (zone != null && zone in 1..60 && easting in 100000.0..999999.0 && northing >= 0) {
                         try {
-                            val (lat, lon) = CoordinateConverter.utmToDd(zone, hemi, easting, northing)
+                            val (lat, lon) = GeoCoordinateMath.utmToDd(zone, hemi, easting, northing)
                             if (lat in -90.0..90.0 && lon in -180.0..180.0) return ParseResult(lat, lon, "UTM")
                         } catch (_: Exception) {}
                     }
@@ -185,8 +185,8 @@ object FormatDetector {
             lonDir = dir2; lonD = g[7]; lonM = g[8]; lonS = g[9]
         }
 
-        val lat = CoordinateConverter.dmsToDd(latD.toIntOrNull() ?: return null, latM.toIntOrNull() ?: return null, latS.toDoubleOrNull() ?: return null, latDir)
-        val lon = CoordinateConverter.dmsToDd(lonD.toIntOrNull() ?: return null, lonM.toIntOrNull() ?: return null, lonS.toDoubleOrNull() ?: return null, lonDir)
+        val lat = GeoCoordinateMath.dmsToDd(latD.toIntOrNull() ?: return null, latM.toIntOrNull() ?: return null, latS.toDoubleOrNull() ?: return null, latDir)
+        val lon = GeoCoordinateMath.dmsToDd(lonD.toIntOrNull() ?: return null, lonM.toIntOrNull() ?: return null, lonS.toDoubleOrNull() ?: return null, lonDir)
         if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
         return ParseResult(lat, lon, "DMS")
     }
@@ -214,8 +214,8 @@ object FormatDetector {
             lonDir = dir2; lonD = g[6]; lonM = g[7]
         }
 
-        val lat = CoordinateConverter.ddmToDd(latD.toIntOrNull() ?: return null, latM.toDoubleOrNull() ?: return null, latDir)
-        val lon = CoordinateConverter.ddmToDd(lonD.toIntOrNull() ?: return null, lonM.toDoubleOrNull() ?: return null, lonDir)
+        val lat = GeoCoordinateMath.ddmToDd(latD.toIntOrNull() ?: return null, latM.toDoubleOrNull() ?: return null, latDir)
+        val lon = GeoCoordinateMath.ddmToDd(lonD.toIntOrNull() ?: return null, lonM.toDoubleOrNull() ?: return null, lonDir)
         if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
         return ParseResult(lat, lon, "DDM")
     }
@@ -235,7 +235,7 @@ object FormatDetector {
             val northing = g[4].toDoubleOrNull() ?: return null
             if (zone !in 1..60 || easting !in 100000.0..999999.0 || northing < 0) return null
             try {
-                val (lat, lon) = CoordinateConverter.utmToDd(zone, hemisphere, easting, northing)
+                val (lat, lon) = GeoCoordinateMath.utmToDd(zone, hemisphere, easting, northing)
                 if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
                 return ParseResult(lat, lon, "UTM")
             } catch (_: Exception) {
@@ -250,7 +250,7 @@ object FormatDetector {
             val northing = shortMatch.groupValues[2].toDoubleOrNull() ?: return null
             if (easting !in 100000.0..999999.0 || northing < 0) return null
             try {
-                val (lat, lon) = CoordinateConverter.utmToDd(defaultZone, defaultHemisphere, easting, northing)
+                val (lat, lon) = GeoCoordinateMath.utmToDd(defaultZone, defaultHemisphere, easting, northing)
                 if (lat !in -90.0..90.0 || lon !in -180.0..180.0) return null
                 return ParseResult(lat, lon, "UTM")
             } catch (_: Exception) {

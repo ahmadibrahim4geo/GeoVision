@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GIS Icon Manager — offline reference</title>
+<style>
+:root{color-scheme:dark;font:15px system-ui,-apple-system,Segoe UI,sans-serif;background:#15191d;color:#f1f3f4}
+*{box-sizing:border-box}body{margin:0;min-height:100vh}button,select,input{font:inherit}
+header{background:#22272b;border-bottom:1px solid #40474c;padding:18px clamp(18px,4vw,60px);display:flex;justify-content:space-between;gap:18px;align-items:center}
+header strong{font-size:19px;letter-spacing:.2px}header small{display:block;color:#adb5bc;margin-top:5px}
+.shell{max-width:1140px;margin:auto;padding:28px 24px 44px;display:grid;grid-template-columns:minmax(310px,430px) minmax(300px,1fr);gap:22px}
+.panel{background:#252a2f;border:1px solid #3c454b;border-radius:14px;padding:22px;min-width:0}
+h1{font-size:21px;margin:0 0 15px}h2{font-size:17px;margin:0 0 12px}.desc{color:#b7c0c6;line-height:1.65;margin:8px 0 20px}
+.formgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}label{display:flex;flex-direction:column;gap:8px;font-size:13px;font-weight:600;color:#d2d7db;margin-bottom:16px}
+select,input[type=color]{border:1px solid #525b61;border-radius:8px;min-height:43px;background:#181d21;color:white;padding:8px;width:100%}
+input[type=color]{padding:4px}input[type=range]{width:100%;accent-color:#d1d8dc}
+.tag{display:inline-flex;font-size:12px;border:1px solid #50605c;border-radius:20px;padding:5px 10px;color:#c7d5d0;margin:0 0 14px}
+.map{background-color:#303a39;background-image:linear-gradient(16deg,transparent 47%,#54625a 47%,#54625a 49%,transparent 49%),linear-gradient(110deg,transparent 48%,#526166 49%,#526166 51%,transparent 52%),linear-gradient(0deg,#394e47 2px,transparent 2px),linear-gradient(90deg,#394e47 2px,transparent 2px);background-size:230px 230px,320px 320px,55px 55px,55px 55px;border:1px solid #4f5b59;display:flex;align-items:center;justify-content:center;min-height:340px;border-radius:12px}
+.preview-icon{width:150px;height:150px;display:flex;align-items:center;justify-content:center;filter:drop-shadow(0 8px 7px #1419168c)}
+.preview-icon svg{max-width:100%;height:auto}
+.actions{display:flex;flex-wrap:wrap;gap:12px;margin-top:18px}button{cursor:pointer;padding:12px 17px;background:#d5e2dc;border:1px solid #d5e2dc;color:#192521;border-radius:9px;font-weight:750}
+button.secondary{background:#353e43;border-color:#637075;color:#f4f6f6}button:focus-visible,select:focus-visible,input:focus-visible{outline:3px solid #f3c682;outline-offset:3px}
+.note{color:#bac4c9;font-size:13px;line-height:1.65;margin:16px 0 0}.code{background:#181d21;padding:12px;overflow-wrap:anywhere;font:12px ui-monospace,Consolas,monospace;border-radius:8px}
+footer{max-width:1140px;margin:auto;padding:0 24px 28px;color:#9facb1;font-size:12px;line-height:1.7}
+@media(max-width:780px){.shell{grid-template-columns:1fr}.map{min-height:280px}header{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <div><strong data-t="brand">GIS Icon Manager</strong><small data-t="subtitle">General GIS icons · dedicated new KML/KMZ output</small></div>
+  <button id="language" class="secondary" type="button">العربية</button>
+</header>
+<main class="shell">
+  <section class="panel" aria-labelledby="controls-title">
+    <span class="tag" data-t="status">Offline reference · new icons only</span>
+    <h1 id="controls-title" data-t="controls">Design a new map icon</h1>
+    <p class="desc" data-t="desc">Choose a shape and symbol. Your image is generated locally. Imported KML/KMZ styles are never opened or changed here.</p>
+    <div class="formgrid">
+      <label><span data-t="shape">Marker shape</span><select id="shape"><option value="pin">Pin</option><option value="circle">Circle</option><option value="square">Square</option><option value="shield">Shield</option></select></label>
+      <label><span data-t="glyph">Inner symbol</span><select id="glyph"><option value="star">Star</option><option value="cross">Hospital</option><option value="tree">Nature</option><option value="mountain">Mountain</option><option value="plane">Airport</option><option value="dot">Simple dot</option></select></label>
+      <label><span data-t="fill">Marker color</span><input id="fill" type="color" value="#d45544"></label>
+      <label><span data-t="border">Outline color</span><input id="border" type="color" value="#ffffff"></label>
+      <label><span data-t="symbolColor">Symbol color</span><input id="symbolColor" type="color" value="#ffffff"></label>
+      <label><span data-t="pixelSize">PNG size</span><select id="pixelSize"><option value="16">16 px</option><option value="24">24 px</option><option value="32">32 px</option><option value="48" selected>48 px</option><option value="64">64 px</option><option value="128">128 px</option></select></label>
+    </div>
+    <label><span data-t="stroke">Outline width</span><input id="stroke" type="range" min="0" max="7" value="3" step="1"></label>
+    <p class="note" data-t="newOnly">This standalone example creates custom images. A real host adapter must package them into a new KMZ via the separate exporter and preserve third-party KMZ imports unchanged.</p>
+  </section>
+  <section class="panel" aria-labelledby="preview-title">
+    <h2 id="preview-title" data-t="preview">Live preview</h2>
+    <div class="map"><div class="preview-icon" id="preview" role="img" aria-label="Marker preview"></div></div>
+    <div class="actions">
+      <button id="downloadSVG" type="button" data-t="svg">Download SVG</button>
+      <button id="downloadPNG" class="secondary" type="button" data-t="png">Download transparent PNG</button>
+    </div>
+    <p class="note" data-t="tint">KMZ tip: preserve the PNG's actual colors by leaving KML IconStyle tint white (#FFFFFF). Set KML tint only if the user deliberately wants recoloring.</p>
+    <p class="code" id="details" aria-live="polite">anchor: (0.5, 0)</p>
+  </section>
+</main>
+<footer data-t="footer">Original, local geometric vector drawings only · no external icon sets or downloads · not a ZEarth feature · use attribution/permission checks before integrating third-party symbols.</footer>
+<script>
+"use strict";
+(() => {
+  const $ = id => document.getElementById(id);
+  const dictionary = {
+    en: {brand:"GIS Icon Manager",subtitle:"General GIS icons · dedicated new KML/KMZ output",status:"Offline reference · new icons only",controls:"Design a new map icon",desc:"Choose a shape and symbol. Your image is generated locally. Imported KML/KMZ styles are never opened or changed here.",shape:"Marker shape",glyph:"Inner symbol",fill:"Marker color",border:"Outline color",symbolColor:"Symbol color",pixelSize:"PNG size",stroke:"Outline width",newOnly:"This standalone example creates custom images. A real host adapter must package them into a new KMZ via the separate exporter and preserve third-party KMZ imports unchanged.",preview:"Live preview",svg:"Download SVG",png:"Download transparent PNG",tint:"KMZ tip: preserve the PNG's actual colors by leaving KML IconStyle tint white (#FFFFFF). Set KML tint only if the user deliberately wants recoloring.",footer:"Original, local geometric vector drawings only · no external icon sets or downloads · not a ZEarth feature · use attribution/permission checks before integrating third-party symbols.", pin:"Pin",circle:"Circle",square:"Square",shield:"Shield",star:"Star",cross:"Hospital",tree:"Nature",mountain:"Mountain",plane:"Airport",dot:"Simple dot",language:"العربية"},
+    ar: {brand:"مدير أيقونات GIS",subtitle:"أيقونات عامة للخرائط · تصدير مستقل لعلامة KMZ جديدة",status:"نموذج محلي · للأيقونات الجديدة فقط",controls:"صمّم أيقونة جديدة للخريطة",desc:"اختَر شكل العلامة والرمز. تولَّد الصورة داخل المتصفح. النموذج لا يفتح أو يغيّر استايلات KML/KMZ المستوردة.",shape:"شكل العلامة",glyph:"الرمز الداخلي",fill:"لون العلامة",border:"لون الإطار",symbolColor:"لون الرمز",pixelSize:"حجم PNG",stroke:"سُمك الإطار",newOnly:"هذا المثال ينشئ صورًا جديدة فقط. يُستخدم المُصدِّر المنفصل لتضمينها في KMZ جديد، بينما تظل ملفات المستخدم المستوردة دون تغيير.",preview:"معاينة مباشرة",svg:"تنزيل SVG",png:"تنزيل PNG بخلفية شفافة",tint:"ملاحظة KMZ: للحفاظ على ألوان PNG الأصلية استخدم #FFFFFF في لون IconStyle؛ غيّره فقط عند رغبة المستخدم.",footer:"رسوم متجهية أصلية ومحلية · دون تنزيل مكتبات خارجية · ليست ميزة مدمجة في ZEarth · راجع ترخيص أي رموز تضيفها مستقبلًا.",pin:"دبوس",circle:"دائرة",square:"مربع",shield:"درع",star:"نجمة",cross:"مستشفى",tree:"طبيعة",mountain:"جبل",plane:"مطار",dot:"نقطة",language:"English"}
+  };
+  let language="en";
+  const ids=["shape","glyph","fill","border","symbolColor","pixelSize","stroke"];
+  const shapes={
+    pin:'<path d="M48 5C26 5 11 22 11 42c0 23 22 38 37 49 15-11 37-26 37-49C85 22 70 5 48 5Z"/>',
+    circle:'<circle cx="48" cy="48" r="39"/>',
+    square:'<rect x="10" y="10" width="76" height="76" rx="17"/>',
+    shield:'<path d="M48 6 84 17v27c0 22-14 37-36 47C26 81 12 66 12 44V17Z"/>'
+  };
+  const glyphs={
+    star:'<path d="m48 23 7 15 17 3-12 12 3 17-15-8-15 8 3-17-12-12 17-3Z"/>',
+    cross:'<path d="M41 25h14v16h16v14H55v16H41V55H25V41h16Z"/>',
+    tree:'<path d="m48 21 20 28H58l10 13H53v12H43V62H28l10-13H28Z"/>',
+    mountain:'<path d="m21 68 20-36 12 18 7-10 17 28H21Zm17-17 5 7 5-8-7-11Z" fill-rule="evenodd"/>',
+    plane:'<path d="m48 20 8 32 19 8v9l-23-5-4 12-4-12-23 5v-9l19-8Z"/>',
+    dot:'<circle cx="48" cy="46" r="12"/>'
+  };
+  const color = id => /^#[0-9a-fA-F]{6}$/.test($(id).value) ? $(id).value : "#ffffff";
+  function renderSvg(){
+    const shape=Object.hasOwn(shapes,$("shape").value)?$("shape").value:"pin";
+    const glyph=Object.hasOwn(glyphs,$("glyph").value)?$("glyph").value:"dot";
+    const stroke=Number($("stroke").value);
+    const centeredY=shape==="pin"?"translate(0,-7)":"";
+    return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96" width="96" height="96" aria-label="Generated map marker"><g fill="'+color("fill")+'" stroke="'+color("border")+'" stroke-width="'+Math.max(0,Math.min(7,stroke))+'" stroke-linejoin="round">'+shapes[shape]+'</g><g fill="'+color("symbolColor")+'" transform="'+centeredY+'">'+glyphs[glyph]+'</g></svg>';
+  }
+  function update(){
+    $("preview").innerHTML=renderSvg();
+    const shape=$("shape").value;
+    $("details").textContent="SVG viewBox 96 × 96 · "+$("pixelSize").value+" px PNG · KML hotSpot: (0.5, "+(shape==="pin"?"0":"0.5")+") fraction";
+  }
+  function download(blob,name){
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1000);
+  }
+  function onSvg(){download(new Blob([renderSvg()],{type:"image/svg+xml;charset=utf-8"}),"new-gis-marker.svg");}
+  function onPng(){
+    const svg=renderSvg(),src=URL.createObjectURL(new Blob([svg],{type:"image/svg+xml"}));
+    const img=new Image();
+    img.onload=()=>{
+      const size=Number($("pixelSize").value),canvas=document.createElement("canvas");
+      canvas.width=size;canvas.height=size;
+      canvas.getContext("2d").drawImage(img,0,0,size,size);
+      canvas.toBlob(blob=>{if(blob)download(blob,"new-gis-marker-"+size+".png");else alert("PNG export unavailable in this browser");},"image/png");
+      URL.revokeObjectURL(src);
+    };
+    img.onerror=()=>{URL.revokeObjectURL(src);alert("SVG-to-PNG export unavailable in this browser");};
+    img.src=src;
+  }
+  function setLanguage(next){
+    language=next;document.documentElement.lang=language;document.documentElement.dir=language==="ar"?"rtl":"ltr";
+    document.querySelectorAll("[data-t]").forEach(el=>{const key=el.getAttribute("data-t");if(dictionary[language][key])el.textContent=dictionary[language][key];});
+    ids.slice(0,2).forEach(id=>{[...$(id).options].forEach(opt=>{opt.textContent=dictionary[language][opt.value]||opt.value;});});
+    $("language").textContent=dictionary[language].language;
+  }
+  ids.forEach(id=>$(id).addEventListener("input",update));
+  $("downloadSVG").addEventListener("click",onSvg);
+  $("downloadPNG").addEventListener("click",onPng);
+  $("language").addEventListener("click",()=>setLanguage(language==="en"?"ar":"en"));
+  setLanguage(language);update();
+})();
+</script>
+</body>
+</html>

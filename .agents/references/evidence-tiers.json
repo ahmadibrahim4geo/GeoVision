@@ -1,0 +1,57 @@
+{
+  "schema_version": "1.0",
+  "registry_id": "gis-evidence-tiers",
+  "policy": "Use the highest tier supported by fresh observed evidence. Lower-tier evidence never proves a higher tier, and unavailable native or packaged checks remain NOT RUN.",
+  "tiers": [
+    {
+      "id": "T0",
+      "ordinal": 0,
+      "name": "source-reviewed",
+      "required_evidence": "Source, requirements, schemas, links or documented procedures inspected.",
+      "native_runtime_required": false,
+      "output_readback_required": false,
+      "clean_environment_required": false,
+      "does_not_establish": "Executable behavior, GIS-host integration or numerical output correctness."
+    },
+    {
+      "id": "T1",
+      "ordinal": 1,
+      "name": "offline-verified",
+      "required_evidence": "Repeatable offline or static checks using deterministic fixtures, including expected results and executed commands.",
+      "native_runtime_required": false,
+      "output_readback_required": false,
+      "clean_environment_required": false,
+      "does_not_establish": "Loading or execution in ArcGIS, QGIS, a live provider, a real database service or another named native host."
+    },
+    {
+      "id": "T2",
+      "ordinal": 2,
+      "name": "native-integrated",
+      "required_evidence": "A named compatible native GIS client, engine, database or live-provider adapter loads or integrates the feature with a controlled fixture.",
+      "native_runtime_required": true,
+      "output_readback_required": false,
+      "clean_environment_required": false,
+      "does_not_establish": "Complete end-to-end user workflow, independently reread production output or clean-machine packaging."
+    },
+    {
+      "id": "T3",
+      "ordinal": 3,
+      "name": "operation-verified",
+      "required_evidence": "A real GIS, database or provider operation completes in the target runtime and its output is independently reopened or reread and compared with expected results.",
+      "native_runtime_required": true,
+      "output_readback_required": true,
+      "clean_environment_required": false,
+      "does_not_establish": "Clean-environment installation, upgrade, uninstall or packaged distribution behavior."
+    },
+    {
+      "id": "T4",
+      "ordinal": 4,
+      "name": "packaged-accepted",
+      "required_evidence": "The packaged deliverable is installed or provisioned in a clean representative environment and the user workflow, persistence, export/reopen, recovery and uninstall or teardown checks are observed where applicable.",
+      "native_runtime_required": true,
+      "output_readback_required": true,
+      "clean_environment_required": true,
+      "does_not_establish": "Future provider uptime, unrestricted licensing or compatibility with untested versions and devices."
+    }
+  ]
+}

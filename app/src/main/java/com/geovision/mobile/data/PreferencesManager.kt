@@ -25,23 +25,21 @@ import com.geovision.mobile.core.AppLogger
  */
 class PreferencesManager(context: Context) {
 
-    // ── إعداد الـ Keystore والـ EncryptedSharedPreferences ──
     private val prefs: SharedPreferences = try {
-        val masterKey = MasterKey.Builder(context)
-            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
-            .build()
-
-        EncryptedSharedPreferences.create(
-            context,
-            PREFS_NAME,
-            masterKey,
-            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
-            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
-        )
+        createEncryptedPrefs(context)
     } catch (e: Exception) {
-        AppLogger.e(AppLogger.Tags.SECURITY, "Failed to create EncryptedSharedPreferences", e)
-        // Fallback إلى SharedPreferences العادي في حالة الفشل (لا يفضل)
-        context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        AppLogger.e(AppLogger.Tags.SECURITY, "Failed to create EncryptedSharedPreferences, resetting preference file", e)
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N) {
+                context.deleteSharedPreferences(PREFS_NAME)
+            } else {
+                context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE).edit().clear().commit()
+            }
+            createEncryptedPrefs(context)
+        } catch (e2: Exception) {
+            AppLogger.e(AppLogger.Tags.SECURITY, "EncryptedSharedPreferences recovery failed, fallback to standard prefs", e2)
+            context.getSharedPreferences(PREFS_NAME + "_unencrypted", Context.MODE_PRIVATE)
+        }
     }
 
     // نظام الوحدات (metric / imperial) – القيمة الافتراضية: متري
@@ -212,6 +210,20 @@ class PreferencesManager(context: Context) {
     }
     fun unregisterListener(listener: SharedPreferences.OnSharedPreferenceChangeListener) {
         prefs.unregisterOnSharedPreferenceChangeListener(listener)
+    }
+
+    private fun createEncryptedPrefs(context: Context): SharedPreferences {
+        val masterKey = MasterKey.Builder(context)
+            .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+            .build()
+
+        return EncryptedSharedPreferences.create(
+            context,
+            PREFS_NAME,
+            masterKey,
+            EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+            EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+        )
     }
 
     // ── مفاتيح التفضيلات (ثوابت) ──

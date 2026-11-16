@@ -1,0 +1,113 @@
+{
+  "schema_version": "1.0",
+  "request_id": "ZEARTH-EXAMPLE-001",
+  "revision": "r1",
+  "original_request": "عايز أصلح تشغيل الشبكة الإحداثية وتسميات خطوط الطول ودوائر العرض والمبالغة الرأسية في برنامج ZEarth",
+  "language": "ar",
+  "status": "draft",
+  "approval": {
+    "approved_by_user": false,
+    "approved_revision": null,
+    "high_risk_approved": false
+  },
+  "assumptions": [
+    "البرنامج يستخدم محرك عرض للكرة الأرضية؛ يجب فحص المحرك الفعلي قبل اختيار الأدوات"
+  ],
+  "open_questions": [],
+  "tasks": [
+    {
+      "id": "T1",
+      "title": "Graticule toggle and scale-aware labels",
+      "description": "Make graticule on/off independent from place-name labels; support coordinate labels and LOD when requested.",
+      "priority": "must",
+      "kind": "desktop-map",
+      "skills": [
+        "gis-desktop-application-development",
+        "geospatial-web-mapping",
+        "coordinate-reference-systems",
+        "gis-security-guardian"
+      ],
+      "depends_on": [],
+      "risk": "medium",
+      "acceptance_criteria": [
+        "Both grid and coordinate label controls respond in the running application",
+        "Grid labels appear at documented zoom levels, persist across view changes"
+      ],
+      "tools": [
+        {
+          "tool_id": "host.source-inspection",
+          "side_effect": "read"
+        }
+      ],
+      "owner_skill": "gis-desktop-application-development"
+    },
+    {
+      "id": "T2",
+      "title": "Live terrain exaggeration",
+      "description": "Wire a user-adjustable, saved 3D terrain vertical exaggeration to the real renderer without changing source DEM Z.",
+      "priority": "must",
+      "kind": "desktop-terrain",
+      "skills": [
+        "gis-desktop-application-development",
+        "geospatial-web-mapping",
+        "terrain-hydrology-lidar",
+        "gis-security-guardian"
+      ],
+      "depends_on": [],
+      "risk": "medium",
+      "acceptance_criteria": [
+        "Changing exaggeration causes a visible scene update on a known high-relief DEM",
+        "Switching 2D/3D and reopening the project preserves the chosen value"
+      ],
+      "tools": [
+        {
+          "tool_id": "host.runtime-smoke-test",
+          "side_effect": "read"
+        }
+      ],
+      "owner_skill": "gis-desktop-application-development"
+    },
+    {
+      "id": "T3",
+      "title": "Regression and evidence",
+      "description": "Run feature and integration tests, record native-run evidence or explicitly report unavailable tests.",
+      "priority": "must",
+      "kind": "qa",
+      "skills": [
+        "gis-desktop-application-development",
+        "gis-security-guardian"
+      ],
+      "depends_on": [
+        "T1",
+        "T2"
+      ],
+      "risk": "low",
+      "acceptance_criteria": [
+        "Regression suite recorded with passed/failed/blocked statuses",
+        "T0–T4 acceptance evidence and rollback notes produced"
+      ],
+      "tools": [],
+      "owner_skill": "gis-desktop-application-development"
+    }
+  ],
+  "goal": "Implement a working, independently verified coordinate grid and terrain exaggeration workflow in an existing GIS desktop app.",
+  "target": "Existing GIS desktop application; preserve current engine, project files and source elevation data",
+  "desired_outcomes": [
+    "Independent coordinate grid and label controls with correct LOD and saved state",
+    "Live terrain vertical exaggeration with 2D/3D save-and-reopen persistence",
+    "Evidence-based regression report distinguishing offline checks from native GUI tests"
+  ],
+  "success_criteria": [
+    "Coordinate grid and labels respond correctly in a running desktop app",
+    "Vertical exaggeration visibly updates real terrain and never changes source DEM values",
+    "Existing project opens after the change and the observed acceptance report includes limitations"
+  ],
+  "constraints": [
+    "Do not replace the existing GIS renderer without reviewed approval",
+    "Retain KML/KMZ styles and source GIS datasets where relevant",
+    "Do not claim native tests when only offline structural checks have been performed"
+  ],
+  "non_goals": [
+    "Redesign entire application or switch mapping engine"
+  ]
+}

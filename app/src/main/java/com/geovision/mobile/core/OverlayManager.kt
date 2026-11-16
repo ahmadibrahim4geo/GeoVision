@@ -31,8 +31,8 @@ class OverlayManager(private val mapView: MapView?) {
     // تتبع الـ overlays حسب الفئة
     private val overlayMap = mutableMapOf<String, MutableList<Overlay>>()
     private var totalOverlays = 0
-    private val MAX_OVERLAYS_PER_CATEGORY = 20
-    private val MAX_TOTAL_OVERLAYS = 100
+    private val MAX_OVERLAYS_PER_CATEGORY = 10_000
+    private val MAX_TOTAL_OVERLAYS = 50_000
 
     /**
      * إضافة overlay جديد مع تتبعه
@@ -55,8 +55,8 @@ class OverlayManager(private val mapView: MapView?) {
                     AppLogger.Tags.MAP,
                     "⚠️ Category '$category' has max overlays. Removing oldest..."
                 )
-                list.removeAt(0)
-                mapView?.overlays?.remove(list[0])
+                val oldest = list.removeAt(0)
+                mapView?.overlays?.remove(oldest)
                 totalOverlays--
             }
 

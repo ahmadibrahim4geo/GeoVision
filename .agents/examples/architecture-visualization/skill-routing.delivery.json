@@ -1,0 +1,17 @@
+{
+  "schemaVersion": 1,
+  "receiptId": "b080fc0a-fdc8-41b0-a6ac-3208cccf7c20",
+  "status": "current",
+  "command": "deliver",
+  "type": "workflow",
+  "input": "/workspace/scratch/817e827aedff/GIS-Development-Skills/examples/architecture-visualization/skill-routing.workflow.json",
+  "output": "/workspace/scratch/817e827aedff/GIS-Development-Skills/examples/architecture-visualization/skill-routing.html",
+  "specification": {
+    "sha256": "ef19d5dc0327e013bb467a0db77e1bf7b51102ed3b9296fe68e1abe5b85bfb53",
+    "bytes": 3837
+  },
+  "artifact": {
+    "sha256": "4bbf8de29079f67dc0b28dea84c6c83acdd33e6889901e0a58bb8d09b34d8ba9",
+    "bytes": 838566
+  }
+}

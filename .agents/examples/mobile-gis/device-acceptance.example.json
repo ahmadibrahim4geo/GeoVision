@@ -1,0 +1,27 @@
+{
+  "schema_version": "1.0",
+  "description": "Example documentation ONLY. No Android/iOS app, OAuth login, or sensor check was performed.",
+  "cases": [
+    {
+      "case_id": "MOB-01",
+      "platform": "android",
+      "mode": "ci-fixture",
+      "status": "NOT_RUN",
+      "reason": "No Android GIS build/emulator/physical device available in static repository validation"
+    },
+    {
+      "case_id": "MOB-03",
+      "platform": "ios",
+      "mode": "ci-fixture",
+      "status": "NOT_RUN",
+      "reason": "No real iOS device, signed app or GNSS reading available for live test"
+    },
+    {
+      "case_id": "MOB-09",
+      "platform": "android",
+      "mode": "ci-fixture",
+      "status": "NOT_RUN",
+      "reason": "No OAuth provider or native Android sign-in app was exercised"
+    }
+  ]
+}

@@ -341,13 +341,17 @@ object GdbParser {
     }
 
     private fun estimateFeatureCount(file: File): Int {
-        // FIXED: validRows is at offset 4 (uint32 LE), NOT offset 16-24
+        // FIXED: Read only 8 header bytes via RandomAccessFile instead of loading full file into memory
         return try {
-            val bytes = file.readBytes()
-            if (bytes.size < 8) return 0
-            val version = java.nio.ByteBuffer.wrap(bytes, 0, 4).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt()
-            if (version != FGDB_VERSION_3 && version != FGDB_VERSION_4) return 0
-            java.nio.ByteBuffer.wrap(bytes, FGDB_VALID_ROWS_OFFSET, 4).order(java.nio.ByteOrder.LITTLE_ENDIAN).getInt()
+            if (!file.exists() || file.length() < 8) return 0
+            RandomAccessFile(file, "r").use { raf ->
+                val buf = ByteArray(8)
+                raf.readFully(buf)
+                val bb = java.nio.ByteBuffer.wrap(buf).order(java.nio.ByteOrder.LITTLE_ENDIAN)
+                val version = bb.getInt()
+                if (version != FGDB_VERSION_3 && version != FGDB_VERSION_4) return 0
+                bb.getInt()
+            }
         } catch (_: Exception) { 0 }
     }
 
@@ -1094,9 +1098,26 @@ object GdbParser {
 
     private fun copyGdbFolder(context: Context, treeUri: Uri, fileName: String): String? {
         return try {
-            val docFolder = DocumentFile.fromTreeUri(context, treeUri) ?: return null
-            val tempDir = File(context.cacheDir, "gdb_${System.nanoTime()}.gdb").also { it.mkdirs() }
-            copyDocumentTree(context, docFolder, tempDir)
+            val tempDir = File(context.cacheDir, "gdb_${System.nanoTime()}").also { it.mkdirs() }
+
+            val uriStr = treeUri.toString().lowercase()
+            val isZip = uriStr.endsWith(".zip") || fileName.lowercase().endsWith(".zip")
+
+            if (isZip) {
+                context.contentResolver.openInputStream(treeUri)?.use { stream ->
+                    extractZipGdb(stream, tempDir)
+                }
+            } else {
+                val docFolder = DocumentFile.fromTreeUri(context, treeUri)
+                if (docFolder != null) {
+                    copyDocumentTree(context, docFolder, tempDir)
+                } else {
+                    context.contentResolver.openInputStream(treeUri)?.use { stream ->
+                        extractZipGdb(stream, tempDir)
+                    }
+                }
+            }
+
             val gdbRoot = findCopiedGdbRoot(tempDir)
             if (gdbRoot != null && gdbRoot.listFiles()?.isNotEmpty() == true) {
                 gdbRoot.absolutePath
@@ -1111,6 +1132,24 @@ object GdbParser {
             AppLogger.e(AppLogger.Tags.PARSER, "Failed to copy GDB folder: ${e.message}")
             null
         }
+    }
+
+    private fun extractZipGdb(stream: InputStream, targetDir: File) {
+        val canonicalTarget = targetDir.canonicalPath
+        val zis = java.util.zip.ZipInputStream(stream)
+        var entry = zis.nextEntry
+        while (entry != null) {
+            if (!entry.isDirectory) {
+                val outFile = File(targetDir, entry.name)
+                if (!outFile.canonicalPath.startsWith(canonicalTarget + File.separator)) {
+                    throw SecurityException("Zip Slip attempt: ${entry.name}")
+                }
+                outFile.parentFile?.mkdirs()
+                outFile.outputStream().use { zis.copyTo(it) }
+            }
+            entry = zis.nextEntry
+        }
+        zis.close()
     }
 
     private fun findCopiedGdbRoot(root: File): File? {

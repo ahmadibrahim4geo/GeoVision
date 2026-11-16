@@ -1,14 +1,14 @@
 /**
  * ملف نماذج البيانات الخاصّة بالطبقات (Layers).
  * يحتوي على أنواع الملفات الجغرافية المدعومة وهياكل البيانات
- * التي تمثل الطبقة وميزاتها (Features) وتفاصيلها.
+ * التي تمثل الطبقة وميزاتها (Features) وتفاصيلها وخصائص التنسيق المتقدمة.
  */
 package com.geovision.mobile.ui.screens.layers
 
 import androidx.compose.ui.graphics.Color
 
 // ── أنواع الملفات الجغرافية المدعومة ──
-/** أنواع الملفات التي يمكن رفعها كطبقة: Shapefile، GeoJSON، KML، GPX، Photo، GeoPackage، GeoDatabase */
+/** أنواع الملفات التي يمكن رفعها كطبقة: Shapefile، GeoJSON، KML، GPX، Photo، GeoPackage، GeoDatabase، Excel، CSV */
 enum class FileType(val label: String) {
     SHAPEFILE("Shapefile"),
     GEOJSON("GeoJSON"),
@@ -16,10 +16,29 @@ enum class FileType(val label: String) {
     GPX("GPX"),
     PHOTO("Photo"),
     GEOPACKAGE("GeoPackage"),
-    GEODATABASE("GeoDatabase")
+    GEODATABASE("GeoDatabase"),
+    EXCEL("Excel (.xlsx)"),
+    CSV("CSV / Coordinates")
 }
 
-// ── نموذج بيانات الـ Style للطبقة ──
+// ── أشكال الرموز للنقاط ──
+enum class PointSymbol(val labelAr: String, val labelEn: String) {
+    CIRCLE("دائرة", "Circle"),
+    SQUARE("مربع", "Square"),
+    TRIANGLE("مثلث", "Triangle"),
+    DIAMOND("معين", "Diamond"),
+    CROSS("علامة +", "Cross"),
+    PIN("دبوس خريطة", "Pin")
+}
+
+// ── أنماط الخطوط والحدود ──
+enum class StrokeStyle(val labelAr: String, val labelEn: String) {
+    SOLID("متصل", "Solid"),
+    DASHED("متقطع", "Dashed"),
+    DOTTED("منقط", "Dotted")
+}
+
+// ── نموذج بيانات الـ Style للطبقة المتقدم ──
 data class LayerStyle(
     val fillColor: Color = Color(0xFFE65100),
     val strokeColor: Color = Color(0xFFE65100),
@@ -27,15 +46,20 @@ data class LayerStyle(
     val fillAlpha: Float = 0.3f,
     val pointSize: Float = 8f,
     val lineWidth: Float = 4f,
+    val pointSymbol: PointSymbol = PointSymbol.CIRCLE,
+    val strokeStyle: StrokeStyle = StrokeStyle.SOLID,
     val pointIcon: String? = null,
     val labelField: String? = null,
     val labelSize: Float = 12f,
-    val labelColor: Color = Color.White
+    val labelColor: Color = Color.White,
+    val showLabels: Boolean = false,
+    val haloColor: Color = Color.Black,
+    val haloWidth: Float = 2.5f
 )
 
 // ── نموذج بيانات الطبقة (Layer) ──
 /**
- * يمثل طبقة جغرافية محمّلة في التطبيق.
+ * يمثل طبقة جغرافية محمّلة في التطبيق مع إمكانيات التحكم في الخصائص والتنسيق.
  */
 data class Layer(
     val id: String,
@@ -57,7 +81,10 @@ data class Layer(
         pointSize = pointSize,
         lineWidth = lineWidth
     ),
-    val crs: String = "EPSG:4326"
+    val crs: String = "EPSG:4326",
+    val groupName: String? = null,
+    val minZoom: Int = 1,
+    val maxZoom: Int = 22
 ) {
     val extent: String get() = ""
 }

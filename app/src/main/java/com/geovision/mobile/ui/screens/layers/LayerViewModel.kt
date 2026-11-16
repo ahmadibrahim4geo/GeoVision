@@ -12,8 +12,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.geovision.mobile.core.AppLogger
 import com.geovision.mobile.core.UserFriendlyErrors
+import com.geovision.mobile.data.CsvParser
 import com.geovision.mobile.data.CrsValidator
 import com.geovision.mobile.data.DatabaseImportWriter
+import com.geovision.mobile.data.ExcelParser
 import com.geovision.mobile.data.ExifGpsParser
 import com.geovision.mobile.data.GeoJsonParser
 import com.geovision.mobile.data.GeoPhoto
@@ -123,6 +125,53 @@ class LayerViewModel : ViewModel() {
         }
     }
 
+    fun showAllLayers() {
+        for (i in _layers.indices) {
+            if (!_layers[i].isVisible) {
+                _layers[i] = _layers[i].copy(isVisible = true)
+                prefs?.setLayerVisible(_layers[i].id, true)
+            }
+        }
+        persistLayers()
+    }
+
+    fun hideAllLayers() {
+        for (i in _layers.indices) {
+            if (_layers[i].isVisible) {
+                _layers[i] = _layers[i].copy(isVisible = false)
+                prefs?.setLayerVisible(_layers[i].id, false)
+            }
+        }
+        persistLayers()
+    }
+
+    fun invertLayersVisibility() {
+        for (i in _layers.indices) {
+            val newVis = !_layers[i].isVisible
+            _layers[i] = _layers[i].copy(isVisible = newVis)
+            prefs?.setLayerVisible(_layers[i].id, newVis)
+        }
+        persistLayers()
+    }
+
+    fun moveLayerUp(id: String) {
+        val idx = _layers.indexOfFirst { it.id == id }
+        if (idx > 0) {
+            val item = _layers.removeAt(idx)
+            _layers.add(idx - 1, item)
+            persistLayers()
+        }
+    }
+
+    fun moveLayerDown(id: String) {
+        val idx = _layers.indexOfFirst { it.id == id }
+        if (idx in 0 until _layers.size - 1) {
+            val item = _layers.removeAt(idx)
+            _layers.add(idx + 1, item)
+            persistLayers()
+        }
+    }
+
     fun updateTransparency(id: String, alpha: Float) {
         val index = _layers.indexOfFirst { it.id == id }
         if (index != -1) { _layers[index] = _layers[index].copy(transparency = alpha); prefs?.setLayerTransparency(id, alpha); persistLayers() }
@@ -178,6 +227,67 @@ class LayerViewModel : ViewModel() {
 
     fun updateLayerColor(id: String, color: Color) { val idx = _layers.indexOfFirst { it.id == id }; if (idx != -1) _layers[idx] = _layers[idx].copy(color = color); persistLayers() }
     fun updatePointSize(id: String, size: Float) { val idx = _layers.indexOfFirst { it.id == id }; if (idx != -1) _layers[idx] = _layers[idx].copy(pointSize = size); persistLayers() }
+
+    fun updateLayerStyle(id: String, style: LayerStyle) {
+        val idx = _layers.indexOfFirst { it.id == id }
+        if (idx != -1) {
+            val updated = _layers[idx].copy(
+                style = style,
+                color = style.fillColor,
+                pointSize = style.pointSize,
+                lineWidth = style.lineWidth,
+                transparency = style.fillAlpha
+            )
+            _layers[idx] = updated
+            _layerDetailsVersion.value = System.nanoTime()
+            persistLayers()
+        }
+    }
+
+    fun setLayerGroupName(id: String, groupName: String?) {
+        val index = _layers.indexOfFirst { it.id == id }
+        if (index != -1) {
+            _layers[index] = _layers[index].copy(groupName = groupName)
+            persistLayers()
+        }
+    }
+
+    fun setGroupVisibility(groupName: String, isVisible: Boolean) {
+        _layers.indices.filter { _layers[it].groupName == groupName }.forEach { i ->
+            _layers[i] = _layers[i].copy(isVisible = isVisible)
+            prefs?.setLayerVisible(_layers[i].id, isVisible)
+        }
+        persistLayers()
+    }
+
+    fun updateLayerZoomLimits(id: String, minZoom: Int, maxZoom: Int) {
+        val index = _layers.indexOfFirst { it.id == id }
+        if (index != -1) {
+            _layers[index] = _layers[index].copy(minZoom = minZoom.coerceIn(1, 22), maxZoom = maxZoom.coerceIn(1, 22))
+            persistLayers()
+        }
+    }
+
+    fun renameLayer(id: String, newName: String) {
+        val index = _layers.indexOfFirst { it.id == id }
+        if (index != -1 && newName.isNotBlank()) {
+            _layers[index] = _layers[index].copy(name = newName.trim())
+            persistLayers()
+        }
+    }
+
+    fun clearAllLayers() {
+        _layers.clear()
+        _layerDetails.clear()
+        _photoData.clear()
+        _lastDetail = null
+        _lastDetailLayerId = null
+        requestedZoomLayerId = null
+        _layerDetailsVersion.value = System.nanoTime()
+        updateLoadState()
+        persistLayers()
+    }
+
     fun updateLineWidth(id: String, width: Float) { val idx = _layers.indexOfFirst { it.id == id }; if (idx != -1) _layers[idx] = _layers[idx].copy(lineWidth = width); persistLayers() }
 
     fun moveLayer(fromIndex: Int, toIndex: Int) {
@@ -230,7 +340,7 @@ class LayerViewModel : ViewModel() {
                 val obj = arr.getJSONObject(i)
                 restored.add(Layer(
                     id = obj.getString("id"), name = obj.getString("name"),
-                    fileType = FileType.valueOf(obj.getString("fileType")),
+                    fileType = runCatching { FileType.valueOf(obj.getString("fileType")) }.getOrDefault(FileType.GEOJSON),
                     geomType = obj.optString("geomType", "").ifEmpty { null },
                     isVisible = obj.optBoolean("isVisible", true),
                     color = obj.optLong("color", -1L).let { if (it == -1L) randomLayerColor() else Color(it) },
@@ -311,6 +421,8 @@ class LayerViewModel : ViewModel() {
             "gpx" -> FileType.GPX
             "geopackage" -> FileType.GEOPACKAGE
             "geodatabase", "filegdb" -> FileType.GEODATABASE
+            "excel", "xlsx", "xls" -> FileType.EXCEL
+            "csv" -> FileType.CSV
             "photo" -> FileType.PHOTO
             else -> FileType.GEOJSON
         }
@@ -452,7 +564,7 @@ class LayerViewModel : ViewModel() {
                     uri = uri,
                     fileType = _layers.getOrNull(idx)?.fileType ?: inferFileType(uri, context) ?: FileType.GEOJSON,
                     result = result,
-                    visible = !crsNeedsReview,
+                    visible = true,
                     layer = _layers.getOrNull(idx)
                 )
                 val info = LayerDetailInfo(fileName = result.fileName.ifEmpty { fileName }, filePath = uri.toString(), crs = result.crs.orEmpty(), extent = result.extent.orEmpty(), features = result.features)
@@ -463,15 +575,14 @@ class LayerViewModel : ViewModel() {
                     featureCount = result.features.size,
                     progressPercent = 1.0f,
                     geomType = deriveGeomType(result.features),
-                    isVisible = !crsNeedsReview,
+                    isVisible = true,
                     filePath = if (persistedToDatabase) "geovision://project/$layerId" else _layers[idx].filePath
                 ).also { persistLayers() }
                 if (crsNeedsReview) {
-                    loadWarning = listOfNotNull(loadWarning, "تم استيراد الطبقة لكنها مخفية حتى مراجعة نظام الإحداثيات CRS.").joinToString("\n")
+                    loadWarning = listOfNotNull(loadWarning, "تنبيه نظام الإسناد: يوصى بمراجعة نظام الإحداثيات CRS للتأكد من الموضع الجغرافي الدقيق.").joinToString("\n")
                     updateLoadState(loadWarning = loadWarning)
-                } else {
-                    requestedZoomLayerId = layerId
                 }
+                requestedZoomLayerId = layerId
                 updateLoadState()
                 AppLogger.d(AppLogger.Tags.LAYER, "تم حفظ ${result.features.size} معلم للطبقة $fileName")
             } catch (e: kotlinx.coroutines.TimeoutCancellationException) {
@@ -508,6 +619,121 @@ class LayerViewModel : ViewModel() {
                 loadError = "فشل تحليل GeoPackage: ${e.message}"; AppLogger.e(AppLogger.Tags.LAYER, "GeoPackage error: ${e.message}", e); updateLoadState(loadError = loadError)
             } finally { isLoading = false; updateLoadState(isLoading = false) }
         }
+    }
+
+    suspend fun inspectSpreadsheet(context: Context, uri: Uri, isExcel: Boolean): ExcelParser.TableInspection = withContext(Dispatchers.IO) {
+        if (isExcel) {
+            ExcelParser.inspect(context, uri)
+        } else {
+            val stream = context.contentResolver.openInputStream(uri) ?: return@withContext ExcelParser.TableInspection(emptyList(), emptyList(), 0, -1, -1, -1, -1)
+            try {
+                val reader = java.io.InputStreamReader(stream, java.nio.charset.StandardCharsets.UTF_8)
+                val insp = CsvParser.inspect(reader)
+                reader.close()
+                insp
+            } finally {
+                try { stream.close() } catch (_: Exception) {}
+            }
+        }
+    }
+
+    fun parseAndCacheExcel(context: Context, uri: Uri, fileName: String, mapping: ExcelParser.CoordinateMapping) {
+        val layerId = addLayer(fileName, FileType.EXCEL, uri.toString())
+        viewModelScope.launch {
+            isLoading = true; loadError = null; loadWarning = null; lastParseTimeMs = 0
+            updateLoadState(isLoading = true, loadError = null, loadWarning = null)
+            try {
+                val result = LayerRepository.loadExcelWithMapping(context, uri, fileName, mapping)
+                lastParseTimeMs = result.parseTimeMs
+                if (result.error != null) {
+                    loadError = result.error
+                    _layers.removeAll { it.id == layerId }
+                    persistLayers()
+                    updateLoadState(loadError = loadError)
+                    return@launch
+                }
+                applyLoadedResult(context, layerId, uri, fileName, result, FileType.EXCEL)
+            } catch (e: Exception) {
+                loadError = "فشل استيراد ملف الإكسيل: ${e.message}"
+                _layers.removeAll { it.id == layerId }
+                persistLayers()
+                updateLoadState(loadError = loadError)
+            } finally {
+                isLoading = false
+                updateLoadState(isLoading = false)
+            }
+        }
+    }
+
+    fun parseAndCacheCsv(context: Context, uri: Uri, fileName: String, mapping: ExcelParser.CoordinateMapping) {
+        val layerId = addLayer(fileName, FileType.CSV, uri.toString())
+        viewModelScope.launch {
+            isLoading = true; loadError = null; loadWarning = null; lastParseTimeMs = 0
+            updateLoadState(isLoading = true, loadError = null, loadWarning = null)
+            try {
+                val result = LayerRepository.loadCsvWithMapping(context, uri, fileName, mapping)
+                lastParseTimeMs = result.parseTimeMs
+                if (result.error != null) {
+                    loadError = result.error
+                    _layers.removeAll { it.id == layerId }
+                    persistLayers()
+                    updateLoadState(loadError = loadError)
+                    return@launch
+                }
+                applyLoadedResult(context, layerId, uri, fileName, result, FileType.CSV)
+            } catch (e: Exception) {
+                loadError = "فشل استيراد ملف CSV: ${e.message}"
+                _layers.removeAll { it.id == layerId }
+                persistLayers()
+                updateLoadState(loadError = loadError)
+            } finally {
+                isLoading = false
+                updateLoadState(isLoading = false)
+            }
+        }
+    }
+
+    private suspend fun applyLoadedResult(
+        context: Context,
+        layerId: String,
+        uri: Uri,
+        fileName: String,
+        result: LayerRepository.LoadResult,
+        fileType: FileType
+    ) {
+        publishImportReport(context, result.importReport)
+        val idx = _layers.indexOfFirst { it.id == layerId }
+        val persistedToDatabase = persistImportedLayerToDatabase(
+            context = context,
+            appLayerId = layerId,
+            layerName = result.fileName.ifEmpty { fileName },
+            uri = uri,
+            fileType = fileType,
+            result = result,
+            visible = true,
+            layer = _layers.getOrNull(idx)
+        )
+        val info = LayerDetailInfo(
+            fileName = result.fileName.ifEmpty { fileName },
+            filePath = uri.toString(),
+            crs = result.crs.orEmpty(),
+            extent = result.extent.orEmpty(),
+            features = result.features
+        )
+        val keepInMemory = !persistedToDatabase || result.features.size <= FEATURE_MEMORY_CACHE_LIMIT
+        if (keepInMemory) _layerDetails[layerId] = info else _layerDetails.remove(layerId)
+        _layerDetailsVersion.value = System.nanoTime()
+        if (idx != -1) {
+            _layers[idx] = _layers[idx].copy(
+                featureCount = result.features.size,
+                progressPercent = 1.0f,
+                geomType = deriveGeomType(result.features),
+                isVisible = true,
+                filePath = if (persistedToDatabase) "geovision://project/$layerId" else _layers[idx].filePath
+            ).also { persistLayers() }
+        }
+        requestedZoomLayerId = layerId
+        updateLoadState()
     }
 
     fun parseAndCacheGdbSelected(context: Context, uri: Uri, fileName: String, selectedTableNames: List<String>) {
@@ -558,7 +784,7 @@ class LayerViewModel : ViewModel() {
                 fileType = fileType,
                 featureCount = result.features.size,
                 progressPercent = 1.0f,
-                isVisible = !crsNeedsReview,
+                isVisible = true,
                 color = randomLayerColor(),
                 filePath = uri.toString(),
                 geomType = deriveGeomType(result.features)
@@ -570,7 +796,7 @@ class LayerViewModel : ViewModel() {
                 uri = uri,
                 fileType = fileType,
                 result = result,
-                visible = !crsNeedsReview,
+                visible = true,
                 layer = layer
             )
             val storedLayer = if (persistedToDatabase) layer.copy(filePath = "geovision://project/${layer.id}") else layer
@@ -587,7 +813,7 @@ class LayerViewModel : ViewModel() {
             } else {
                 _layerDetails.remove(layerId)
             }
-            if (crsNeedsReview) warnings.add("تم استيراد $layerFileName لكنها مخفية حتى مراجعة نظام الإحداثيات CRS.")
+            if (crsNeedsReview) warnings.add("تم استيراد $layerFileName (يوصى بمراجعة نظام الإحداثيات CRS للتأكد من الدقة).")
             addedCount++
         }
         if (addedCount == 0) {
@@ -599,6 +825,7 @@ class LayerViewModel : ViewModel() {
         lastParseTimeMs = totalElapsed / addedCount.coerceAtLeast(1)
         _layerDetailsVersion.value = System.nanoTime()
         persistLayers()
+        requestedZoomLayerId = _layers.lastOrNull()?.id
         loadWarning = warnings.distinct().joinToString("\n").takeIf { it.isNotBlank() }
         updateLoadState(lastParseTimeMs = lastParseTimeMs, loadWarning = loadWarning)
         AppLogger.d(AppLogger.Tags.LAYER, "${fileType.label}: تمت إضافة $addedCount طبقة (${totalElapsed}ms)")

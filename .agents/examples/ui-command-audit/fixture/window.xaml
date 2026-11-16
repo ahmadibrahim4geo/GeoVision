@@ -1,0 +1,14 @@
+<Window xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Synthetic GIS Window">
+  <DockPanel>
+    <Menu DockPanel.Dock="Top">
+      <MenuItem Header="File">
+        <MenuItem x:Name="ImportKmlMenu" Header="Import KML" Command="{Binding ImportKmlCommand}" />
+        <MenuItem x:Name="ExportLayerMenu" Header="Export Layer" Click="OnExportLayer" />
+        <MenuItem x:Name="PlaceholderMenu" Header="Unavailable future tool" />
+      </MenuItem>
+    </Menu>
+    <Button x:Name="ZoomFullExtent" Content="Full Extent" Command="{Binding ZoomFullExtentCommand}" />
+  </DockPanel>
+</Window>

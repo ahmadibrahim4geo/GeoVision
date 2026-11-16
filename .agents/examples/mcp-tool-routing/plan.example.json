@@ -1,0 +1,82 @@
+{
+  "schema_version": "1.0",
+  "request_id": "mcp-demo",
+  "revision": "r1",
+  "original_request": "Inspect code, test Windows UI and GIS readback without assuming tool access",
+  "language": "en",
+  "status": "draft",
+  "assumptions": [],
+  "open_questions": [],
+  "approval": {
+    "approved_by_user": false,
+    "high_risk_approved": false,
+    "approved_revision": null
+  },
+  "goal": "Demonstrate offline tool candidate routing without execution",
+  "target": "Fictional GIS desktop project",
+  "desired_outcomes": [
+    "Candidate map with explicit blocked tools"
+  ],
+  "success_criteria": [
+    "No calls or authorization claimed"
+  ],
+  "tasks": [
+    {
+      "id": "inspect",
+      "title": "Read repo",
+      "description": "Read one repo",
+      "kind": "inspection",
+      "priority": "must",
+      "risk": "low",
+      "skills": [
+        "gis-desktop-application-development",
+        "gis-security-guardian",
+        "mcp-integration-and-tool-orchestration"
+      ],
+      "owner_skill": "gis-desktop-application-development",
+      "depends_on": [],
+      "acceptance_criteria": [
+        "Files identified"
+      ],
+      "tools": [],
+      "capability_requests": [
+        {
+          "capability": "github.repository.read",
+          "side_effect": "read"
+        }
+      ]
+    },
+    {
+      "id": "nativeui",
+      "title": "Test native UI",
+      "description": "Use Windows harness if host truly offers it",
+      "kind": "testing",
+      "priority": "must",
+      "risk": "medium",
+      "skills": [
+        "gis-desktop-application-development",
+        "gis-desktop-e2e-testing",
+        "gis-security-guardian",
+        "mcp-integration-and-tool-orchestration"
+      ],
+      "owner_skill": "gis-desktop-application-development",
+      "depends_on": [
+        "inspect"
+      ],
+      "acceptance_criteria": [
+        "UI observed"
+      ],
+      "tools": [],
+      "capability_requests": [
+        {
+          "capability": "desktop.ui.test",
+          "side_effect": "execute"
+        },
+        {
+          "capability": "gis.output.readback",
+          "side_effect": "read"
+        }
+      ]
+    }
+  ]
+}

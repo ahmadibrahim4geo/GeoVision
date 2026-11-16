@@ -1,0 +1,23 @@
+{
+  "schema_version": "1.0",
+  "workflow_id": "golden-qgis-coordinate-audit",
+  "evidence_tier": "T1",
+  "status": "verified",
+  "fixture": "fixtures/points.geojson",
+  "expected_artifacts": [
+    "expected/audited_points.geojson",
+    "expected/summary.json"
+  ],
+  "assertions": [
+    "deterministic artifact bytes match committed expected output",
+    "output artifact and summary are reread after writing",
+    "malformed geometry and invalid coordinates are rejected",
+    "missing CRS and pre-existing output directory fail safely"
+  ],
+  "native_qgis": {
+    "T2": "NOT RUN",
+    "T3": "NOT RUN",
+    "T4": "NOT RUN"
+  },
+  "limitation": "This committed report describes the offline acceptance contract. Fresh command results are required for a current claim; native QGIS evidence must come from native_qgis_smoke.py in a named QGIS runtime."
+}

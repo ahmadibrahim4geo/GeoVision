@@ -92,13 +92,17 @@ object ShapefileImporter {
         }
     }
 
-    /** فك ضغط ZIP إلى مجلد */
+    /** فك ضغط ZIP إلى مجلد مع الحماية من ثغرة Zip Slip */
     private fun extractZip(stream: InputStream, targetDir: File) {
+        val canonicalTarget = targetDir.canonicalPath
         val zis = ZipInputStream(stream)
         var entry = zis.nextEntry
         while (entry != null) {
             if (!entry.isDirectory) {
                 val outFile = File(targetDir, entry.name)
+                if (!outFile.canonicalPath.startsWith(canonicalTarget + File.separator)) {
+                    throw SecurityException("محاولة اختراق مسار غير مسموح بها في ملف ZIP: ${entry.name}")
+                }
                 outFile.parentFile?.mkdirs()
                 outFile.outputStream().use { zis.copyTo(it) }
             }
@@ -195,7 +199,7 @@ object ShapefileImporter {
                     GeoJsonParser.ParseResult(
                         features = transformed,
                         fileName = baseName,
-                        crs = if (crsInfo.isWgs84) "EPSG:4326 (WGS84)" else "محوّل من $crsStr",
+                        crs = "EPSG:4326 (محوّل من $crsStr)",
                         extent = computeExtent(transformed),
                         parseTimeMs = elapsedMs
                     )
@@ -215,7 +219,7 @@ object ShapefileImporter {
 
     /** تحويل إحداثيات جميع المعالم من النظام الإحداثي المكتشف إلى WGS84 */
     private fun transformFeatures(features: List<FeatureRow>, crsInfo: CrsTransform.CrsInfo): List<FeatureRow> {
-        if (crsInfo.isWgs84 || crsInfo.epsg == null) return features
+        if (crsInfo.epsg == null) return features
         return features.map { feature ->
             val newCoords = transformCoordinates(feature.geometryCoordinates, crsInfo)
             feature.copy(geometryCoordinates = newCoords)

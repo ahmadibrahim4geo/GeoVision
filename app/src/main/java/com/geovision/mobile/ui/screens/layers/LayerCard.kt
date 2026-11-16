@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.FeaturedPlayList
+import androidx.compose.material.icons.automirrored.filled.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -24,6 +25,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -45,6 +48,8 @@ fun fileTypeIcon(type: FileType) = when (type) {
     FileType.PHOTO -> Icons.Default.PhotoCamera
     FileType.GEOPACKAGE -> Icons.Default.Storage
     FileType.GEODATABASE -> Icons.Default.FolderOpen
+    FileType.EXCEL -> Icons.Default.TableChart
+    FileType.CSV -> Icons.Default.TableChart
 }
 
 /** أيقونة صغيرة تُظهر نوع الهندسة (Point/Line/Polygon) بجوار اسم الطبقة.
@@ -53,7 +58,7 @@ fun fileTypeIcon(type: FileType) = when (type) {
  *  @return ImageVector للأيقونة المناسبة، أو null إن كان النوع غير معروف */
 fun geomTypeIcon(type: String?) = when (type) {
     "Point" -> Icons.Default.FmdGood
-    "Line" -> Icons.Default.ShowChart
+    "Line" -> Icons.AutoMirrored.Filled.ShowChart
     "Polygon" -> Icons.Default.CropSquare
     else -> null
 }
@@ -66,6 +71,8 @@ fun fileTypeBgColor(type: FileType, scheme: ColorScheme) = when (type) {
     FileType.PHOTO -> scheme.outline
     FileType.GEOPACKAGE -> scheme.primary
     FileType.GEODATABASE -> scheme.tertiary
+    FileType.EXCEL -> scheme.primary
+    FileType.CSV -> scheme.secondary
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
@@ -77,16 +84,21 @@ fun LayerCard(
     onToggleVisibility: (String) -> Unit,
     onTransparencyChanged: (String, Float) -> Unit,
     onDelete: (String) -> Unit,
+    modifier: Modifier = Modifier,
+    onOpenProperties: () -> Unit = {},
     onReloadLayer: (String) -> Unit = {},
     onZoomToLayer: (String) -> Unit = {},
+    onRename: (String) -> Unit = {},
     onColorChange: (String, Color) -> Unit = { _, _ -> },
-                    onPointSizeChanged: (String, Float) -> Unit = { _, _ -> },
-                    onLineWidthChanged: (String, Float) -> Unit = { _, _ -> },
+    onPointSizeChanged: (String, Float) -> Unit = { _, _ -> },
+    onLineWidthChanged: (String, Float) -> Unit = { _, _ -> },
+    onMoveUp: (String) -> Unit = {},
+    onMoveDown: (String) -> Unit = {},
     onDragStart: () -> Unit = {},
     onDrag: (Float) -> Unit = {},
-    onDragEnd: () -> Unit = {},
-    modifier: Modifier = Modifier
+    onDragEnd: () -> Unit = {}
 ) {
+    val haptic = LocalHapticFeedback.current
     var expanded by remember { mutableStateOf(false) }
     var localTransparency by remember(layer.id) { mutableFloatStateOf(layer.transparency) }
     var isTransparencyDragging by remember { mutableStateOf(false) }
@@ -148,8 +160,11 @@ fun LayerCard(
                     Spacer(Modifier.width(10.dp))
 
                     Column(Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            Text(layer.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.W700, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface)
+                        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                            Text(layer.name, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.W700, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.weight(1f, fill = false))
+                            IconButton(onClick = { onRename(layer.id) }, modifier = Modifier.size(20.dp)) {
+                                Icon(Icons.Default.Edit, "إعادة تسمية", Modifier.size(14.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f))
+                            }
                             val gIcon = geomTypeIcon(layer.geomType)
                             if (gIcon != null) {
                                 Icon(gIcon, layer.geomType, Modifier.size(16.dp), tint = typeColor.copy(alpha = 0.7f))
@@ -162,6 +177,12 @@ fun LayerCard(
                         }
                     }
 
+                    IconButton(onClick = onOpenProperties, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.Palette, "خصائص وتنسيق الطبقة", Modifier.size(20.dp), tint = MaterialTheme.colorScheme.secondary)
+                    }
+                    IconButton(onClick = onOpenDetails, modifier = Modifier.size(32.dp)) {
+                        Icon(Icons.Default.TableChart, "عرض جدول البيانات", Modifier.size(20.dp), tint = MaterialTheme.colorScheme.primary)
+                    }
                     IconButton(onClick = { onReloadLayer(layer.id) }, modifier = Modifier.size(32.dp), enabled = layer.progressPercent >= 1f || layer.progressPercent == 0f) {
                         Icon(Icons.Default.Refresh, stringResource(R.string.refresh), Modifier.size(20.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
@@ -177,15 +198,18 @@ fun LayerCard(
                 }
 
                 Row(Modifier.fillMaxWidth().padding(start = 12.dp, end = 12.dp, bottom = if (expanded) 0.dp else 8.dp), verticalAlignment = Alignment.CenterVertically) {
-                    if (geometrySummary != null) {
-                        Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Row(Modifier.weight(1f), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                        Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)) {
+                            Text("🔍 z${layer.minZoom}-z${layer.maxZoom}", modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSecondaryContainer, fontWeight = FontWeight.W600)
+                        }
+                        if (geometrySummary != null) {
                             geometrySummary.split(" · ").forEach { item ->
                                 Surface(shape = RoundedCornerShape(6.dp), color = typeColor.copy(alpha = 0.08f)) {
                                     Text(item, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp), style = MaterialTheme.typography.labelSmall, color = typeColor.copy(alpha = 0.8f), fontWeight = FontWeight.W600)
                                 }
                             }
                         }
-                    } else { Spacer(Modifier.weight(1f)) }
+                    }
 
                     if (layer.progressPercent < 1f) {
                         CircularProgressIndicator(progress = { layer.progressPercent }, modifier = Modifier.size(18.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.tertiary, trackColor = MaterialTheme.colorScheme.surfaceContainerHighest)
@@ -260,7 +284,23 @@ fun LayerCard(
                         Spacer(Modifier.height(12.dp))
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.2f))
                         Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text("ترتيب الطبقة في الرسم:", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.W600, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                FilledTonalIconButton(onClick = { onMoveUp(layer.id) }, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.KeyboardArrowUp, "تحريك لأعلى", Modifier.size(18.dp))
+                                }
+                                FilledTonalIconButton(onClick = { onMoveDown(layer.id) }, modifier = Modifier.size(32.dp)) {
+                                    Icon(Icons.Default.KeyboardArrowDown, "تحريك لأسفل", Modifier.size(18.dp))
+                                }
+                            }
+                        }
 
+                        Spacer(Modifier.height(8.dp))
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             OutlinedButton(onClick = onOpenDetails, shape = RoundedCornerShape(12.dp), modifier = Modifier.weight(1f).height(38.dp),
                                 colors = ButtonDefaults.outlinedButtonColors(contentColor = MaterialTheme.colorScheme.onSurfaceVariant)) {

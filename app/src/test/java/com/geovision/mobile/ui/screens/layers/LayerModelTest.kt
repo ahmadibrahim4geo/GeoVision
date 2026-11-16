@@ -80,11 +80,13 @@ class LayerModelTest {
         assertEquals("Photo", FileType.PHOTO.label)
         assertEquals("GeoPackage", FileType.GEOPACKAGE.label)
         assertEquals("GeoDatabase", FileType.GEODATABASE.label)
+        assertEquals("Excel (.xlsx)", FileType.EXCEL.label)
+        assertEquals("CSV / Coordinates", FileType.CSV.label)
     }
 
     @Test
     fun fileType_values() {
-        assertEquals(7, FileType.entries.size)
+        assertEquals(9, FileType.entries.size)
     }
 
     @Test

@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "note": "Fictional tool advertisements only, NOT actual server discovery.",
+  "tools": [
+    {
+      "tool_id": "example.github.read",
+      "protocol": "mcp",
+      "available": true,
+      "capabilities": [
+        "github.repository.read"
+      ],
+      "side_effects": [
+        "read"
+      ]
+    },
+    {
+      "tool_id": "example.ui.native",
+      "protocol": "native",
+      "available": true,
+      "capabilities": [
+        "desktop.ui.test"
+      ],
+      "side_effects": [
+        "execute"
+      ]
+    },
+    {
+      "tool_id": "example.ui.offline",
+      "protocol": "mcp",
+      "available": false,
+      "capabilities": [
+        "desktop.ui.test"
+      ],
+      "side_effects": [
+        "execute"
+      ]
+    }
+  ]
+}

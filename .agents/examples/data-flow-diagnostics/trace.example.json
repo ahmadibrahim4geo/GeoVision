@@ -1,0 +1,72 @@
+{
+  "schema_version": "1.0",
+  "trace_id": "TRACE-DEMO-001",
+  "command_id": "import.kml",
+  "task_id": "T2",
+  "dataset_id": "synthetic-two-placemarks",
+  "operation": "lossless",
+  "required_phases": [
+    "IMPORT",
+    "PARSE",
+    "ENGINE",
+    "RENDER",
+    "SAVE",
+    "EXPORT",
+    "READBACK"
+  ],
+  "events": [
+    {
+      "sequence": 1,
+      "phase": "IMPORT",
+      "status": "PASS",
+      "feature_count": 2,
+      "crs": "EPSG:4326",
+      "duration_ms": 5
+    },
+    {
+      "sequence": 2,
+      "phase": "PARSE",
+      "status": "PASS",
+      "feature_count": 2,
+      "crs": "EPSG:4326",
+      "duration_ms": 8
+    },
+    {
+      "sequence": 3,
+      "phase": "ENGINE",
+      "status": "PASS",
+      "feature_count": 2,
+      "crs": "EPSG:4326",
+      "duration_ms": 12
+    },
+    {
+      "sequence": 4,
+      "phase": "RENDER",
+      "status": "PASS",
+      "duration_ms": 14
+    },
+    {
+      "sequence": 5,
+      "phase": "SAVE",
+      "status": "PASS",
+      "artifact_id": "synthetic-project",
+      "duration_ms": 3
+    },
+    {
+      "sequence": 6,
+      "phase": "EXPORT",
+      "status": "PASS",
+      "artifact_id": "synthetic-export",
+      "duration_ms": 3
+    },
+    {
+      "sequence": 7,
+      "phase": "READBACK",
+      "status": "PASS",
+      "feature_count": 2,
+      "crs": "EPSG:4326",
+      "artifact_id": "synthetic-export",
+      "duration_ms": 4
+    }
+  ]
+}

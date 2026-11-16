@@ -27,17 +27,10 @@ build/
 **/.gradle/
 .idea/
 .vscode/
-local.properties
-*.apk
-*.aab
 
-# Build and local files
-build/
-**/build/
-.gradle/
-**/.gradle/
-.idea/
-.vscode/
-local.properties
-*.apk
-*.aab
+# Local junctions and module build artifacts
+skills/
+desktop.ini
+geovision_flutter/.android/
+geovision_flutter/.ios/
+geovision_flutter/.dart_tool/

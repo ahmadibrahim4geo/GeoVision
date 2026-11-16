@@ -73,6 +73,39 @@ object GpkgReader {
         }
     }
 
+    /**
+     * قراءة كل طبقة محددة على حدة من GeoPackage في تمريرة واحدة (نسخ وفتح قاعدة البيانات مرة واحدة فقط).
+     * @return قائمة أزواج (اسم الطبقة, LayerDetailInfo)
+     */
+    suspend fun readEachSelected(
+        context: Context, uri: Uri, fileName: String, selectedTableNames: List<String>
+    ): List<Pair<String, LayerDetailInfo>> = withContext(Dispatchers.IO) {
+        var tmpPath: String? = null
+        try {
+            coroutineContext.ensureActive()
+            val pair = openDb(context, uri)
+            val db = pair.first ?: return@withContext emptyList()
+            tmpPath = pair.second
+            db.use { dbh ->
+                coroutineContext.ensureActive()
+                val allLayers = listLayers(dbh)
+                val layers = allLayers.filter { it.tableName in selectedTableNames }
+                val results = mutableListOf<Pair<String, LayerDetailInfo>>()
+                for (layer in layers) {
+                    coroutineContext.ensureActive()
+                    val detail = readSelectedLayers(dbh, listOf(layer), "$fileName / ${layer.tableName}", uri.toString())
+                    results.add(layer.tableName to detail)
+                }
+                results
+            }
+        } catch (e: Exception) {
+            AppLogger.e(AppLogger.Tags.PARSER, "Failed to read each selected GeoPackage layer: ${e.message}", e)
+            emptyList()
+        } finally {
+            if (tmpPath != null) try { File(tmpPath).delete() } catch (_: Exception) {}
+        }
+    }
+
     private suspend fun readSelectedLayers(
         dbh: SQLiteDatabase, layers: List<GpkgLayer>, fileName: String, filePath: String
     ): LayerDetailInfo {

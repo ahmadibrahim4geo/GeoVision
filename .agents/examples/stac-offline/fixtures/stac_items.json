@@ -1,0 +1,67 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "synthetic-clear-2026-01-01",
+      "bbox": [
+        30,
+        25,
+        32,
+        27
+      ],
+      "properties": {
+        "datetime": "2026-01-01T10:00:00Z",
+        "eo:cloud_cover": 3
+      },
+      "assets": {
+        "B04": {
+          "href": "https://example.invalid/nonexistent-red.tif",
+          "type": "image/tiff; application=geotiff"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "synthetic-cloudy-2026-01-03",
+      "bbox": [
+        30,
+        25,
+        32,
+        27
+      ],
+      "properties": {
+        "datetime": "2026-01-03T10:00:00Z",
+        "eo:cloud_cover": 83
+      },
+      "assets": {
+        "thumbnail": {
+          "href": "https://example.invalid/nonexistent-thumb.png",
+          "type": "image/png"
+        }
+      }
+    },
+    {
+      "type": "Feature",
+      "stac_version": "1.0.0",
+      "id": "synthetic-outside-2026-01-05",
+      "bbox": [
+        10,
+        10,
+        12,
+        12
+      ],
+      "properties": {
+        "datetime": "2026-01-05T10:00:00Z",
+        "eo:cloud_cover": 0
+      },
+      "assets": {
+        "data": {
+          "href": "https://example.invalid/nonexistent-data.tif"
+        }
+      }
+    }
+  ]
+}

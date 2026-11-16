@@ -873,7 +873,7 @@ private fun MiniMap(
                     val savedSource = tileSources.find { it.key == prefs.defaultMapType }?.source ?: TileSourceFactory.MAPNIK
                     try { setTileSource(savedSource) } catch (_: Exception) { try { setTileSource(TileSourceFactory.MAPNIK) } catch (_: Exception) {} }
                     setMultiTouchControls(true)
-                    setBuiltInZoomControls(false)
+                    zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
                     setHorizontalMapRepetitionEnabled(false)
                     setVerticalMapRepetitionEnabled(false)
                     minZoomLevel = 2.0

@@ -1,0 +1,490 @@
+{
+  "schema_version": "1.0",
+  "last_reviewed": "2026-10-25",
+  "purpose": "Reference-only GIS style and icon catalog for general GIS workflows; KML/KMZ is a specialized consumer. User-owned or source-authored imported KMZ styling is authoritative. External assets are not bundled or silently recolored.",
+  "sources": [
+    {
+      "id": "ahmad-arcmap-styles",
+      "name": "ArcMap Style Collection",
+      "url": "https://github.com/ahmadibrahim4geo/ArcMap-Style-Collection",
+      "kind": "mixed-symbol-library",
+      "platforms": [
+        "ArcMap",
+        "ArcGIS Pro",
+        "QGIS source conversions"
+      ],
+      "assets": [
+        "style",
+        "stylx",
+        "lyrx",
+        "font",
+        "palette"
+      ],
+      "license": "Mixed upstream terms; organization/translation code MIT only",
+      "license_status": "unverified-per-item",
+      "redistribution": "do-not-repackage",
+      "cost": "free-download-with-license-review",
+      "notes": "Primary reference; inspect Esri, USGS, BGS, DGGS and font licenses individually; QGIS source conversions not a warranty of rendering fidelity"
+    },
+    {
+      "id": "qgis-resources",
+      "name": "QGIS Resources Sharing Collections",
+      "url": "https://github.com/qgis/QGIS-Resources",
+      "kind": "community-symbol-library",
+      "platforms": [
+        "QGIS"
+      ],
+      "assets": [
+        "svg",
+        "qml",
+        "xml",
+        "color-ramp"
+      ],
+      "license": "Varies by collection and individual asset",
+      "license_status": "unverified-per-item",
+      "redistribution": "review-per-asset",
+      "cost": "free-download",
+      "notes": "Official catalog/index for community collections. Consult exact resource metadata"
+    },
+    {
+      "id": "qgis-resource-sharing-plugin",
+      "name": "QGIS Resource Sharing Plugin",
+      "url": "https://github.com/QGIS-Contribution/QGIS-ResourceSharing",
+      "kind": "open-source-integration",
+      "platforms": [
+        "QGIS"
+      ],
+      "assets": [
+        "symbol-management",
+        "style-discovery"
+      ],
+      "license": "AGPL-3.0",
+      "license_status": "upstream-declared",
+      "redistribution": "follow-AGPL-3.0-for-code",
+      "cost": "open-source",
+      "notes": "Plugin code license is distinct from styles downloaded through it"
+    },
+    {
+      "id": "ordnance-geodataviz",
+      "name": "OS GeoDataViz Toolkit",
+      "url": "https://github.com/OrdnanceSurvey/GeoDataViz-Toolkit",
+      "kind": "design-and-symbol-guide",
+      "platforms": [
+        "ArcGIS Pro",
+        "QGIS",
+        "general"
+      ],
+      "assets": [
+        "symbol",
+        "color",
+        "design-principles"
+      ],
+      "license": "Open Government Licence v3.0",
+      "license_status": "upstream-declared",
+      "redistribution": "attribution-required",
+      "cost": "open-data-license",
+      "notes": "Contains CVD palettes, principles and examples"
+    },
+    {
+      "id": "cartocolor",
+      "name": "CARTOColors",
+      "url": "https://github.com/CartoDB/CartoColor",
+      "kind": "color-palette",
+      "platforms": [
+        "Python",
+        "JavaScript",
+        "web GIS",
+        "general"
+      ],
+      "assets": [
+        "sequential",
+        "diverging",
+        "qualitative"
+      ],
+      "license": "CC-BY-4.0",
+      "license_status": "upstream-declared",
+      "redistribution": "attribution-required",
+      "cost": "free-with-attribution",
+      "notes": "Do not transfer license to the separately included ColorBrewer definitions without checking their terms"
+    },
+    {
+      "id": "scientific-colour-maps",
+      "name": "Scientific Colour Maps",
+      "url": "https://www.fabiocrameri.ch/colourmaps/",
+      "kind": "scientific-palette",
+      "platforms": [
+        "ArcGIS Pro",
+        "QGIS",
+        "Python",
+        "web GIS"
+      ],
+      "assets": [
+        "perceptual-colormap",
+        "raster-ramp"
+      ],
+      "license": "Check exact downloaded scientific map version and license",
+      "license_status": "not-independently-verified",
+      "redistribution": "review-per-asset",
+      "cost": "free-to-access",
+      "notes": "Prefer for perceptually uniform scientific surface rendering and color-vision accessibility"
+    },
+    {
+      "id": "cmocean",
+      "name": "cmocean",
+      "url": "https://github.com/matplotlib/cmocean",
+      "kind": "scientific-palette",
+      "platforms": [
+        "Python",
+        "QGIS",
+        "ArcGIS",
+        "web GIS"
+      ],
+      "assets": [
+        "oceanography-colormap",
+        "raster-ramp"
+      ],
+      "license": "MIT (repository code; validate downloaded datasets)",
+      "license_status": "upstream-declared",
+      "redistribution": "retain-license-and-attribution",
+      "cost": "open-source",
+      "notes": "Scientific oceanographic palettes; port the actual stops only when license allows"
+    },
+    {
+      "id": "colorbrewer",
+      "name": "ColorBrewer",
+      "url": "https://colorbrewer2.org/",
+      "kind": "color-palette",
+      "platforms": [
+        "all"
+      ],
+      "assets": [
+        "qualitative",
+        "sequential",
+        "diverging"
+      ],
+      "license": "Attribution and redistribution conditions; verify asset-specific terms",
+      "license_status": "review-required",
+      "redistribution": "review-per-asset",
+      "cost": "free-public-reference",
+      "notes": "Class-count limits and color-vision accessibility checks"
+    },
+    {
+      "id": "maplibre-spec",
+      "name": "MapLibre Style Specification",
+      "url": "https://maplibre.org/maplibre-style-spec/layers/",
+      "kind": "renderer-specification",
+      "platforms": [
+        "MapLibre GL JS",
+        "MapLibre Native"
+      ],
+      "assets": [
+        "circle",
+        "line",
+        "fill",
+        "raster",
+        "hillshade",
+        "color-relief"
+      ],
+      "license": "Documentation/source terms govern reuse; link reference only",
+      "license_status": "documentation-reference",
+      "redistribution": "link-only",
+      "cost": "free-reference",
+      "notes": "Use paint/layout expressions and validate supported SDK property"
+    },
+    {
+      "id": "qgis-source",
+      "name": "QGIS core source and Symbology APIs",
+      "url": "https://github.com/qgis/QGIS",
+      "kind": "renderer-implementation",
+      "platforms": [
+        "QGIS"
+      ],
+      "assets": [
+        "QgsRenderer",
+        "QgsStyle",
+        "raster-renderer"
+      ],
+      "license": "GPL-2.0-or-later per upstream code sections",
+      "license_status": "upstream-declared",
+      "redistribution": "follow-upstream-license",
+      "cost": "open-source",
+      "notes": "Use public APIs, not private implementation copies"
+    },
+    {
+      "id": "pinhead-map-icons",
+      "name": "Pinhead Map Icons",
+      "url": "https://github.com/waysidemapping/pinhead",
+      "kind": "map-marker-icon-library",
+      "platforms": [
+        "QGIS",
+        "ArcGIS Pro",
+        "Cesium",
+        "Web GIS",
+        "KML/KMZ authoring"
+      ],
+      "assets": [
+        "svg",
+        "point-of-interest",
+        "icons"
+      ],
+      "license": "CC0-1.0 as declared by upstream",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/waysidemapping/pinhead",
+      "redistribution": "CC0; check trademark/third-party marks when relevant",
+      "cost": "public-domain",
+      "kmz_use": "new-feature-only: PNG export with embedded relative href",
+      "recommended_for_new_kmz": true,
+      "notes": "Primary open map POI icon source; never replace styles/icons of imported KMZ."
+    },
+    {
+      "id": "mapbox-maki-icons",
+      "name": "Mapbox Maki",
+      "url": "https://github.com/mapbox/maki",
+      "kind": "map-marker-icon-library",
+      "platforms": [
+        "QGIS",
+        "Cesium PinBuilder",
+        "Web GIS",
+        "KML/KMZ authoring"
+      ],
+      "assets": [
+        "svg",
+        "poi-icons"
+      ],
+      "license": "CC0-1.0",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/mapbox/maki/blob/main/LICENSE.txt",
+      "redistribution": "CC0",
+      "cost": "public-domain",
+      "kmz_use": "new-feature-only: rasterize SVG to PNG + package inside KMZ",
+      "recommended_for_new_kmz": true,
+      "notes": "Maki identifier is supported by Cesium PinBuilder for generated *new* placemarks."
+    },
+    {
+      "id": "temaki-map-icons",
+      "name": "Temaki",
+      "url": "https://github.com/rapideditor/temaki",
+      "kind": "map-marker-icon-library",
+      "platforms": [
+        "QGIS",
+        "Web GIS",
+        "KML/KMZ authoring"
+      ],
+      "assets": [
+        "svg",
+        "specialized-poi-icons"
+      ],
+      "license": "Public-domain dedication / CC0-style",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/rapideditor/temaki",
+      "redistribution": "public-domain dedication where legally valid; review local rights",
+      "cost": "public-domain",
+      "kmz_use": "new-feature-only: transparent PNG from checked SVG",
+      "recommended_for_new_kmz": true,
+      "notes": "Maki companion with more specialized POI categories; check pinned icon IDs/version."
+    },
+    {
+      "id": "nicolas-mollet-map-icons",
+      "name": "Map Icons Collection (Nicolas Mollet)",
+      "url": "https://mapicons.mapsmarker.com/",
+      "kind": "map-marker-icon-library",
+      "platforms": [
+        "Google Earth-style maps",
+        "ArcGIS",
+        "QGIS",
+        "KML/KMZ authoring"
+      ],
+      "assets": [
+        "svg",
+        "png",
+        "placemark-icons",
+        "custom-color"
+      ],
+      "license": "CC BY-SA 3.0",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://mapicons.mapsmarker.com/about/license/",
+      "redistribution": "credit source; ShareAlike for adapted icons; evaluate export obligations",
+      "cost": "free-with-attribution-and-sharealike",
+      "kmz_use": "new-feature-only: embed asset and preserve attribution obligations",
+      "recommended_for_new_kmz": false,
+      "notes": "Since 2026-10-14, site offers customizable SVG and PNG; verify per-icon derivative/trademark conditions. CC BY-SA 3.0 credit/adapted-artwork ShareAlike; do not hotlink images. For new/user-edited features only; never overwrite imported KMZ icons.",
+      "no_hotlinking": true
+    },
+    {
+      "id": "scott-map-icons",
+      "name": "Scott de Jonge Map Icons",
+      "url": "https://github.com/scottdejonge/map-icons",
+      "kind": "legacy-map-marker-library",
+      "platforms": [
+        "Google Maps JS",
+        "Web GIS",
+        "KML/KMZ via conversion"
+      ],
+      "assets": [
+        "svg",
+        "icon-font",
+        "marker-code"
+      ],
+      "license": "Mixed: MIT code; SIL OFL 1.1 fonts; CC BY 3.0 docs",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/scottdejonge/map-icons",
+      "redistribution": "respect code/font/doc licenses individually",
+      "cost": "free-with-asset-license-conditions",
+      "kmz_use": "new-feature-only: rasterized export after font license review",
+      "recommended_for_new_kmz": false,
+      "notes": "Upstream deprecates project; HTML/CSS icons cannot be used natively as KML IconStyle."
+    },
+    {
+      "id": "leaflet-extra-markers",
+      "name": "Leaflet ExtraMarkers",
+      "url": "https://github.com/coryasilva/Leaflet.ExtraMarkers",
+      "kind": "marker-generator-plugin",
+      "platforms": [
+        "Leaflet",
+        "Web GIS",
+        "KML/KMZ via conversion"
+      ],
+      "assets": [
+        "javascript-plugin",
+        "svg-markers",
+        "icon-font-dependency"
+      ],
+      "license": "MIT plugin; external icon font licenses separate",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/coryasilva/Leaflet.ExtraMarkers/blob/master/LICENSE",
+      "redistribution": "retain MIT notice; separately review font/icon use",
+      "cost": "free-plugin-with-external-dependencies",
+      "kmz_use": "new-feature-only: export rendered pin as PNG then embed",
+      "recommended_for_new_kmz": false,
+      "notes": "This is a Leaflet renderer, not native KMZ import/export support."
+    },
+    {
+      "id": "google-material-symbols",
+      "name": "Google Material Symbols",
+      "url": "https://github.com/google/material-design-icons",
+      "kind": "general-purpose-icon-library",
+      "platforms": [
+        "Web GIS",
+        "ArcGIS",
+        "QGIS",
+        "KML/KMZ authoring"
+      ],
+      "assets": [
+        "svg",
+        "png",
+        "icon-font"
+      ],
+      "license": "Apache-2.0",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://developers.google.com/fonts/docs/material_symbols",
+      "redistribution": "Apache-2.0 conditions for included assets",
+      "cost": "open-source",
+      "kmz_use": "new-feature-only: SVG/PNG icon exported as PNG and embedded",
+      "recommended_for_new_kmz": true,
+      "notes": "Google's open Material Symbols are NOT the same as proprietary Google Earth pushpins."
+    },
+    {
+      "id": "leaflet-awesome-markers",
+      "name": "Leaflet AwesomeMarkers",
+      "url": "https://github.com/lennardv2/Leaflet.awesome-markers",
+      "kind": "marker-generator-plugin",
+      "platforms": [
+        "Leaflet",
+        "Web GIS",
+        "KML/KMZ via conversion"
+      ],
+      "assets": [
+        "javascript-plugin",
+        "marker-color",
+        "font-dependency"
+      ],
+      "license": "MIT plugin/colored markers; dependency licenses vary",
+      "license_status": "upstream-declared",
+      "license_evidence_url": "https://github.com/lennardv2/Leaflet.awesome-markers",
+      "redistribution": "MIT notice for plugin; check dependent fonts",
+      "cost": "free-plugin-with-external-dependencies",
+      "kmz_use": "new-feature-only: export generated pin to PNG + embed",
+      "recommended_for_new_kmz": false,
+      "notes": "Older Leaflet plugin and font dependencies: do not assume interoperability with Cesium/KML."
+    },
+    {
+      "id": "cesium-pinbuilder",
+      "name": "CesiumJS PinBuilder",
+      "url": "https://cesium.com/learn/cesiumjs/ref-doc/PinBuilder.html",
+      "kind": "point-symbol-generator",
+      "platforms": [
+        "CesiumJS",
+        "ZEarth-like globe",
+        "KML/KMZ authoring via export"
+      ],
+      "assets": [
+        "runtime-pin-generator",
+        "maki-icons",
+        "canvas-png"
+      ],
+      "license": "CesiumJS engine license; icon inputs independently licensed",
+      "license_status": "renderer-documentation",
+      "license_evidence_url": "https://github.com/CesiumGS/cesium/blob/main/LICENSE.md",
+      "redistribution": "check Cesium version and input icon rights",
+      "cost": "open-source-engine-runtime",
+      "kmz_use": "only for new/user-restyled features; PNG export and pack with relative href",
+      "recommended_for_new_kmz": true,
+      "notes": "Canvas pin builder is NOT an importer and must never override existing KML Style/StyleMap."
+    },
+    {
+      "id": "streamline-google-earth-placemarks",
+      "name": "Streamline — Google Earth Placemark search",
+      "url": "https://www.streamlinehq.com/icons/tag/google-earth-placemark",
+      "kind": "mixed-license-icon-discovery",
+      "platforms": [
+        "General GIS design",
+        "Desktop UI design",
+        "Web GIS",
+        "KML/KMZ new feature (approved per-asset only)"
+      ],
+      "assets": [
+        "svg",
+        "png",
+        "icon-library-search"
+      ],
+      "license": "Mixed: certain named Open Source sets CC BY 4.0; other free sets are restricted; premium requires separate license",
+      "license_status": "review-per-exact-set-and-asset",
+      "license_evidence_url": "https://help.streamlinehq.com/en/articles/5354376-streamline-free-license",
+      "redistribution": "DO NOT include default free/premium Streamline assets in selectable/reusable/icon-download manager; select explicitly licensed open-source sets and review exact terms/attribution",
+      "cost": "mixed-open-source-restricted-free-premium",
+      "kmz_use": "new-feature-only if selected source set independently permits bundling/reuse; otherwise external design inspiration only",
+      "recommended_for_new_kmz": false,
+      "icon_manager_role": "discovery-only-by-default",
+      "catalog_origin": "user-requested-three-sites",
+      "notes": "Search/category page aggregates unrelated families with different licensing; generic 'free' Streamline asset license expressly bars use as an in-app selectable, customizable or downloadable asset library. Open Source sets need own CC BY 4.0 attribution and verification; no copying gallery wholesale."
+    },
+    {
+      "id": "mapular-map-icon-creator",
+      "name": "Mapular — Map Icon Creator",
+      "url": "https://mapular.com/tools/map-icon-creator",
+      "kind": "map-marker-generator-reference",
+      "platforms": [
+        "General GIS design",
+        "Web GIS",
+        "Desktop GIS",
+        "KML/KMZ newly authored placemarks"
+      ],
+      "assets": [
+        "generated-svg",
+        "generated-png",
+        "pin-generator",
+        "icon-upload"
+      ],
+      "license": "Website says user-created outputs may be used commercially; original site/app source code is NOT offered under an identified open-source license",
+      "license_status": "output-use-declared-source-code-not-licensed",
+      "license_evidence_url": "https://mapular.com/tools/map-icon-creator",
+      "redistribution": "Use own independently implemented generator; do not copy site source/code/interface artwork; uploaded third-party logos retain their original rights",
+      "cost": "free-online-tool",
+      "kmz_use": "new-feature-only: generated PNG may be packaged inside user-authored KMZ; existing imported KML icon stays unchanged",
+      "recommended_for_new_kmz": true,
+      "icon_manager_role": "design-reference-no-source-code-reuse",
+      "catalog_origin": "user-requested-three-sites",
+      "notes": "Four pin shapes, 80+ selectable Lucide icons, color/border/logo and PNG/SVG exports; source says browser-local. Use as functional inspiration for independently implemented icon manager; no licensing assumption on platform code."
+    }
+  ]
+}

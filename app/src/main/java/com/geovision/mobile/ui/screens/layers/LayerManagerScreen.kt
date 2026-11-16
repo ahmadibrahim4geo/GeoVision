@@ -6,11 +6,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -37,8 +39,17 @@ private val GIS_DOCUMENT_MIME_TYPES = arrayOf(
     "application/octet-stream",
     "application/geo+json",
     "application/vnd.google-earth.kml+xml",
+    "application/vnd.google-earth.kmz",
     "application/x-qgis",
     "application/geopackage+sqlite3",
+    "application/zip",
+    "application/x-zip-compressed",
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    "application/vnd.ms-excel",
+    "text/csv",
+    "text/comma-separated-values",
+    "text/tab-separated-values",
+    "text/plain",
     "image/jpeg",
     "image/png",
     "image/webp",
@@ -80,6 +91,20 @@ fun LayerManagerScreen(
     var pendingGdbName by remember { mutableStateOf("") }
     var gdbTableNames by remember { mutableStateOf<List<String>>(emptyList()) }
     var gdbTableInfos by remember { mutableStateOf<List<GdbParser.GdbTableInfo>>(emptyList()) }
+
+    // حالات مركز الاستيراد الموحد
+    var showImportCenter by remember { mutableStateOf(false) }
+
+    // حالات Coordinate Mapping Dialog للإكسيل و CSV
+    var showCoordinateMappingDialog by remember { mutableStateOf(false) }
+    var pendingSpreadsheetUri by remember { mutableStateOf<Uri?>(null) }
+    var pendingSpreadsheetName by remember { mutableStateOf("") }
+    var pendingSpreadsheetIsExcel by remember { mutableStateOf(false) }
+    var spreadsheetInspection by remember { mutableStateOf<com.geovision.mobile.data.ExcelParser.TableInspection?>(null) }
+
+    // حالات Layer Properties & Styling Dialog
+    var showLayerPropertiesDialog by remember { mutableStateOf(false) }
+    var selectedLayerForProperties by remember { mutableStateOf<Layer?>(null) }
 
     val gdbFolderPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
@@ -145,11 +170,24 @@ fun LayerManagerScreen(
 
         for (uri in uris) {
             val fileName = viewModel.getFileName(context, uri) ?: uri.lastPathSegment?.substringAfterLast('/') ?: ""
+            val nameLower = fileName.lowercase()
             val fileType = viewModel.inferFileType(uri, context)
             if (fileType != null) {
-                if (fileType == FileType.SHAPEFILE) {
-                    val nameLower = fileName.lowercase()
-
+                if (fileType == FileType.GEODATABASE) {
+                    pendingGdbUri = uri
+                    pendingGdbName = fileName
+                    isLoadingLayers = true
+                    scope.launch {
+                        val tables = GdbParser.listTableNames(context, uri, fileName)
+                        gdbTableInfos = tables
+                        gdbTableNames = tables.map { it.fileName }
+                        isLoadingLayers = false
+                        viewModel.scanImportReport(context, uri, fileName)
+                        if (tables.isNotEmpty()) showGdbSelection = true
+                        else snackbarHostState.showSnackbar("لم يتم العثور على جداول في $fileName")
+                    }
+                    added++; continue
+                } else if (fileType == FileType.SHAPEFILE) {
                     // ZIP مباشرة دون تجميع
                     if (nameLower.endsWith(".zip")) {
                         viewModel.scanImportReport(context, uri, fileName)
@@ -194,6 +232,23 @@ fun LayerManagerScreen(
                         else snackbarHostState.showSnackbar("لم يتم العثور على طبقات في $fileName")
                     }
                     added++
+                } else if (fileType == FileType.EXCEL || fileType == FileType.CSV) {
+                    val isExcel = fileType == FileType.EXCEL || nameLower.endsWith(".xlsx") || nameLower.endsWith(".xls")
+                    pendingSpreadsheetUri = uri
+                    pendingSpreadsheetName = fileName
+                    pendingSpreadsheetIsExcel = isExcel
+                    isLoadingLayers = true
+                    scope.launch {
+                        val inspection = viewModel.inspectSpreadsheet(context, uri, isExcel)
+                        isLoadingLayers = false
+                        if (inspection.headers.isNotEmpty()) {
+                            spreadsheetInspection = inspection
+                            showCoordinateMappingDialog = true
+                        } else {
+                            snackbarHostState.showSnackbar("تعذّر قراءة أعمدة ملف $fileName")
+                        }
+                    }
+                    added++
                 } else {
                     viewModel.scanImportReport(context, uri, fileName)
                     val layerId = viewModel.addLayer(fileName, fileType, uri.toString())
@@ -201,6 +256,14 @@ fun LayerManagerScreen(
                     added++
                 }
             } else {
+                if (nameLower.endsWith(".mdb")) {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(
+                            message = "ملف Personal Geodatabase (.mdb) غير مدعوم على أندرويد لكونه يعتمد على Microsoft Access. يُنصح بتحويله إلى GeoPackage (.gpkg) أو FileGDB (.gdb) عبر ArcGIS أو QGIS.",
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                }
                 skipped++
             }
         }
@@ -218,7 +281,27 @@ fun LayerManagerScreen(
         viewModel.loadWarning?.let { snackbarHostState.showSnackbar(it, duration = SnackbarDuration.Long) }
     }
 
-    val grouped = layers.groupBy { it.fileType }
+    var searchQuery by remember { mutableStateOf("") }
+    var selectedGeomFilter by remember { mutableStateOf("ALL") }
+    var selectedVisFilter by remember { mutableStateOf("ALL") }
+
+    val filteredLayers = layers.filter { layer ->
+        val matchesSearch = searchQuery.isBlank() || layer.name.contains(searchQuery, ignoreCase = true)
+        val matchesGeom = when (selectedGeomFilter) {
+            "Point" -> layer.geomType == "Point"
+            "Line" -> layer.geomType == "Line"
+            "Polygon" -> layer.geomType == "Polygon"
+            else -> true
+        }
+        val matchesVis = when (selectedVisFilter) {
+            "VISIBLE" -> layer.isVisible
+            "HIDDEN" -> !layer.isVisible
+            else -> true
+        }
+        matchesSearch && matchesGeom && matchesVis
+    }
+
+    val grouped = filteredLayers.groupBy { it.fileType }
 
     var collapsedSections by remember { mutableStateOf(setOf<String>()) }
 
@@ -227,68 +310,149 @@ fun LayerManagerScreen(
     var draggedFlatIndex by remember { mutableIntStateOf(0) }
     val itemHeights = remember { mutableMapOf<Int, Int>() }
 
+    var renamingLayerId by remember { mutableStateOf<String?>(null) }
+    var renamingLayerName by remember { mutableStateOf("") }
+    var showClearAllDialog by remember { mutableStateOf(false) }
+
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.layer_manager_title), style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground) },
+                actions = {
+                    FilledTonalButton(
+                        onClick = { showImportCenter = true },
+                        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(10.dp)
+                    ) {
+                        Icon(Icons.Default.CloudDownload, null, Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("مركز الاستيراد", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                    }
+                    if (layers.isNotEmpty()) {
+                        IconButton(onClick = { showClearAllDialog = true }) {
+                            Icon(Icons.Default.DeleteSweep, "مسح الكل", tint = MaterialTheme.colorScheme.error)
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceDim)
             )
         },
         bottomBar = { BottomNavBar(selectedTab = BottomNavTab.LAYERS, onTabSelected = onNavigateToTab) },
         floatingActionButton = {
-            if (layers.isNotEmpty()) {
-                Box {
-                    FloatingActionButton(onClick = { showFabMenu = true },
-                        shape = RoundedCornerShape(16.dp),
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer) {
-                        Icon(Icons.Default.Add, null, Modifier.size(24.dp))
-                    }
-                    DropdownMenu(expanded = showFabMenu, onDismissRequest = { showFabMenu = false }) {
-                        DropdownMenuItem(
-                            text = { Text("ملف GIS") },
-                            onClick = {
-                                showFabMenu = false
-                                filePickerLauncher.launch(GIS_DOCUMENT_MIME_TYPES)
-                            },
-                            leadingIcon = { Icon(Icons.Default.InsertDriveFile, "استيراد ملفات GIS") }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.open_filegdb_experimental)) },
-                            onClick = {
-                                showFabMenu = false
-                                gdbFolderPickerLauncher.launch(null)
-                            },
-                            leadingIcon = { Icon(Icons.Default.Folder, "استيراد GeoDatabase") }
-                        )
-                    }
-                }
+            FloatingActionButton(
+                onClick = { showImportCenter = true },
+                shape = RoundedCornerShape(16.dp),
+                containerColor = MaterialTheme.colorScheme.primary,
+                contentColor = MaterialTheme.colorScheme.onPrimary
+            ) {
+                Icon(Icons.Default.Add, "إضافة واستيراد طبقات", Modifier.size(26.dp))
             }
         },
         containerColor = MaterialTheme.colorScheme.surfaceDim
     ) { paddingValues ->
         Box(Modifier.fillMaxSize().padding(paddingValues)) {
             if (layers.isEmpty()) {
-                Column(Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
-                    Box(Modifier.size(100.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest), contentAlignment = Alignment.Center) {
-                        Icon(Icons.Default.Layers, null, Modifier.size(48.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                Column(
+                    Modifier.fillMaxSize().padding(horizontal = 20.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Box(
+                        Modifier.size(80.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceContainerHighest),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Default.Layers, null, Modifier.size(42.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f))
                     }
-                    Spacer(Modifier.height(20.dp))
-                    Text(stringResource(R.string.no_layers), style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.W600)
-                    Spacer(Modifier.height(8.dp))
-                    Text(stringResource(R.string.add_layer_hint), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f), textAlign = TextAlign.Center, modifier = Modifier.padding(horizontal = 48.dp))
-                    Spacer(Modifier.height(28.dp))
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                            FilledTonalButton(onClick = { filePickerLauncher.launch(GIS_DOCUMENT_MIME_TYPES) },
-                                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
-                                Icon(Icons.Default.InsertDriveFile, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("GIS", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        stringResource(R.string.no_layers),
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "ابدأ باستيراد ملفاتك وقواعد بياناتك الجغرافية لعرضها وتحليلها على الخريطة",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center
+                    )
+                    Spacer(Modifier.height(24.dp))
+
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showImportCenter = true },
+                        shape = RoundedCornerShape(18.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(MaterialTheme.colorScheme.primary),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Default.CloudDownload, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.size(26.dp))
                             }
-                            FilledTonalButton(onClick = { gdbFolderPickerLauncher.launch(null) },
-                                shape = RoundedCornerShape(14.dp), colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer)) {
-                                Icon(Icons.Default.FolderOpen, null, Modifier.size(20.dp)); Spacer(Modifier.width(8.dp)); Text("FileGDB", style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.W600)
+                            Spacer(Modifier.width(14.dp))
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    "مركز استيراد البيانات الجغرافية",
+                                    style = MaterialTheme.typography.titleSmall,
+                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                                )
+                                Spacer(Modifier.height(2.dp))
+                                Text(
+                                    "Esri GDB · GeoPackage · Shapefile · Excel · KML · GeoJSON",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+                                )
                             }
+                        }
+                    }
+
+                    Spacer(Modifier.height(14.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        FilledTonalButton(
+                            onClick = {
+                                filePickerLauncher.launch(arrayOf(
+                                    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                    "application/vnd.ms-excel",
+                                    "text/csv",
+                                    "text/plain",
+                                    "*/*"
+                                ))
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.Default.TableChart, null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("Excel / CSV", style = MaterialTheme.typography.labelMedium)
+                        }
+
+                        FilledTonalButton(
+                            onClick = {
+                                filePickerLauncher.launch(GIS_DOCUMENT_MIME_TYPES)
+                            },
+                            modifier = Modifier.weight(1f),
+                            shape = RoundedCornerShape(12.dp)
+                        ) {
+                            Icon(Icons.AutoMirrored.Filled.InsertDriveFile, null, Modifier.size(18.dp))
+                            Spacer(Modifier.width(6.dp))
+                            Text("ملف GIS", style = MaterialTheme.typography.labelMedium)
                         }
                     }
                 }
@@ -296,6 +460,128 @@ fun LayerManagerScreen(
                 Column(
                     modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(top = 8.dp, bottom = 80.dp)
                 ) {
+                    // ── شريط التحكم الجماعي بالطبقات (Batch Layer Controls) ──
+                    Card(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+                        shape = RoundedCornerShape(12.dp),
+                        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                    ) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            val visibleCount = layers.count { it.isVisible }
+                            Text(
+                                text = "${layers.size} طبقة ($visibleCount معروضة)",
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = FontWeight.W700,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                                FilledTonalButton(
+                                    onClick = { viewModel.showAllLayers() },
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                                    )
+                                ) {
+                                    Icon(Icons.Default.Visibility, null, Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("إظهار الكل", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.W600)
+                                }
+                                FilledTonalButton(
+                                    onClick = { viewModel.hideAllLayers() },
+                                    contentPadding = PaddingValues(horizontal = 10.dp, vertical = 4.dp),
+                                    shape = RoundedCornerShape(8.dp),
+                                    colors = ButtonDefaults.filledTonalButtonColors(
+                                        containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                                        contentColor = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                ) {
+                                    Icon(Icons.Default.VisibilityOff, null, Modifier.size(16.dp))
+                                    Spacer(Modifier.width(4.dp))
+                                    Text("إخفاء الكل", style = MaterialTheme.typography.labelSmall, fontWeight = FontWeight.W600)
+                                }
+                                IconButton(
+                                    onClick = { viewModel.invertLayersVisibility() },
+                                    modifier = Modifier.size(32.dp)
+                                ) {
+                                    Icon(Icons.Default.SwapVert, "عكس الرؤية", Modifier.size(18.dp), tint = MaterialTheme.colorScheme.onSurfaceVariant)
+                                }
+                            }
+                        }
+                    }
+
+                    // ── شريط البحث والتصفية الذكي ──
+                    Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp)) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            placeholder = { Text("بحث عن طبقة باسمها...", style = MaterialTheme.typography.bodyMedium) },
+                            leadingIcon = { Icon(Icons.Default.Search, null) },
+                            trailingIcon = {
+                                if (searchQuery.isNotEmpty()) {
+                                    IconButton(onClick = { searchQuery = "" }) {
+                                        Icon(Icons.Default.Clear, "مسح البحث")
+                                    }
+                                }
+                            },
+                            singleLine = true,
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
+                                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                            )
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            FilterChip(
+                                selected = selectedGeomFilter == "ALL" && selectedVisFilter == "ALL",
+                                onClick = { selectedGeomFilter = "ALL"; selectedVisFilter = "ALL" },
+                                label = { Text("كل الطبقات (${layers.size})") }
+                            )
+                            FilterChip(
+                                selected = selectedGeomFilter == "Point",
+                                onClick = { selectedGeomFilter = if (selectedGeomFilter == "Point") "ALL" else "Point" },
+                                label = { Text("نقاط 📍") }
+                            )
+                            FilterChip(
+                                selected = selectedGeomFilter == "Line",
+                                onClick = { selectedGeomFilter = if (selectedGeomFilter == "Line") "ALL" else "Line" },
+                                label = { Text("خطوط 〰️") }
+                            )
+                            FilterChip(
+                                selected = selectedGeomFilter == "Polygon",
+                                onClick = { selectedGeomFilter = if (selectedGeomFilter == "Polygon") "ALL" else "Polygon" },
+                                label = { Text("مضلعات 🔷") }
+                            )
+                            FilterChip(
+                                selected = selectedVisFilter == "VISIBLE",
+                                onClick = { selectedVisFilter = if (selectedVisFilter == "VISIBLE") "ALL" else "VISIBLE" },
+                                label = { Text("ظاهرة 👁️") }
+                            )
+                            FilterChip(
+                                selected = selectedVisFilter == "HIDDEN",
+                                onClick = { selectedVisFilter = if (selectedVisFilter == "HIDDEN") "ALL" else "HIDDEN" },
+                                label = { Text("مخفية 🙈") }
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+
+                    if (filteredLayers.isEmpty()) {
+                        Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
+                            Text("لا توجد طبقات تطابق شروط البحث والفلترة الحاليّة", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                     grouped.forEach { (fileType, groupLayers) ->
                         val sectionKey = fileType.name
                         val isExpanded = sectionKey !in collapsedSections
@@ -323,6 +609,8 @@ fun LayerManagerScreen(
                                             FileType.PHOTO -> Icons.Default.PhotoCamera
                                             FileType.GEOPACKAGE -> Icons.Default.Storage
                                             FileType.GEODATABASE -> Icons.Default.FolderOpen
+                                            FileType.EXCEL -> Icons.Default.TableChart
+                                            FileType.CSV -> Icons.Default.TableChart
                                         }, null, Modifier.size(20.dp),
                                         tint = MaterialTheme.colorScheme.primary
                                     )
@@ -369,6 +657,10 @@ fun LayerManagerScreen(
                                         layer = layer,
                                         geometrySummary = geoSummary,
                                         onOpenDetails = { onLayerClick(layer.id, layer.name) },
+                                        onOpenProperties = {
+                                            selectedLayerForProperties = layer
+                                            showLayerPropertiesDialog = true
+                                        },
                                         onToggleVisibility = { viewModel.toggleVisibility(it) },
                                         onTransparencyChanged = { id, a -> viewModel.updateTransparency(id, a) },
                                         onDelete = { id ->
@@ -382,9 +674,15 @@ fun LayerManagerScreen(
                                         },
                                         onReloadLayer = { id -> viewModel.reloadLayer(context, id) },
                                         onZoomToLayer = { id -> viewModel.requestZoomToLayer(id); onNavigateToTab(BottomNavTab.MAP) },
+                                        onRename = { id ->
+                                            renamingLayerId = id
+                                            renamingLayerName = layers.find { it.id == id }?.name ?: ""
+                                        },
                                         onColorChange = { id, c -> viewModel.updateLayerColor(id, c) },
                                         onPointSizeChanged = { id, s -> viewModel.updatePointSize(id, s) },
                                         onLineWidthChanged = { id, w -> viewModel.updateLineWidth(id, w) },
+                                        onMoveUp = { id -> viewModel.moveLayerUp(id) },
+                                        onMoveDown = { id -> viewModel.moveLayerDown(id) },
                                         onDragStart = {
                                             draggedItemId = layer.id
                                             draggedFlatIndex = flatIndex
@@ -490,6 +788,155 @@ fun LayerManagerScreen(
                     Text("جار قراءة الطبقات...", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
+        }
+
+        if (renamingLayerId != null) {
+            AlertDialog(
+                onDismissRequest = { renamingLayerId = null },
+                title = { Text("إعادة تسمية الطبقة", fontWeight = FontWeight.Bold) },
+                text = {
+                    OutlinedTextField(
+                        value = renamingLayerName,
+                        onValueChange = { renamingLayerName = it },
+                        singleLine = true,
+                        label = { Text("اسم الطبقة الجديد") },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                },
+                confirmButton = {
+                    Button(onClick = {
+                        val id = renamingLayerId
+                        if (id != null && renamingLayerName.isNotBlank()) {
+                            viewModel.renameLayer(id, renamingLayerName)
+                        }
+                        renamingLayerId = null
+                    }) { Text("حفظ") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { renamingLayerId = null }) { Text("إلغاء") }
+                }
+            )
+        }
+
+        if (showClearAllDialog) {
+            AlertDialog(
+                onDismissRequest = { showClearAllDialog = false },
+                title = { Text("مسح كافة الطبقات", fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.error) },
+                text = { Text("هل أنت تأكد من رغبتك في حذف جميع الطبقات المعروضة حالياً وإعادة ضبط الخريطة؟") },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            viewModel.clearAllLayers()
+                            showClearAllDialog = false
+                        },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                    ) { Text("نعم، مسح الكل") }
+                },
+                dismissButton = {
+                    TextButton(onClick = { showClearAllDialog = false }) { Text("إلغاء") }
+                }
+            )
+        }
+
+        if (showCoordinateMappingDialog && pendingSpreadsheetUri != null && spreadsheetInspection != null) {
+            CoordinateMappingDialog(
+                fileName = pendingSpreadsheetName,
+                inspection = spreadsheetInspection!!,
+                onDismiss = {
+                    showCoordinateMappingDialog = false
+                    pendingSpreadsheetUri = null
+                },
+                onConfirm = { mapping ->
+                    showCoordinateMappingDialog = false
+                    val targetUri = pendingSpreadsheetUri ?: return@CoordinateMappingDialog
+                    val targetName = pendingSpreadsheetName
+                    val isExcel = pendingSpreadsheetIsExcel
+                    if (isExcel) {
+                        viewModel.parseAndCacheExcel(context, targetUri, targetName, mapping)
+                    } else {
+                        viewModel.parseAndCacheCsv(context, targetUri, targetName, mapping)
+                    }
+                    pendingSpreadsheetUri = null
+                }
+            )
+        }
+
+        if (showImportCenter) {
+            ImportCenterDialog(
+                onDismiss = { showImportCenter = false },
+                onSelectOption = { option ->
+                    when (option) {
+                        ImportSourceOption.EXCEL_CSV -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                                "application/vnd.ms-excel",
+                                "text/csv",
+                                "text/comma-separated-values",
+                                "text/tab-separated-values",
+                                "text/plain",
+                                "*/*"
+                            ))
+                        }
+                        ImportSourceOption.GEOPACKAGE -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "application/geopackage+sqlite3",
+                                "application/octet-stream",
+                                "*/*"
+                            ))
+                        }
+                        ImportSourceOption.ESRI_GDB -> {
+                            gdbFolderPickerLauncher.launch(null)
+                        }
+                        ImportSourceOption.SHAPEFILE -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "application/zip",
+                                "application/x-zip-compressed",
+                                "application/octet-stream",
+                                "*/*"
+                            ))
+                        }
+                        ImportSourceOption.KML_KMZ -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "application/vnd.google-earth.kml+xml",
+                                "application/vnd.google-earth.kmz",
+                                "application/xml",
+                                "*/*"
+                            ))
+                        }
+                        ImportSourceOption.GEOJSON -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "application/geo+json",
+                                "application/json",
+                                "*/*"
+                            ))
+                        }
+                        ImportSourceOption.GEO_PHOTOS -> {
+                            filePickerLauncher.launch(arrayOf(
+                                "image/jpeg",
+                                "image/png",
+                                "image/*"
+                            ))
+                        }
+                    }
+                }
+            )
+        }
+
+        if (showLayerPropertiesDialog && selectedLayerForProperties != null) {
+            val targetLayer = selectedLayerForProperties!!
+            val cachedDetail = viewModel.getCachedDetail(targetLayer.id)
+            val fields = cachedDetail?.features?.firstOrNull()?.properties?.keys?.toList() ?: emptyList()
+            LayerPropertiesDialog(
+                layer = targetLayer,
+                availableFields = fields,
+                onDismiss = {
+                    showLayerPropertiesDialog = false
+                    selectedLayerForProperties = null
+                },
+                onSaveStyle = { updatedStyle ->
+                    viewModel.updateLayerStyle(targetLayer.id, updatedStyle)
+                }
+            )
         }
     }
 }

@@ -66,16 +66,24 @@ data class KmlStyle(
     var labelScale: Float = 1f
 ) {
     /**
-     * Convert KML aabbggrr color format to hex rrggbbaa used by the app.
+     * Convert KML aabbggrr color format to Android hex #AARRGGBB.
      */
     fun parseKmlColor(kmlColor: String?): String? {
-        if (kmlColor == null || kmlColor.length < 8) return null
+        if (kmlColor == null) return null
+        val clean = kmlColor.trim().removePrefix("#")
         return try {
-            val a = kmlColor.substring(0, 2)
-            val b = kmlColor.substring(2, 4)
-            val g = kmlColor.substring(4, 6)
-            val r = kmlColor.substring(6, 8)
-            "#$r$g$b$a"
+            if (clean.length == 8) {
+                val a = clean.substring(0, 2)
+                val b = clean.substring(2, 4)
+                val g = clean.substring(4, 6)
+                val r = clean.substring(6, 8)
+                "#$a$r$g$b"
+            } else if (clean.length == 6) {
+                val b = clean.substring(0, 2)
+                val g = clean.substring(2, 4)
+                val r = clean.substring(4, 6)
+                "#ff$r$g$b"
+            } else null
         } catch (_: Exception) { null }
     }
 
@@ -196,6 +204,10 @@ object KmlParser {
                                 skipTag(parser)
                             }
                         }
+                        "StyleMap" -> {
+                            val styleMapId = parser.getAttributeValue(null, "id") ?: ""
+                            parseStyleMap(parser, styleMapId, styles)
+                        }
                         "Placemark" -> {
                             if (featureCount < GeoJsonParser.MAX_FEATURES) {
                                 parsePlacemark(parser, features, styles)
@@ -275,6 +287,10 @@ object KmlParser {
                         val styleId = parser.getAttributeValue(null, "id") ?: ""
                         if (styleId.isNotBlank()) parseStyle(parser, styleId)?.let { s -> styles[s.id] = s }
                         else skipTag(parser)
+                    }
+                    "StyleMap" -> {
+                        val styleMapId = parser.getAttributeValue(null, "id") ?: ""
+                        parseStyleMap(parser, styleMapId, styles)
                     }
                     "Placemark" -> parsePlacemark(parser, features, styles)
                     "Folder", "Document" -> { }
@@ -361,7 +377,13 @@ object KmlParser {
                     }
                     "Style" -> {
                         val inlineId = parser.getAttributeValue(null, "id") ?: name
-                        parseStyle(parser, inlineId)?.let { s -> props["kml_style_${s.id}"] = s.toString() }
+                        parseStyle(parser, inlineId)?.let { s ->
+                            s.polyColor?.let { raw -> (s.parseKmlColor(raw) ?: raw).let { props["kml_poly_color"] = it } }
+                            s.lineColor?.let { raw -> (s.parseKmlColor(raw) ?: raw).let { props["kml_line_color"] = it } }
+                            if (s.lineWidth > 0f) props["kml_line_width"] = s.lineWidth.toString()
+                            s.iconHref?.let { props["kml_icon_href"] = it }
+                            props["kml_style_${s.id}"] = s.toString()
+                        }
                     }
                     "LookAt", "Region" -> skipTag(parser)
                     "ExtendedData" -> parseExtendedData(parser, props)
@@ -376,8 +398,8 @@ object KmlParser {
         // تطبيق Style إذا وجد
         if (styleUrl != null && styleUrl in styles) {
             val s = styles[styleUrl]!!
-            s.polyColor?.let { props["kml_poly_color"] = it }
-            s.lineColor?.let { props["kml_line_color"] = it }
+            s.polyColor?.let { raw -> (s.parseKmlColor(raw) ?: raw).let { props["kml_poly_color"] = it } }
+            s.lineColor?.let { raw -> (s.parseKmlColor(raw) ?: raw).let { props["kml_line_color"] = it } }
             if (s.lineWidth > 0f) props["kml_line_width"] = s.lineWidth.toString()
             s.iconHref?.let { props["kml_icon_href"] = it }
             props["kml_style_id"] = styleUrl
@@ -542,7 +564,7 @@ object KmlParser {
                         while (!(psEvent == XmlPullParser.END_TAG && tagName(parser) == "PolyStyle")) {
                             if (psEvent == XmlPullParser.START_TAG) {
                                 when (tagName(parser)) {
-                                    "color" -> { val c = parser.nextText().trim(); if (c.length == 8) style.polyColor = c }
+                                    "color" -> { val c = parser.nextText().trim().removePrefix("#"); if (c.length in 6..8) style.polyColor = c }
                                     "fill" -> style.polyFill = parser.nextText().trim().toIntOrNull() != 0
                                     "outline" -> { }
                                 }
@@ -555,7 +577,7 @@ object KmlParser {
                         while (!(lsEvent == XmlPullParser.END_TAG && tagName(parser) == "LineStyle")) {
                             if (lsEvent == XmlPullParser.START_TAG) {
                                 when (tagName(parser)) {
-                                    "color" -> { val c = parser.nextText().trim(); if (c.length == 8) style.lineColor = c }
+                                    "color" -> { val c = parser.nextText().trim().removePrefix("#"); if (c.length in 6..8) style.lineColor = c }
                                     "width" -> style.lineWidth = parser.nextText().trim().toFloatOrNull() ?: 1f
                                 }
                             }
@@ -567,7 +589,7 @@ object KmlParser {
                         while (!(isEvent == XmlPullParser.END_TAG && tagName(parser) == "IconStyle")) {
                             if (isEvent == XmlPullParser.START_TAG) {
                                 when (tagName(parser)) {
-                                    "color" -> { val c = parser.nextText().trim(); if (c.length == 8) style.iconColor = c }
+                                    "color" -> { val c = parser.nextText().trim().removePrefix("#"); if (c.length in 6..8) style.iconColor = c }
                                     "scale" -> { }
                                     "Icon" -> {
                                         var icEvent = parser.next()
@@ -588,7 +610,7 @@ object KmlParser {
                         while (!(lbEvent == XmlPullParser.END_TAG && tagName(parser) == "LabelStyle")) {
                             if (lbEvent == XmlPullParser.START_TAG) {
                                 when (tagName(parser)) {
-                                    "color" -> { val c = parser.nextText().trim(); if (c.length == 8) style.labelColor = c }
+                                    "color" -> { val c = parser.nextText().trim().removePrefix("#"); if (c.length in 6..8) style.labelColor = c }
                                     "scale" -> style.labelScale = parser.nextText().trim().toFloatOrNull() ?: 1f
                                 }
                             }
@@ -601,6 +623,37 @@ object KmlParser {
             eventType = parser.next()
         }
         return style
+    }
+
+    private fun parseStyleMap(parser: XmlPullParser, styleMapId: String, styles: MutableMap<String, KmlStyle>) {
+        var normalStyleUrl: String? = null
+        var isNormalKey = false
+        var eventType = parser.next()
+        while (!(eventType == XmlPullParser.END_TAG && tagName(parser) == "StyleMap")) {
+            if (eventType == XmlPullParser.START_TAG) {
+                when (tagName(parser)) {
+                    "key" -> {
+                        val key = parser.nextText().trim()
+                        isNormalKey = key.equals("normal", ignoreCase = true)
+                    }
+                    "styleUrl" -> {
+                        val url = parser.nextText().trim().removePrefix("#")
+                        if (isNormalKey || normalStyleUrl == null) {
+                            normalStyleUrl = url
+                        }
+                    }
+                }
+            }
+            eventType = parser.next()
+        }
+        if (styleMapId.isNotBlank() && !normalStyleUrl.isNullOrBlank()) {
+            val target = styles[normalStyleUrl]
+            if (target != null) {
+                styles[styleMapId] = target.copy(id = styleMapId)
+            } else {
+                styles[styleMapId] = KmlStyle(id = styleMapId)
+            }
+        }
     }
 
     private fun parsePolygon(parser: XmlPullParser, props: MutableMap<String, String>): Pair<String, String>? {
@@ -650,28 +703,47 @@ object KmlParser {
         return null
     }
 
+    private fun getAttributeNameValue(parser: XmlPullParser): String {
+        val attrVal = parser.getAttributeValue(null, "name")
+        if (!attrVal.isNullOrBlank()) return attrVal
+        for (i in 0 until parser.attributeCount) {
+            if (parser.getAttributeName(i).equals("name", ignoreCase = true)) {
+                return parser.getAttributeValue(i) ?: ""
+            }
+        }
+        return ""
+    }
+
     private fun parseExtendedData(parser: XmlPullParser, props: MutableMap<String, String>) {
         var eventType = parser.next()
         while (!(eventType == XmlPullParser.END_TAG && tagName(parser) == "ExtendedData")) {
             if (eventType == XmlPullParser.START_TAG) {
                 when (tagName(parser)) {
                     "Data" -> {
-                        val key = parser.getAttributeValue(null, "name") ?: ""
+                        val key = getAttributeNameValue(parser)
                         val value = findChildText(parser, "value") ?: ""
                         if (key.isNotBlank()) props[key] = value
                     }
-                    "SchemaData" -> {
-                        var sdEvent = parser.next()
-                        while (!(sdEvent == XmlPullParser.END_TAG && tagName(parser) == "SchemaData")) {
-                            if (sdEvent == XmlPullParser.START_TAG && tagName(parser) == "SimpleData") {
-                                val key = parser.getAttributeValue(null, "name") ?: ""
-                                val value = parser.nextText().trim()
-                                if (key.isNotBlank()) props[key] = value
-                            }
-                            sdEvent = parser.next()
-                        }
+                    "SimpleData" -> {
+                        val key = getAttributeNameValue(parser)
+                        val value = parser.nextText().trim()
+                        if (key.isNotBlank()) props[key] = value
                     }
-                    else -> skipTag(parser)
+                    "SchemaData" -> {
+                        // Iterates inner tags naturally
+                    }
+                    "SimpleArrayData" -> {
+                        val key = getAttributeNameValue(parser)
+                        val values = mutableListOf<String>()
+                        var saEvent = parser.next()
+                        while (!(saEvent == XmlPullParser.END_TAG && tagName(parser) == "SimpleArrayData")) {
+                            if (saEvent == XmlPullParser.START_TAG && tagName(parser) == "value") {
+                                values.add(parser.nextText().trim())
+                            }
+                            saEvent = parser.next()
+                        }
+                        if (key.isNotBlank()) props[key] = values.joinToString(", ")
+                    }
                 }
             }
             eventType = parser.next()

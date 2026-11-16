@@ -19,6 +19,7 @@ object ImportScanner {
             lower.endsWith(".kml") -> scanKml(context, uri, fileName)
             lower.endsWith(".kmz") -> scanKmz(context, uri, fileName)
             lower.endsWith(".gpkg") -> scanGeoPackage(context, uri, fileName)
+            lower.endsWith(".geodatabase") -> scanMobileGdb(context, uri, fileName)
             lower.endsWith(".gdb") || uri.toString().lowercase().contains(".gdb") -> scanFileGdb(context, uri, fileName)
             else -> ImportReport(
                 sourceName = fileName,
@@ -127,6 +128,27 @@ object ImportScanner {
             sourceType = "GeoPackage",
             layers = layers,
             warnings = if (layers.isEmpty()) listOf(ImportWarning("GPKG_NO_LAYERS", "لم يتم العثور على طبقات مكانية.")) else emptyList()
+        )
+    }
+
+    private suspend fun scanMobileGdb(context: Context, uri: Uri, fileName: String): ImportReport {
+        val names = MobileGdbReader.listLayerNames(context, uri)
+        val layers = names.map { name ->
+            ImportLayerInfo(
+                id = name,
+                name = name,
+                geometryType = null,
+                featureCount = null,
+                crs = null,
+                status = ImportStatus.SUPPORTED,
+                message = "طبقة Esri Mobile Geodatabase؛ ستتم قراءة المعالم عند الاستيراد."
+            )
+        }
+        return ImportReport(
+            sourceName = fileName,
+            sourceType = "Mobile Geodatabase",
+            layers = layers,
+            warnings = if (layers.isEmpty()) listOf(ImportWarning("MGDB_NO_LAYERS", "لم يتم العثور على طبقات مكانية.")) else emptyList()
         )
     }
 

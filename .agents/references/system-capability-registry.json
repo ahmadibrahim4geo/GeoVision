@@ -1,0 +1,227 @@
+{
+  "schema_version": "1.0",
+  "note": "Unverified candidate references; no device access, installed software, OS permission or native test implied.",
+  "capabilities": {
+    "time": {
+      "permission": "not_required",
+      "fallback": "manual_time"
+    },
+    "timezone": {
+      "permission": "not_required",
+      "fallback": "manual_timezone"
+    },
+    "location": {
+      "permission": "user_consent",
+      "fallback": "manual_coordinates"
+    },
+    "files": {
+      "permission": "scoped_access",
+      "fallback": "file_picker"
+    },
+    "network": {
+      "permission": "host_policy",
+      "fallback": "offline_mode"
+    },
+    "notifications": {
+      "permission": "user_or_host_policy",
+      "fallback": "in_app_notice"
+    },
+    "serial": {
+      "permission": "device_access",
+      "fallback": "import_gnss_log"
+    },
+    "bluetooth": {
+      "permission": "device_access",
+      "fallback": "offline_file"
+    },
+    "camera": {
+      "permission": "user_consent",
+      "fallback": "file_import"
+    },
+    "microphone": {
+      "permission": "user_consent",
+      "fallback": "no_audio"
+    },
+    "screen": {
+      "permission": "user_consent",
+      "fallback": "no_capture"
+    },
+    "hardware": {
+      "permission": "minimum_scope",
+      "fallback": "manual_profile"
+    }
+  },
+  "adapters": [
+    {
+      "id": "windows-native",
+      "platform": "windows",
+      "url": "https://learn.microsoft.com/en-us/windows/apps/develop/maps-and-location/get-location",
+      "capabilities": [
+        "time",
+        "timezone",
+        "location",
+        "files",
+        "network",
+        "notifications",
+        "serial",
+        "bluetooth",
+        "camera",
+        "microphone",
+        "screen",
+        "hardware"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "qt6",
+      "platform": "qt",
+      "url": "https://doc.qt.io/qt-6/qpermission.html",
+      "capabilities": [
+        "time",
+        "timezone",
+        "location",
+        "files",
+        "serial",
+        "bluetooth",
+        "camera",
+        "microphone"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "browser",
+      "platform": "browser",
+      "url": "https://developer.mozilla.org/en-US/docs/Web/API/Geolocation_API",
+      "capabilities": [
+        "time",
+        "timezone",
+        "location",
+        "files",
+        "network",
+        "notifications",
+        "camera",
+        "microphone",
+        "screen",
+        "bluetooth",
+        "serial"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "electron",
+      "platform": "electron",
+      "url": "https://www.electronjs.org/docs/latest/api/session",
+      "capabilities": [
+        "files",
+        "network",
+        "notifications",
+        "camera",
+        "microphone",
+        "screen",
+        "bluetooth",
+        "serial",
+        "location"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "tauri-v2",
+      "platform": "tauri",
+      "url": "https://tauri.app/security/capabilities/",
+      "capabilities": [
+        "files",
+        "network",
+        "notifications",
+        "screen",
+        "location",
+        "serial",
+        "bluetooth"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "linux-portals",
+      "platform": "linux",
+      "url": "https://flatpak.github.io/xdg-desktop-portal/",
+      "capabilities": [
+        "files",
+        "notifications",
+        "camera",
+        "screen",
+        "location"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "apple-native",
+      "platform": "apple",
+      "url": "https://developer.apple.com/documentation/corelocation",
+      "capabilities": [
+        "time",
+        "timezone",
+        "location",
+        "files",
+        "notifications",
+        "camera",
+        "microphone",
+        "bluetooth"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "android-native",
+      "platform": "android",
+      "url": "https://developer.android.com/guide/topics/permissions/overview",
+      "capabilities": [
+        "time",
+        "timezone",
+        "location",
+        "files",
+        "notifications",
+        "camera",
+        "microphone",
+        "bluetooth"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "python-stdlib",
+      "platform": "python",
+      "url": "https://docs.python.org/3/library/datetime.html",
+      "capabilities": [
+        "time",
+        "timezone",
+        "files"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "psutil",
+      "platform": "python",
+      "url": "https://github.com/giampaolo/psutil",
+      "capabilities": [
+        "network",
+        "hardware"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "pyserial",
+      "platform": "python",
+      "url": "https://github.com/pyserial/pyserial",
+      "capabilities": [
+        "serial"
+      ],
+      "review_status": "candidate_unverified"
+    },
+    {
+      "id": "bleak",
+      "platform": "python",
+      "url": "https://github.com/hbldh/bleak",
+      "capabilities": [
+        "bluetooth"
+      ],
+      "review_status": "candidate_unverified"
+    }
+  ]
+}

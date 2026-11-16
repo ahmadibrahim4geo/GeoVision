@@ -1,0 +1,39 @@
+{
+  "crs": {
+    "properties": {
+      "name": "EPSG:4326"
+    },
+    "type": "name"
+  },
+  "features": [
+    {
+      "geometry": {
+        "coordinates": [
+          31.2357,
+          30.0444
+        ],
+        "type": "Point"
+      },
+      "id": "cairo",
+      "properties": {
+        "name": "Cairo"
+      },
+      "type": "Feature"
+    },
+    {
+      "geometry": {
+        "coordinates": [
+          29.9187,
+          31.2001
+        ],
+        "type": "Point"
+      },
+      "id": "alexandria",
+      "properties": {
+        "name": "Alexandria"
+      },
+      "type": "Feature"
+    }
+  ],
+  "type": "FeatureCollection"
+}

@@ -141,7 +141,7 @@ abstract class LegalTextActivity : ComponentActivity() {
         // ── Cards ──
         val sections = provideSections()
         val textDir = if (isArabic) TextView.TEXT_DIRECTION_RTL else TextView.TEXT_DIRECTION_LTR
-        val textGravity = if (isArabic) Gravity.RIGHT else Gravity.LEFT
+        val textGravity = Gravity.START
 
         sections.forEach { (sectionTitle, sectionBody) ->
             val card = LinearLayout(ctx).apply {

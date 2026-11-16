@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.MyLocation
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -37,6 +38,8 @@ import com.geovision.mobile.ui.navigation.BottomNavBar
 import com.geovision.mobile.ui.navigation.BottomNavTab
 import org.json.JSONArray
 
+import androidx.compose.foundation.verticalScroll
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LayerDetailsScreen(
@@ -51,6 +54,10 @@ fun LayerDetailsScreen(
     var selectedFeature by remember { mutableStateOf<FeatureRow?>(null) }
     var sortColumn by remember { mutableStateOf<String?>(null) }
     var sortAscending by remember { mutableStateOf(true) }
+    var hiddenKeys by remember { mutableStateOf<Set<String>>(emptySet()) }
+    var showColumnSelectorDialog by remember { mutableStateOf(false) }
+    var showExportDialog by remember { mutableStateOf(false) }
+
     val sheetState = rememberModalBottomSheetState()
     val scrollState = rememberScrollState()
     val clipboardManager = LocalClipboardManager.current
@@ -84,6 +91,17 @@ fun LayerDetailsScreen(
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.back), tint = MaterialTheme.colorScheme.onSurface)
                     }
                 },
+                actions = {
+                    if (detailInfo != null && detailInfo.features.isNotEmpty()) {
+                        IconButton(onClick = { showExportDialog = true }) {
+                            Icon(
+                                Icons.Default.Share,
+                                contentDescription = "تصدير ومشاركة الطبقة",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                        }
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.surfaceDim)
             )
         },
@@ -101,6 +119,7 @@ fun LayerDetailsScreen(
         } else {
             val allKeys = detailInfo.features.flatMap { it.properties.keys }.distinct()
                 .filter { !it.startsWith("_") && it != "description_parsed" }
+            val visibleKeys = allKeys.filter { it !in hiddenKeys }
 
             val filtered = detailInfo.features.filter { feature ->
                 searchQuery.isBlank() ||
@@ -121,27 +140,37 @@ fun LayerDetailsScreen(
             LazyColumn(modifier = Modifier.fillMaxSize().padding(paddingValues), contentPadding = PaddingValues(bottom = 16.dp)) {
                 item { FileInfoCard(detailInfo) }
 
-                if (allKeys.isNotEmpty()) {
+                if (visibleKeys.isNotEmpty()) {
                     item {
                         Spacer(Modifier.height(12.dp))
-                        FieldStatsCard(detailInfo, allKeys)
+                        FieldStatsCard(detailInfo, visibleKeys)
                     }
                 }
 
                 item {
                     Spacer(Modifier.height(12.dp))
-                    OutlinedTextField(
-                        value = searchQuery,
-                        onValueChange = { searchQuery = it },
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                        placeholder = { Text(stringResource(R.string.search_attributes), color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                        leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_attributes), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
-                        singleLine = true,
-                        shape = RoundedCornerShape(12.dp),
-                        colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant, focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer),
-                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { })
-                    )
+                    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+                        OutlinedTextField(
+                            value = searchQuery,
+                            onValueChange = { searchQuery = it },
+                            modifier = Modifier.weight(1f),
+                            placeholder = { Text(stringResource(R.string.search_attributes), color = MaterialTheme.colorScheme.onSurfaceVariant) },
+                            leadingIcon = { Icon(Icons.Default.Search, contentDescription = stringResource(R.string.search_attributes), tint = MaterialTheme.colorScheme.onSurfaceVariant) },
+                            singleLine = true,
+                            shape = RoundedCornerShape(12.dp),
+                            colors = OutlinedTextFieldDefaults.colors(focusedBorderColor = MaterialTheme.colorScheme.primary, unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant, focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer, unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { })
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        OutlinedButton(
+                            onClick = { showColumnSelectorDialog = true },
+                            shape = RoundedCornerShape(12.dp),
+                            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 14.dp)
+                        ) {
+                            Text("👁️ الأعمدة", style = MaterialTheme.typography.labelMedium, fontWeight = FontWeight.Bold)
+                        }
+                    }
                 }
 
                 item {
@@ -181,7 +210,7 @@ fun LayerDetailsScreen(
                 if (filtered.isNotEmpty()) {
                     item {
                         DynamicTableHeader(
-                            allKeys = allKeys,
+                            allKeys = visibleKeys,
                             sortColumn = sortColumn,
                             sortAscending = sortAscending,
                             scrollState = scrollState,
@@ -195,7 +224,7 @@ fun LayerDetailsScreen(
                     items(pagedFeatures, key = { "${it.id}_${it.properties.hashCode()}" }) { feature ->
                         FeatureRow(
                             feature = feature,
-                            allKeys = allKeys,
+                            allKeys = visibleKeys,
                             scrollState = scrollState,
                             isSelected = feature.id == selectedFeature?.id && feature.properties == selectedFeature?.properties,
                             onClick = { selectedFeature = feature }
@@ -264,6 +293,47 @@ fun LayerDetailsScreen(
                         onDismiss = { selectedFeature = null }
                     )
                 }
+            }
+
+            if (showColumnSelectorDialog) {
+                AlertDialog(
+                    onDismissRequest = { showColumnSelectorDialog = false },
+                    title = { Text("👁️ تخصيص وتصفية الأعمدة", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column(Modifier.fillMaxWidth().heightIn(max = 350.dp).verticalScroll(rememberScrollState())) {
+                            allKeys.forEach { key ->
+                                val isVisible = key !in hiddenKeys
+                                Row(
+                                    modifier = Modifier.fillMaxWidth().clickable {
+                                        hiddenKeys = if (isVisible) hiddenKeys + key else hiddenKeys - key
+                                    }.padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Checkbox(
+                                        checked = isVisible,
+                                        onCheckedChange = { checked ->
+                                            hiddenKeys = if (checked) hiddenKeys - key else hiddenKeys + key
+                                        }
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    Text(key, style = MaterialTheme.typography.bodyMedium)
+                                }
+                            }
+                        }
+                    },
+                    confirmButton = {
+                        TextButton(onClick = { showColumnSelectorDialog = false }) { Text("إغلاق") }
+                    }
+                )
+            }
+
+            if (showExportDialog) {
+                ExportLayerDialog(
+                    layerName = layerName,
+                    features = detailInfo.features,
+                    crs = detailInfo.crs,
+                    onDismiss = { showExportDialog = false }
+                )
             }
         }
     }
@@ -493,22 +563,27 @@ private fun InfoRow(label: String, value: String) {
 }
 
 private fun parsePointCoords(coordStr: String?): Pair<Double, Double>? {
-    if (coordStr == null) return null
+    if (coordStr.isNullOrBlank()) return null
     return try {
-        val arr = JSONArray(coordStr)
-        if (arr.length() >= 2) {
-            val lng = arr.getDouble(0)
-            val lat = arr.getDouble(1)
-            lat to lng
+        val numbers = Regex("-?\\d+\\.\\d+|-?\\d+").findAll(coordStr).map { it.value.toDouble() }.toList()
+        if (numbers.size >= 2) {
+            val lats = mutableListOf<Double>()
+            val lngs = mutableListOf<Double>()
+            var i = 0
+            while (i + 1 < numbers.size) {
+                val x = numbers[i]
+                val y = numbers[i + 1]
+                if (x in -180.0..180.0 && y in -90.0..90.0) {
+                    lngs.add(x)
+                    lats.add(y)
+                }
+                i += 2
+            }
+            if (lats.isNotEmpty() && lngs.isNotEmpty()) {
+                lats.average() to lngs.average()
+            } else null
         } else null
-    } catch (e: Exception) {
-        try {
-            val cleaned = coordStr.trim('[', ']', ' ')
-            val parts = cleaned.split(",").map { it.trim() }
-            if (parts.size >= 2) parts[1].toDouble() to parts[0].toDouble()
-            else null
-        } catch (_: Exception) { null }
-    }
+    } catch (_: Exception) { null }
 }
 
 private fun formatCoordDD(lat: Double, lng: Double): String {

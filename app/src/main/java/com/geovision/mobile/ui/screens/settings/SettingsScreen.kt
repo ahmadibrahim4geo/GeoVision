@@ -16,6 +16,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.Help
+import androidx.compose.material.icons.automirrored.outlined.ShowChart
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
@@ -217,7 +219,7 @@ fun SettingsScreen(
             // ── نمط الرسم (Polar / Ortho) ──
             SettingsCard(
                 cardShape,
-                Icons.Outlined.ShowChart,
+                Icons.AutoMirrored.Outlined.ShowChart,
                 stringResource(R.string.draw_mode_title)
             ) {
                 Column(modifier = Modifier.selectableGroup()) {
@@ -440,7 +442,7 @@ fun SettingsScreen(
                 HorizontalDivider(modifier = Modifier.padding(vertical = 4.dp), color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                 SettingsClickableItem(
                     label = stringResource(R.string.user_guide),
-                    icon = Icons.Outlined.Help
+                    icon = Icons.AutoMirrored.Outlined.Help
                 ) {
                     context.startActivity(android.content.Intent(context, com.geovision.mobile.ui.screens.terms.UserGuideActivity::class.java))
                 }

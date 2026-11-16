@@ -114,6 +114,7 @@ private fun renderSignature(layer: Layer, detail: LayerDetailInfo): String {
         layer.transparency.toString(),
         layer.pointSize.toString(),
         layer.lineWidth.toString(),
+        layer.style.hashCode().toString(),
         detail.features.size.toString(),
         System.identityHashCode(detail).toString()
     ).joinToString(":")
@@ -129,6 +130,7 @@ private fun renderDatabaseSignature(layer: Layer, mapView: MapView): String {
         layer.transparency.toString(),
         layer.pointSize.toString(),
         layer.lineWidth.toString(),
+        layer.style.hashCode().toString(),
         mapView.zoomLevelDouble.toInt().toString(),
         bb.lonWest.roundForSignature(),
         bb.latSouth.roundForSignature(),
@@ -385,19 +387,24 @@ fun LayerOverlays(
                         val currentSignature = if (currentDetail != null) renderSignature(currentLayer, currentDetail) else renderDatabaseSignature(currentLayer, m)
                         if (currentSignature != prepared.signature) return@launch
 
-                        val alpha = (currentLayer.color.alpha * currentLayer.transparency * 255).toInt().coerceIn(0, 255)
-                        val lc = AColor.argb(alpha, (currentLayer.color.red * 255).toInt(), (currentLayer.color.green * 255).toInt(), (currentLayer.color.blue * 255).toInt())
+                        val style = currentLayer.style
+                        val fillA = (style.fillColor.alpha * style.fillAlpha * currentLayer.transparency * 255).toInt().coerceIn(0, 255)
+                        val fillColorInt = AColor.argb(fillA, (style.fillColor.red * 255).toInt(), (style.fillColor.green * 255).toInt(), (style.fillColor.blue * 255).toInt())
+                        val strokeA = (style.strokeColor.alpha * currentLayer.transparency * 255).toInt().coerceIn(0, 255)
+                        val strokeColorInt = AColor.argb(strokeA, (style.strokeColor.red * 255).toInt(), (style.strokeColor.green * 255).toInt(), (style.strokeColor.blue * 255).toInt())
+
                         val overlay = OptimizedCanvasOverlay(
                             prepared.layerId,
                             prepared.features,
                             selectModeState,
                             { layId, feature, geoPts -> onSelectLayerFeature(layId, feature, geoPts) },
-                            lc,
-                            lc,
-                            lc,
-                            currentLayer.pointSize,
-                            currentLayer.lineWidth,
+                            strokeColorInt,
+                            strokeColorInt,
+                            fillColorInt,
+                            style.pointSize,
+                            if (currentLayer.geomType == "Line") style.lineWidth else style.strokeWidth,
                             skipFeatureTaps = skipFeatureTaps,
+                            layerStyle = style,
                             preparedSpatialIndex = prepared.spatialIndex
                         )
 

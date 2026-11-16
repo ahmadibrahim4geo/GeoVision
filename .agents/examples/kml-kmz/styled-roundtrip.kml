@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<kml xmlns="http://www.opengis.net/kml/2.2" xmlns:gx="http://www.google.com/kml/ext/2.2">
+  <Document id="demoDocument">
+    <name>KML Round-Trip Preservation Fixture</name>
+    <open>1</open>
+    <Style id="normalStyle">
+      <IconStyle><color>ff0000ff</color><scale>1.25</scale><hotSpot x="0.5" y="0" xunits="fraction" yunits="fraction"/></IconStyle>
+      <LabelStyle><color>ffffffff</color><scale>1.1</scale></LabelStyle>
+      <LineStyle><color>ff00ff00</color><width>3</width></LineStyle>
+      <PolyStyle><color>7fff0000</color><fill>1</fill><outline>1</outline></PolyStyle>
+    </Style>
+    <Style id="highlightStyle"><IconStyle><scale>1.8</scale></IconStyle><LineStyle><width>5</width></LineStyle></Style>
+    <StyleMap id="twoStates">
+      <Pair><key>normal</key><styleUrl>#normalStyle</styleUrl></Pair>
+      <Pair><key>highlight</key><styleUrl>#highlightStyle</styleUrl></Pair>
+    </StyleMap>
+    <Folder id="sourceFolder">
+      <name>Original layer and styles</name><visibility>1</visibility><open>1</open>
+      <Placemark id="samplePoint">
+        <name>Sample point</name><description><![CDATA[<p>Safe original description</p>]]></description>
+        <styleUrl>#twoStates</styleUrl>
+        <TimeStamp><when>2026-10-25T09:00:00Z</when></TimeStamp>
+        <ExtendedData><Data name="station_code"><value>EG-001</value></Data><Data name="category"><value>reference</value></Data></ExtendedData>
+        <LookAt><longitude>31.24</longitude><latitude>30.04</latitude><range>5000</range><tilt>40</tilt><heading>5</heading></LookAt>
+        <Point><altitudeMode>relativeToGround</altitudeMode><coordinates>31.24,30.04,20</coordinates></Point>
+      </Placemark>
+      <Placemark id="sampleLine">
+        <name>Sample line</name><styleUrl>#normalStyle</styleUrl>
+        <LineString><tessellate>1</tessellate><coordinates>31.23,30.03,0 31.25,30.05,0</coordinates></LineString>
+      </Placemark>
+      <Placemark id="samplePolygon">
+        <name>Polygon with a hole</name><styleUrl>#normalStyle</styleUrl>
+        <Polygon><outerBoundaryIs><LinearRing><coordinates>31.2,30,0 31.3,30,0 31.3,30.1,0 31.2,30.1,0 31.2,30,0</coordinates></LinearRing></outerBoundaryIs><innerBoundaryIs><LinearRing><coordinates>31.23,30.03,0 31.27,30.03,0 31.27,30.07,0 31.23,30.07,0 31.23,30.03,0</coordinates></LinearRing></innerBoundaryIs></Polygon>
+      </Placemark>
+      <Placemark id="sampleTrack">
+        <name>GPS track</name><styleUrl>#normalStyle</styleUrl>
+        <gx:Track><altitudeMode>absolute</altitudeMode><when>2026-10-25T09:00:00Z</when><when>2026-10-25T09:05:00Z</when><gx:coord>31.24 30.04 100</gx:coord><gx:coord>31.25 30.05 110</gx:coord></gx:Track>
+      </Placemark>
+    </Folder>
+  </Document>
+</kml>

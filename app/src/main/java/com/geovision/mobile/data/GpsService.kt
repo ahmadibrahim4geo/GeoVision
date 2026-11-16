@@ -51,7 +51,8 @@ object GpsService {
             val lastGps = if (hasFine) lm.getLastKnownLocation(LocationManager.GPS_PROVIDER) else null
             val lastNet = lm.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
             val lastPassive = lm.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER)
-            val bestLast = listOfNotNull(lastGps, lastNet, lastPassive).maxByOrNull { it.accuracy }
+            val bestLast = listOfNotNull(lastGps, lastNet, lastPassive).filter { it.accuracy > 0 }.minByOrNull { it.accuracy }
+                ?: listOfNotNull(lastGps, lastNet, lastPassive).firstOrNull()
             if (bestLast != null) {
                 trySend(GpsState(location = bestLast, isRunning = true))
             }
@@ -71,8 +72,10 @@ object GpsService {
             LocationManager.NETWORK_PROVIDER,
             LocationManager.PASSIVE_PROVIDER
         )
-        return providers.mapNotNull { provider ->
+        val validLocations = providers.mapNotNull { provider ->
             try { lm.getLastKnownLocation(provider) } catch (_: SecurityException) { null }
-        }.maxByOrNull { it.accuracy }
+        }
+        return validLocations.filter { it.accuracy > 0 }.minByOrNull { it.accuracy }
+            ?: validLocations.firstOrNull()
     }
 }

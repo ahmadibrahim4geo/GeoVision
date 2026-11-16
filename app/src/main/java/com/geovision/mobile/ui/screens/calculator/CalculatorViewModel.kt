@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlin.math.abs
-import com.geovision.mobile.data.geo.CoordinateConverter
+import com.geovision.mobile.data.geo.GeoCoordinateMath
 import com.geovision.mobile.data.geo.FormatDetector
 
 data class ConvertedPoint(
@@ -108,17 +108,17 @@ class CalculatorViewModel : ViewModel() {
                     if (lon >= 0 && state.lonHemisphere == 'W') lon = -lon
                     else if (lon < 0 && state.lonHemisphere == 'E') lon = abs(lon)
                 }
-                val utmResult = CoordinateConverter.ddToUtm(lat, lon)
-                val mercResult = CoordinateConverter.ddToWebMercator(lat, lon)
+                val utmResult = GeoCoordinateMath.ddToUtm(lat, lon)
+                val mercResult = GeoCoordinateMath.ddToWebMercator(lat, lon)
                 results.add(
                     ConvertedPoint(
                         index = index + 1,
                         original = line.trim(),
-                        dd = CoordinateConverter.formatDD(lat, lon),
-                        dms = "${CoordinateConverter.ddToDms(lat, true)} - ${CoordinateConverter.ddToDms(lon, false)}",
-                        ddm = "${CoordinateConverter.ddToDdm(lat, true)} - ${CoordinateConverter.ddToDdm(lon, false)}",
-                        utm = CoordinateConverter.formatUtm(utmResult),
-                        epsg3857 = CoordinateConverter.formatWebMercator(mercResult.first, mercResult.second),
+                        dd = GeoCoordinateMath.formatDD(lat, lon),
+                        dms = "${GeoCoordinateMath.ddToDms(lat, true)} - ${GeoCoordinateMath.ddToDms(lon, false)}",
+                        ddm = "${GeoCoordinateMath.ddToDdm(lat, true)} - ${GeoCoordinateMath.ddToDdm(lon, false)}",
+                        utm = GeoCoordinateMath.formatUtm(utmResult),
+                        epsg3857 = GeoCoordinateMath.formatWebMercator(mercResult.first, mercResult.second),
                         lat = lat,
                         lon = lon,
                         error = false

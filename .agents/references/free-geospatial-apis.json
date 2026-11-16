@@ -1,0 +1,1558 @@
+{
+  "schema_version": "1.0",
+  "reviewed_on": "2026-10-25",
+  "description": "Curated GIS, Earth-science and place-search service directory; free quotas, evaluation, production rights and hosted/self-hosted use are distinct.",
+  "policy": "Verify live docs, quotas, keys, data licenses, geographic/temporal coverage and uptime before production use; never hardcode credentials; obey caching and attribution rules. Default free-only recommendations use cost_tier free-self-hosted or free-conditional only, subject to account, scientific data and terms verification. Pricing groups for geocoding are separate subtypes.",
+  "access_vocabulary": {
+    "free-noncommercial": "Free only within noncommercial fair-use quota; commercial use requires a separate plan or permission.",
+    "free-key-required": "Free tier available after personal API key issuance; no shared embedded keys.",
+    "free-registration": "Registration and personal access token needed for programmatic access.",
+    "free-limited": "Low-volume public trial or free key tier.",
+    "public-fair-use": "Open public entry point without unlimited traffic, availability or asset redistribution promise.",
+    "public-with-asset-restrictions": "Open catalog; asset access or volumes may require signing, auth or throttling.",
+    "restricted-public": "Public endpoint with explicit strict usage policy, unsuitable for bulk/generic integrations.",
+    "temporarily-unavailable": "Provider reports service unavailable; use alternatives.",
+    "self-hosted-open-source": "Open-source deployable engine, not a guaranteed public hosted API.",
+    "commercial-metered": "Commercial platform requiring billing and/or paid entitlements; any free allowance is conditional.",
+    "free-trial": "Provider explicitly limits the free entitlement to testing or evaluation."
+  },
+  "services": [
+    {
+      "id": "open-meteo-forecast",
+      "name": "Open-Meteo Forecast",
+      "category": "climate-weather",
+      "documentation_url": "https://open-meteo.com/en/docs",
+      "service_url": "https://api.open-meteo.com/v1/forecast",
+      "access": "free-noncommercial",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "JSON",
+        "CSV",
+        "XLSX"
+      ],
+      "limits": "Free non-commercial service: <10,000 calls/day, 5,000/hour, 600/minute; commercial subscriptions required.",
+      "attribution": "CC BY 4.0 data attribution to Open-Meteo and applicable original sources.",
+      "use_cases": [
+        "weather forecasts",
+        "hourly time series"
+      ],
+      "caveat": "Forecast model availability and native resolution vary by area; do not represent forecasts as ground station observations.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://api.open-meteo.com/v1/forecast?latitude=30.0444&longitude=31.2357&hourly=temperature_2m,relative_humidity_2m",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-meteo-archive",
+      "name": "Open-Meteo Historical Weather",
+      "category": "climate-weather",
+      "documentation_url": "https://open-meteo.com/en/docs/historical-weather-api",
+      "service_url": "https://archive-api.open-meteo.com/v1/archive",
+      "access": "free-noncommercial",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "JSON",
+        "CSV",
+        "XLSX"
+      ],
+      "limits": "Same free non-commercial Open-Meteo service limits; data coverage/resolution depend on selected model.",
+      "attribution": "CC BY 4.0 data attribution.",
+      "use_cases": [
+        "ERA5/ERA5-Land reanalysis",
+        "historical climate studies"
+      ],
+      "caveat": "Select a consistent source/model over the entire study period; reanalysis is gridded, not a station record.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://archive-api.open-meteo.com/v1/archive?latitude=30.0444&longitude=31.2357&start_date=2023-01-01&end_date=2023-01-03&daily=temperature_2m_max",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nasa-power",
+      "name": "NASA POWER Temporal API",
+      "category": "climate-weather",
+      "documentation_url": "https://power.larc.nasa.gov/docs/services/api/temporal/",
+      "service_url": "https://power.larc.nasa.gov/api/temporal/daily/point",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "JSON",
+        "CSV",
+        "NetCDF"
+      ],
+      "limits": "Respect service 429/rate constraints; point daily API has parameter constraints; avoid redundant requests over same coarse grid cell.",
+      "attribution": "Cite NASA POWER, underlying source data and version according to product guidelines.",
+      "use_cases": [
+        "daily meteorology",
+        "solar radiation",
+        "agroclimatology"
+      ],
+      "caveat": "Spatial/time resolution and near-real-time latency vary. Daily values may be local solar time unless explicitly set.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://power.larc.nasa.gov/api/temporal/daily/point?parameters=T2M&community=AG&longitude=31.2357&latitude=30.0444&start=20230101&end=20230103&format=JSON",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "copernicus-cds",
+      "name": "Copernicus Climate Data Store CDS API",
+      "category": "climate-weather",
+      "documentation_url": "https://cds.climate.copernicus.eu/how-to-api",
+      "service_url": "https://cds.climate.copernicus.eu/api",
+      "access": "free-registration",
+      "authentication": "account-token",
+      "coverage": "global and regional by dataset",
+      "formats": [
+        "NetCDF",
+        "GRIB"
+      ],
+      "limits": "Account and personal access token required; accept the requested dataset-specific licence; job queues and size restrictions apply.",
+      "attribution": "Cite ECMWF/Copernicus and specific dataset/licence.",
+      "use_cases": [
+        "ERA5 retrieval",
+        "climate time-series",
+        "gridded reanalysis"
+      ],
+      "caveat": "Use CDS API client and secrets via environment or private configuration, not source control.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-meteo-elevation",
+      "name": "Open-Meteo Elevation API",
+      "category": "terrain-elevation",
+      "documentation_url": "https://open-meteo.com/en/docs/elevation-api",
+      "service_url": "https://api.open-meteo.com/v1/elevation",
+      "access": "free-noncommercial",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Up to 100 coordinates per request; general Open-Meteo non-commercial rate limits apply.",
+      "attribution": "Open-Meteo/Copernicus DEM source attribution.",
+      "use_cases": [
+        "point elevation",
+        "weather downscaling"
+      ],
+      "caveat": "Uses Copernicus GLO-90, roughly 90 m; not a survey-grade height or local high-resolution DEM.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://api.open-meteo.com/v1/elevation?latitude=30.0444&longitude=31.2357",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "opentopography",
+      "name": "OpenTopography Global DEM API",
+      "category": "terrain-elevation",
+      "documentation_url": "https://opentopography.org/developers",
+      "service_url": "https://portal.opentopography.org/API/globaldem",
+      "access": "free-key-required",
+      "authentication": "api-key",
+      "coverage": "global coverage depends on DEM selection",
+      "formats": [
+        "GeoTIFF"
+      ],
+      "limits": "Free academic key generally 200 calls/day and non-academic 50/day for global datasets; product and area limits apply.",
+      "attribution": "Dataset-specific attribution; review OpenTopography API agreement.",
+      "use_cases": [
+        "DEM downloads",
+        "SRTM/Copernicus elevation grids"
+      ],
+      "caveat": "Never embed or redistribute a personal key in a desktop or multiuser app; commercial software integration may require Enterprise access.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-elevation",
+      "name": "Open-Elevation Hosted API",
+      "category": "terrain-elevation",
+      "documentation_url": "https://www.open-elevation.com/",
+      "service_url": "https://api.open-elevation.com/api/v1/lookup",
+      "access": "free-limited",
+      "authentication": "none-or-api-key",
+      "coverage": "global",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Public no-key trial: up to 500 coordinates/month per IP; free account/key advertised up to 1,000 coordinates/month.",
+      "attribution": "SRTM/NASA data and service attribution per current provider terms.",
+      "use_cases": [
+        "simple elevation samples"
+      ],
+      "caveat": "Approximate/resampled heights; no-data may return 0; self-hostable GPLv2 server has separate licence.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://api.open-elevation.com/api/v1/lookup?locations=30.0444,31.2357",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "usgs-epqs",
+      "name": "USGS Elevation Point Query Service",
+      "category": "terrain-elevation",
+      "documentation_url": "https://www.usgs.gov/the-national-map-data-delivery/gis-data-download",
+      "service_url": "https://epqs.nationalmap.gov/v1/json",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "United States and supported territories",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Public point queries; USGS service policies and availability may change.",
+      "attribution": "USGS 3DEP attribution recommended.",
+      "use_cases": [
+        "US terrain elevations"
+      ],
+      "caveat": "Not a globally applicable DEM service. Elevations are interpolated from varying 3DEP resolutions.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "earth-search",
+      "name": "Element 84 Earth Search STAC",
+      "category": "satellite-imagery",
+      "documentation_url": "https://element84.com/earth-search",
+      "service_url": "https://earth-search.aws.element84.com/v1",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "multi-collection global or regional",
+      "formats": [
+        "STAC JSON",
+        "COG asset links"
+      ],
+      "limits": "Free public catalog with no guaranteed SLA. Assets may have their own rules or requester-pays S3 links.",
+      "attribution": "Cite original dataset provider and asset terms.",
+      "use_cases": [
+        "Sentinel-2 scene search",
+        "Landsat discovery",
+        "STAC querying"
+      ],
+      "caveat": "STAC search metadata is not itself a basemap or unrestricted satellite image redistribution.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "microsoft-planetary-computer",
+      "name": "Microsoft Planetary Computer STAC",
+      "category": "satellite-imagery",
+      "documentation_url": "https://planetarycomputer.microsoft.com/docs/",
+      "service_url": "https://planetarycomputer.microsoft.com/api/stac/v1",
+      "access": "public-with-asset-restrictions",
+      "authentication": "none-for-stac",
+      "coverage": "global or collection-specific",
+      "formats": [
+        "STAC JSON",
+        "cloud-optimized imagery assets"
+      ],
+      "limits": "STAC search anonymously available; most assets can be read without account but are throttled and sometimes need signed URLs or tokens.",
+      "attribution": "Original collection/provider licences and required attribution.",
+      "use_cases": [
+        "environmental datasets",
+        "satellite imagery STAC"
+      ],
+      "caveat": "Do not treat anonymous catalogue access as an unlimited anonymous asset download licence.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "copernicus-dataspace",
+      "name": "Copernicus Data Space APIs",
+      "category": "satellite-imagery",
+      "documentation_url": "https://dataspace.copernicus.eu/analyse/apis",
+      "service_url": "https://catalogue.dataspace.copernicus.eu/stac",
+      "access": "free-registration",
+      "authentication": "service-dependent",
+      "coverage": "Copernicus Sentinel missions",
+      "formats": [
+        "STAC",
+        "OData",
+        "openEO"
+      ],
+      "limits": "Catalog/search and actual processing/download endpoints have differing authentication, quota and subscription/access rules.",
+      "attribution": "Copernicus Sentinel data-use terms and provider acknowledgements.",
+      "use_cases": [
+        "Sentinel imagery search",
+        "Sentinel download",
+        "cloud processing"
+      ],
+      "caveat": "Obtain tokens through official flow when required; do not publish refresh credentials.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nasa-gibs",
+      "name": "NASA GIBS Web Map Services",
+      "category": "satellite-imagery",
+      "documentation_url": "https://www.earthdata.nasa.gov/engage/open-data-services-software/earthdata-developer-portal/gibs-api",
+      "service_url": "https://gibs.earthdata.nasa.gov/wms/epsg4326/best",
+      "access": "public-fair-use",
+      "authentication": "none-for-many-layers",
+      "coverage": "global",
+      "formats": [
+        "WMS",
+        "WMTS",
+        "tiles"
+      ],
+      "limits": "Follow layer-specific temporal, projection, attribution and terms; no public SLA.",
+      "attribution": "NASA Earthdata product-specific credits.",
+      "use_cases": [
+        "time-enabled satellite imagery layers",
+        "GIS map overlays"
+      ],
+      "caveat": "GIBS map images are visualization services; not a substitute for the underlying scientific pixel data or original raster.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "openfreemap",
+      "name": "OpenFreeMap Hosted Styles",
+      "category": "basemaps",
+      "documentation_url": "https://openfreemap.org/quick_start/",
+      "service_url": "https://tiles.openfreemap.org/styles/liberty",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "global OSM-derived coverage",
+      "formats": [
+        "MapLibre style",
+        "vector tiles"
+      ],
+      "limits": "Site advertises no public map-view/request limit; offline per-download limit 3,000 tiles or 50 MB with max 4 concurrent requests; terms may evolve.",
+      "attribution": "Visible OpenStreetMap/OpenMapTiles attribution as applicable.",
+      "use_cases": [
+        "free vector basemaps",
+        "MapLibre maps"
+      ],
+      "caveat": "Hosted service best-effort; do not assume unlimited bulk download or remove attribution.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://tiles.openfreemap.org/styles/liberty",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "osm-tiles",
+      "name": "OSM Foundation Standard Tile Server",
+      "category": "basemaps",
+      "documentation_url": "https://operations.osmfoundation.org/policies/tiles/",
+      "service_url": "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+      "access": "restricted-public",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "PNG XYZ tiles"
+      ],
+      "limits": "No bulk/offline prefetching; use correct attribution and valid identifying client; no SLA; block risk for heavy use.",
+      "attribution": "© OpenStreetMap contributors (ODbL for OSM data).",
+      "use_cases": [
+        "low-volume interactive map previews"
+      ],
+      "caveat": "Not a free unlimited production tile CDN and not suitable for harvesting tiles.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "restricted"
+    },
+    {
+      "id": "overpass",
+      "name": "OSM Overpass Public API",
+      "category": "vector-poi",
+      "documentation_url": "https://wiki.openstreetmap.org/wiki/Overpass_API",
+      "service_url": "https://overpass-api.de/api/interpreter",
+      "access": "restricted-public",
+      "authentication": "none",
+      "coverage": "global OSM data",
+      "formats": [
+        "JSON",
+        "XML"
+      ],
+      "limits": "Shared volunteer instances subject to load/usage policies; avoid large or repeated bulk queries and cache results.",
+      "attribution": "OSM contributors / ODbL.",
+      "use_cases": [
+        "targeted OSM POI queries",
+        "regional feature extraction"
+      ],
+      "caveat": "For high-volume operations use planet/regional extracts or self-host rather than public API.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "restricted"
+    },
+    {
+      "id": "pelias-self-hosted",
+      "name": "Pelias Open-Source Geocoder",
+      "category": "geocoding",
+      "documentation_url": "https://pelias.github.io/pelias/",
+      "service_url": "https://github.com/pelias/pelias",
+      "access": "self-hosted-open-source",
+      "authentication": "none for self-hosted deployment",
+      "coverage": "Global depending on imported datasets",
+      "formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "limits": "MIT open-source geocoder; self-hosting requires compute, storage and data imports; there is NO official unlimited free hosted Pelias API.",
+      "attribution": "Pelias MIT code license; each imported dataset keeps its own terms/attribution.",
+      "use_cases": [
+        "forward/reverse geocoding",
+        "autocomplete",
+        "self-hosted multilingual POI and gazetteer search"
+      ],
+      "caveat": "service_url is source code, not a live geocoding API endpoint. Do not equate free software with free hosting; optional hosted Geocode Earth is a separate commercial provider.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "self-hosted-open-source",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-self-hosted"
+    },
+    {
+      "id": "soilgrids",
+      "name": "ISRIC SoilGrids REST API",
+      "category": "soil",
+      "documentation_url": "https://isric.org/explore/soilgrids",
+      "service_url": "https://rest.isric.org/soilgrids/v2.0",
+      "access": "temporarily-unavailable",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Official site reports the REST service temporarily paused as of 2026-10-24; no restoration ETA.",
+      "attribution": "ISRIC SoilGrids data-specific citation.",
+      "use_cases": [
+        "soil properties by point"
+      ],
+      "caveat": "Do not build runtime dependency on paused service. See ISRIC alternate WCS/WebDAV data access.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "unavailable"
+    },
+    {
+      "id": "gbif",
+      "name": "GBIF Occurrence API",
+      "category": "biodiversity",
+      "documentation_url": "https://techdocs.gbif.org/en/openapi/",
+      "service_url": "https://api.gbif.org/v1/occurrence/search",
+      "access": "public-fair-use",
+      "authentication": "none-for-search",
+      "coverage": "global biodiversity records",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Search endpoint max 300 records per page and offset pagination totals 100,000 records; use download API for bulk.",
+      "attribution": "Cite GBIF download DOI and original publishers/datasets as appropriate.",
+      "use_cases": [
+        "species occurrence points",
+        "biodiversity maps"
+      ],
+      "caveat": "Species occurrence coordinates may be generalized or imprecise; sensitive species data require care.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "geoboundaries",
+      "name": "geoBoundaries",
+      "category": "administrative-boundaries",
+      "documentation_url": "https://www.geoboundaries.org/api.html",
+      "service_url": "https://www.geoboundaries.org/api/current/gbOpen/EGY/ADM1/",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "Global administrative boundaries; levels vary by country",
+      "formats": [
+        "JSON metadata",
+        "GeoJSON",
+        "Shapefile"
+      ],
+      "limits": "No guaranteed public throughput; cache only in line with source license",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "administrative boundaries",
+        "geoBoundaries"
+      ],
+      "caveat": "Boundary editions and original layer licenses vary; gbOpen generally CC BY 4.0",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "worldpop-v2",
+      "name": "WorldPop API v2",
+      "category": "population-demographics",
+      "documentation_url": "https://api.worldpop.org/v2/",
+      "service_url": "https://api.worldpop.org/v2/",
+      "access": "public-fair-use",
+      "authentication": "none or approved key",
+      "coverage": "Global modeled population datasets by year",
+      "formats": [
+        "JSON",
+        "GeoJSON request"
+      ],
+      "limits": "1,000 daily no-key requests; 50,000 square km maximum no-key polygon",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "population demographics",
+        "WorldPop API v2"
+      ],
+      "caveat": "Population is modeled rather than official census; asynchronous tasks may apply",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-meteo-geocoding",
+      "name": "Open-Meteo Geocoding API",
+      "category": "geocoding",
+      "documentation_url": "https://open-meteo.com/en/docs/geocoding-api",
+      "service_url": "https://geocoding-api.open-meteo.com/v1/search",
+      "access": "free-noncommercial",
+      "authentication": "none for noncommercial",
+      "coverage": "Worldwide location and postcode search; not a complete address/POI directory",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free no-key for non-commercial use; shared Open-Meteo fair-use caps (around 10,000 calls/day); commercial licensing/plan differs.",
+      "attribution": "Open-Meteo attribution/CC BY 4.0 where applicable.",
+      "use_cases": [
+        "city and postcode name search"
+      ],
+      "caveat": "Use as city/location finder, not a rooftop street-address geocoder; localized labels and coverage may differ.",
+      "verified_on": "2026-10-25",
+      "example_url": "https://geocoding-api.open-meteo.com/v1/search?name=Cairo&count=5&language=ar&countryCode=EG",
+      "pricing_group": "public-fair-use",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nasa-firms",
+      "name": "NASA FIRMS Area API",
+      "category": "hazards-disasters",
+      "documentation_url": "https://firms.modaps.eosdis.nasa.gov/api/area",
+      "service_url": "https://firms.modaps.eosdis.nasa.gov/api/area/csv",
+      "access": "free-key-required",
+      "authentication": "map-key",
+      "coverage": "Global MODIS/VIIRS thermal detections",
+      "formats": [
+        "CSV",
+        "WMS",
+        "WFS"
+      ],
+      "limits": "Free map key; 5,000 map transactions per 10 minutes, area requests 1 to 5 days",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "hazards disasters",
+        "NASA FIRMS Area API"
+      ],
+      "caveat": "Hotspots are not burned-area perimeters; product latency differs",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "usgs-earthquake",
+      "name": "USGS Earthquake Event API",
+      "category": "hazards-disasters",
+      "documentation_url": "https://earthquake.usgs.gov/fdsnws/event/1/",
+      "service_url": "https://earthquake.usgs.gov/fdsnws/event/1/query",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "Global earthquake catalog, variable completeness",
+      "formats": [
+        "GeoJSON",
+        "CSV",
+        "QuakeML"
+      ],
+      "limits": "Fair-use and result limits; restrict queries by bounding box and time",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "hazards disasters",
+        "USGS Earthquake Event API"
+      ],
+      "caveat": "Locations/depths uncertain and catalogue records may be revised",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nasa-cmr",
+      "name": "NASA Earthdata CMR Search",
+      "category": "satellite-imagery",
+      "documentation_url": "https://cmr.earthdata.nasa.gov/search/site/docs/search/api.html",
+      "service_url": "https://cmr.earthdata.nasa.gov/search/collections.json",
+      "access": "public-with-asset-restrictions",
+      "authentication": "none for public metadata",
+      "coverage": "Global Earth observation collection/granule metadata",
+      "formats": [
+        "JSON",
+        "XML",
+        "STAC"
+      ],
+      "limits": "Paging and service constraints; downloads may require Earthdata Login",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "satellite imagery",
+        "NASA Earthdata CMR Search"
+      ],
+      "caveat": "Metadata discovery does not grant access to every asset",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "openaq-v3",
+      "name": "OpenAQ v3 Observations",
+      "category": "air-quality",
+      "documentation_url": "https://docs.openaq.org/api",
+      "service_url": "https://api.openaq.org/v3/locations",
+      "access": "free-key-required",
+      "authentication": "api-key",
+      "coverage": "Global station monitoring where available",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free key: 60 requests/minute and 2,000/hour",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "air quality",
+        "OpenAQ v3 Observations"
+      ],
+      "caveat": "Ground observations not modeled air quality; harmonize timestamps and units",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-meteo-air-quality",
+      "name": "Open-Meteo Air Quality API",
+      "category": "air-quality",
+      "documentation_url": "https://open-meteo.com/en/docs/air-quality-api",
+      "service_url": "https://air-quality-api.open-meteo.com/v1/air-quality",
+      "access": "free-noncommercial",
+      "authentication": "none",
+      "coverage": "Global/regional model-based pollution datasets",
+      "formats": [
+        "JSON",
+        "CSV",
+        "XLSX"
+      ],
+      "limits": "Free noncommercial limits: under 10,000 daily, 5,000 hourly, 600 per minute",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "air quality",
+        "Open-Meteo Air Quality API"
+      ],
+      "caveat": "Forecast model grids not observed sensor data; attribute original CAMS inputs",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "open-meteo-flood",
+      "name": "Open-Meteo Flood GloFAS",
+      "category": "hydrology-water",
+      "documentation_url": "https://open-meteo.com/en/docs/flood-api",
+      "service_url": "https://flood-api.open-meteo.com/v1/flood",
+      "access": "free-noncommercial",
+      "authentication": "none",
+      "coverage": "Global modeled river discharge at about 5 km",
+      "formats": [
+        "JSON",
+        "CSV",
+        "XLSX"
+      ],
+      "limits": "Open-Meteo noncommercial fair-use quotas apply",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "hydrology water",
+        "Open-Meteo Flood GloFAS"
+      ],
+      "caveat": "Discharge (m3/s) is not an inundation polygon or an ephemeral wadi map",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "ohsome-v2",
+      "name": "HeiGIT ohsome API v2",
+      "category": "osm-history",
+      "documentation_url": "https://docs.ohsome.org/ohsome-api/v2/",
+      "service_url": "https://api.heigit.org/ohsome-api/v2/",
+      "access": "free-key-required",
+      "authentication": "api-key",
+      "coverage": "Global OSM historical data",
+      "formats": [
+        "JSON",
+        "GeoJSON",
+        "Parquet"
+      ],
+      "limits": "Free key with account plan quotas; v1 retires 2026-11-30",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "osm history",
+        "HeiGIT ohsome API v2"
+      ],
+      "caveat": "OSM edit time is not real-world building date; do not use deprecated v2-rc",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "openrouteservice-heigit",
+      "name": "HeiGIT openrouteservice v2",
+      "category": "routing-accessibility",
+      "documentation_url": "https://api.heigit.org/",
+      "service_url": "https://api.heigit.org/openrouteservice/v2/",
+      "access": "free-key-required",
+      "authentication": "api-key",
+      "coverage": "Global where OpenStreetMap routing graph available",
+      "formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "limits": "Free Standard plan quotas vary by directions, isochrone and matrix endpoint",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "routing accessibility",
+        "HeiGIT openrouteservice v2"
+      ],
+      "caveat": "Use new api.heigit.org host; old api.openrouteservice.org is being shut down in November 2026",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "hdx-hapi",
+      "name": "HDX Humanitarian API HAPI",
+      "category": "humanitarian-data",
+      "documentation_url": "https://hdx-hapi.readthedocs.io/en/latest/getting-started/",
+      "service_url": "https://hapi.humdata.org/api/v1/",
+      "access": "free-registration",
+      "authentication": "app-identifier",
+      "coverage": "Humanitarian datasets by country and administrative zone",
+      "formats": [
+        "JSON",
+        "CSV"
+      ],
+      "limits": "Generate free app identifier; use filtering, pagination and fair-use quotas",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "humanitarian data",
+        "HDX Humanitarian API HAPI"
+      ],
+      "caveat": "Original dataset has its own temporal coverage, spatial references and attribution",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "usgs-waterdata",
+      "name": "USGS Water Data OGC API",
+      "category": "hydrology-water",
+      "documentation_url": "https://api.waterdata.usgs.gov/docs/ogcapi/migration/",
+      "service_url": "https://api.waterdata.usgs.gov/ogcapi/v1/collections",
+      "access": "public-fair-use",
+      "authentication": "none for public reads",
+      "coverage": "US and supported territories only",
+      "formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "limits": "Paged modern OGC collections and fair-use limits",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "hydrology water",
+        "USGS Water Data OGC API"
+      ],
+      "caveat": "US-only; legacy WaterServices endpoints retire in early 2027",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "noaa-coops",
+      "name": "NOAA CO-OPS Tides and Currents API",
+      "category": "ocean-coastal",
+      "documentation_url": "https://api.tidesandcurrents.noaa.gov/api/dev",
+      "service_url": "https://api.tidesandcurrents.noaa.gov/api/prod/datagetter",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "US coastal/territorial observation stations",
+      "formats": [
+        "JSON",
+        "CSV",
+        "XML"
+      ],
+      "limits": "Station/product-specific date limits and usage guidelines",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "ocean coastal",
+        "NOAA CO-OPS Tides and Currents API"
+      ],
+      "caveat": "Requires explicit tidal datum, units, station ID and time zone",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nasa-eonet",
+      "name": "NASA EONET Natural Events v3",
+      "category": "hazards-disasters",
+      "documentation_url": "https://eonet.gsfc.nasa.gov/docs/v3",
+      "service_url": "https://eonet.gsfc.nasa.gov/api/v3/events/geojson",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "Global curated natural event metadata",
+      "formats": [
+        "GeoJSON",
+        "JSON"
+      ],
+      "limits": "Use bounding box, category, day and limit parameters with fair use",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "hazards disasters",
+        "NASA EONET Natural Events v3"
+      ],
+      "caveat": "Curated natural events not a complete scientific disaster census",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "worldbank-indicators",
+      "name": "World Bank Indicators API v2",
+      "category": "population-demographics",
+      "documentation_url": "https://datahelpdesk.worldbank.org/knowledgebase/articles/889392",
+      "service_url": "https://api.worldbank.org/v2/country/EG/indicator/SP.POP.TOTL",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "Global country-level statistical indicators",
+      "formats": [
+        "JSON",
+        "XML"
+      ],
+      "limits": "Paged API with responsible request use",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "population demographics",
+        "World Bank Indicators API v2"
+      ],
+      "caveat": "National statistical totals are not local population grids",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "noaa-ncei-cdo",
+      "name": "NOAA NCEI Climate Data Online v2",
+      "category": "climate-weather",
+      "documentation_url": "https://www.ncei.noaa.gov/cdo-web/webservices/v2",
+      "service_url": "https://www.ncei.noaa.gov/cdo-web/api/v2/datasets",
+      "access": "free-key-required",
+      "authentication": "access-token",
+      "coverage": "Station archives vary by NOAA dataset",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free token: 5 requests/second and 10,000 requests/day",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "climate weather",
+        "NOAA NCEI Climate Data Online v2"
+      ],
+      "caveat": "Station records need quality and missing-value checks",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "noaa-ncei-erddap",
+      "name": "NOAA NCEI ERDDAP",
+      "category": "ocean-coastal",
+      "documentation_url": "https://www.ncei.noaa.gov/erddap/rest.html",
+      "service_url": "https://www.ncei.noaa.gov/erddap/search/index.json",
+      "access": "public-with-asset-restrictions",
+      "authentication": "none for many public collections",
+      "coverage": "Dataset-specific gridded/tabular marine and ocean data",
+      "formats": [
+        "JSON",
+        "NetCDF",
+        "CSV",
+        "OPeNDAP"
+      ],
+      "limits": "Use bounded griddap/tabledap subsets; dataset size/access varies",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "ocean coastal",
+        "NOAA NCEI ERDDAP"
+      ],
+      "caveat": "ERDDAP gateway does not mean every dataset permits all reuse",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "inaturalist",
+      "name": "iNaturalist Observations API",
+      "category": "biodiversity",
+      "documentation_url": "https://www.inaturalist.org/pages/developers",
+      "service_url": "https://api.inaturalist.org/v1/observations",
+      "access": "public-fair-use",
+      "authentication": "none for public searches",
+      "coverage": "Global citizen-science observations",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Recommended ~1 request/sec, under 10,000/day; max throttle 100/min; no bulk exports",
+      "attribution": "Credit the service provider and the original contributing dataset under its own license.",
+      "use_cases": [
+        "biodiversity",
+        "iNaturalist Observations API"
+      ],
+      "caveat": "Sensitive species coordinates may be obscured; respect observation and image licenses",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "gebco-2026-wms",
+      "name": "GEBCO_2026 Global Seafloor/Land Terrain WMS",
+      "category": "terrain-bathymetry",
+      "documentation_url": "https://www.gebco.net/data-products/gebco-web-services/web-map-service",
+      "service_url": "https://wms.gebco.net/mapserv",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "Global land and ocean; GEBCO_2026 15-arc-second underlying grid",
+      "formats": [
+        "WMS 1.3.0",
+        "GetCapabilities XML",
+        "rendered map image"
+      ],
+      "limits": "Public WMS with no unlimited request allowance or uptime guarantee; obtain layer IDs via GetCapabilities and make bounded GetMap requests.",
+      "attribution": "GEBCO Bathymetric Compilation Group 2026 (2026), GEBCO_2026 Grid, doi:10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa; public domain with source acknowledgment required.",
+      "use_cases": [
+        "bathymetry shaded relief visualization",
+        "land and ocean topographic map layers",
+        "TID source-class map display"
+      ],
+      "caveat": "WMS is rendered map imagery and NOT numeric DEM cell data; not suitable for quantitative terrain modeling. GEBCO must NOT be used for navigation or other safety-at-sea uses. Mean sea level vertical reference is approximate in some coastal areas.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://wms.gebco.net/mapserv?request=getcapabilities&service=wms&version=1.3.0",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "gebco-2026-ceda-opendap",
+      "name": "GEBCO_2026 Bathymetry/Topography via CEDA OPeNDAP",
+      "category": "terrain-bathymetry",
+      "documentation_url": "https://www.gebco.net/data-products/gridded-bathymetry-data",
+      "service_url": "https://dap.ceda.ac.uk/bodc/gebco/global/gebco_2026/ice_surface_elevation/netcdf/GEBCO_2026.nc",
+      "access": "public-with-asset-restrictions",
+      "authentication": "Check current CEDA dataset/OPeNDAP access conditions; no shared keys",
+      "coverage": "Global ocean and land; 15 arc-second WGS84 lat/lon grid, ~463 m at equator (grid interval only)",
+      "formats": [
+        "OPeNDAP",
+        "NetCDF4",
+        "GeoTIFF through official separate download tool",
+        "Esri ASCII through official separate download tool"
+      ],
+      "limits": "Free public-domain dataset but no verified unlimited OPeNDAP quota; prefer spatial subsets, verify authentication/constraint syntax and avoid whole-global multi-GB transfer.",
+      "attribution": "GEBCO Bathymetric Compilation Group 2026 (2026), GEBCO_2026 Grid, doi:10.5285/4f68d5c7-45eb-f999-e063-7086abc036fa. Free commercial/noncommercial reuse with required credit.",
+      "use_cases": [
+        "numeric ocean bathymetry and land elevation rasters",
+        "coastal and submarine terrain analysis",
+        "GEBCO TID source-type quality companion"
+      ],
+      "caveat": "Official CEDA NetCDF archive file; OPeNDAP constraint syntax and current access must be checked at runtime. Land elevations positive, underwater depths negative (m). TID identifies measured/predicted/interpolated data. Grid spacing is not actual bathymetric accuracy; vertical reference approximates mean sea level with local variations. Not for marine navigation.",
+      "verified_on": "2026-10-24",
+      "example_url": "https://data.ceda.ac.uk/bodc/gebco/global/gebco_2026/ice_surface_elevation/netcdf",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "nominatim",
+      "name": "OSM Foundation Nominatim Public API",
+      "category": "geocoding",
+      "documentation_url": "https://operations.osmfoundation.org/policies/nominatim/",
+      "service_url": "https://nominatim.openstreetmap.org",
+      "access": "restricted-public",
+      "authentication": "none",
+      "coverage": "global OSM data",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Absolute maximum 1 request/second per application; identifying User-Agent/Referer; no autocomplete; no systematic scraping.",
+      "attribution": "OSM contributors / ODbL.",
+      "use_cases": [
+        "manual name and address searches",
+        "reverse geocoding"
+      ],
+      "caveat": "OSMF-hosted server is NOT for autocomplete, systematic/bulk extraction, generic geocoding backends, or white-label geocoding services. Do not embed as automatic fallback in agent-generated apps; use permissioned or self-hosted alternatives.",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "pricing_group": "public-fair-use",
+      "cost_tier": "restricted"
+    },
+    {
+      "id": "photon-komoot",
+      "name": "Photon OSM Geocoder (public demo / self-host)",
+      "category": "geocoding",
+      "documentation_url": "https://github.com/komoot/photon",
+      "service_url": "https://photon.komoot.io/api",
+      "access": "public-fair-use",
+      "authentication": "none on public demo",
+      "coverage": "Global OpenStreetMap-derived locations",
+      "formats": [
+        "GeoJSON"
+      ],
+      "limits": "Public demonstration is best-effort; undocumented reasonable-use threshold, throttling or bans; self-host for production volume.",
+      "attribution": "© OpenStreetMap contributors / ODbL; Photon software license separately.",
+      "use_cases": [
+        "search-as-you-type",
+        "multilingual names",
+        "reverse geocoding"
+      ],
+      "caveat": "The demo is NOT a guaranteed commercial production backend; no fixed daily allowance is published. Self-hosting requires OSM import and server resources.",
+      "verified_on": "2026-10-25",
+      "example_url": "https://photon.komoot.io/api?q=Cairo&limit=3",
+      "pricing_group": "public-fair-use",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "arcgis-world-geocoding",
+      "name": "Esri ArcGIS World Geocoding Service",
+      "category": "geocoding",
+      "documentation_url": "https://developers.arcgis.com/rest/geocode/",
+      "service_url": "https://geocode-api.arcgis.com/arcgis/rest/services/World/GeocodeServer/findAddressCandidates",
+      "access": "free-key-required",
+      "authentication": "ArcGIS Location Platform API key / account",
+      "coverage": "Global country-dependent addresses and places",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "ArcGIS Location Platform: 20,000 free *non-stored geocodes* per month according to pricing; stored/batch stored geocodes are billed. Suggestions currently shown at $0 in platform pricing.",
+      "attribution": "Esri and licensed source attribution per service terms.",
+      "use_cases": [
+        "address/POI search",
+        "suggestions",
+        "reverse geocoding"
+      ],
+      "caveat": "Charges may be per result returned rather than per request; 'forStorage=true' changes billing. Do not cache stored geocodes on non-stored entitlement.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "free-with-quota",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "geoapify-geocoding",
+      "name": "Geoapify Geocoding & Autocomplete",
+      "category": "geocoding",
+      "documentation_url": "https://apidocs.geoapify.com/docs/geocoding/",
+      "service_url": "https://api.geoapify.com/v1/geocode/search",
+      "access": "free-key-required",
+      "authentication": "individual API key",
+      "coverage": "Global addresses, cities and OSM POIs",
+      "formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "limits": "Free 3,000 credits/day, up to 5 requests/second; a typical forward/reverse/autocomplete request costs one credit. Free plan can serve commercial production with required attribution.",
+      "attribution": "Geoapify and underlying OSM contributors attribution.",
+      "use_cases": [
+        "address geocoding",
+        "autocomplete",
+        "POI text search"
+      ],
+      "caveat": "Keep API keys private; check feature-specific costs, result storage and applicable third-party dataset licenses.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "free-with-quota",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "geocode-maps-co",
+      "name": "geocode.maps.co Geocoding",
+      "category": "geocoding",
+      "documentation_url": "https://geocode.maps.co/plans/",
+      "service_url": "https://geocode.maps.co/search",
+      "access": "free-limited",
+      "authentication": "personal API key / demo account",
+      "coverage": "Global OSM-derived address search",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free Demo Account advertises 25,000 requests at up to 5 requests/second, then throttling to 1 request/second; plan page says no daily limit. Verify current policy and applicability.",
+      "attribution": "Credit data suppliers and site as contract requires; OSM attribution where applicable.",
+      "use_cases": [
+        "forward/reverse geocoding",
+        "simple place search"
+      ],
+      "caveat": "Demo/free allowance is not 25,000 requests per day; do not interpret it as a daily reset, or assume commercial production permissions.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "free-with-quota",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "geonames",
+      "name": "GeoNames Web Services",
+      "category": "geocoding",
+      "documentation_url": "https://www.geonames.org/export/",
+      "service_url": "https://secure.geonames.org/searchJSON",
+      "access": "free-registration",
+      "authentication": "username",
+      "coverage": "Global gazetteer",
+      "formats": [
+        "JSON",
+        "XML"
+      ],
+      "limits": "10,000 credits/day and 1,000 credits/hour per username (typically one search request = one credit); attribution and CC BY apply.",
+      "attribution": "Cite named provider, original underlying dataset and applicable per-product license.",
+      "use_cases": [
+        "gazetteer of cities, villages, mountains, rivers and geographic names",
+        "alternate names and multilingual search"
+      ],
+      "caveat": "Validate transliteration and administrative names; GeoNames data CC BY",
+      "verified_on": "2026-10-24",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "pricing_group": "free-with-quota",
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "locationiq-geocoding",
+      "name": "LocationIQ Geocoding & Autocomplete",
+      "category": "geocoding",
+      "documentation_url": "https://locationiq.com/geocoding",
+      "service_url": "https://us1.locationiq.com/v1/search",
+      "access": "free-key-required",
+      "authentication": "individual access token",
+      "coverage": "Global address and POI search",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free 5,000 requests/day with 2 requests/second; limited commercial use requires a prominent powered-by LocationIQ link and compliance with their terms.",
+      "attribution": "LocationIQ attribution; OSM contributors where used.",
+      "use_cases": [
+        "address name search",
+        "reverse geocoding",
+        "autocomplete"
+      ],
+      "caveat": "Free terms require attribution; rate ceilings and data storage rights must be reviewed before embedding.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "free-with-quota",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "maptiler-geocoding",
+      "name": "MapTiler Geocoding",
+      "category": "geocoding",
+      "documentation_url": "https://docs.maptiler.com/cloud/api/geocoding/",
+      "service_url": "https://api.maptiler.com/geocoding/Cairo.json",
+      "access": "free-key-required",
+      "authentication": "individual MapTiler Cloud key",
+      "coverage": "Global OSM-derived search coverage",
+      "formats": [
+        "JSON",
+        "GeoJSON"
+      ],
+      "limits": "Free Cloud plan currently lists 1,000 search sessions/month and 100,000 total API requests/month across product use; verify free-vs-commercial plan terms and search session accounting.",
+      "attribution": "MapTiler and OSM/data source attribution.",
+      "use_cases": [
+        "forward geocoding",
+        "autocomplete",
+        "MapLibre place search"
+      ],
+      "caveat": "Search sessions and general API request quota are distinct; hosted free plan conditions may restrict commercial deployment; do not promise unrestricted production use.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "free-with-quota",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    },
+    {
+      "id": "opencage-geocoding",
+      "name": "OpenCage Geocoding Trial",
+      "category": "geocoding",
+      "documentation_url": "https://opencagedata.com/api",
+      "service_url": "https://api.opencagedata.com/geocode/v1/json",
+      "access": "free-trial",
+      "authentication": "personal API key",
+      "coverage": "Global addresses and named locations",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free trial: 2,500 requests/day at 1 request/second, explicitly TESTING ONLY; ongoing production use requires a paid plan.",
+      "attribution": "OpenCage and constituent open-data attribution.",
+      "use_cases": [
+        "forward/reverse geocoding",
+        "evaluation of place names"
+      ],
+      "caveat": "Do not deploy ongoing production workloads under trial; must upgrade for sustained service use despite seemingly ample daily credits.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "trial-only",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "trial"
+    },
+    {
+      "id": "google-places-new",
+      "name": "Google Places API (New) Text Search",
+      "category": "geocoding",
+      "documentation_url": "https://developers.google.com/maps/documentation/places/web-service/text-search",
+      "service_url": "https://places.googleapis.com/v1/places:searchText",
+      "access": "commercial-metered",
+      "authentication": "Google Maps Platform project with billing + key",
+      "coverage": "Global place/business search depending on region",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Commercial SKU pricing and monthly free usage caps vary by operation/field mask; account billing must be enabled. Do not infer 2,500 daily free geocodes.",
+      "attribution": "Google Maps Platform Places policies, attribution and display restrictions.",
+      "use_cases": [
+        "named POI and establishment searches",
+        "text search",
+        "autocomplete"
+      ],
+      "caveat": "Text search is POST and requires field mask; returned data storage/caching and map usage are license-constrained; choose minimal billable fields.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "commercial",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "commercial"
+    },
+    {
+      "id": "here-search",
+      "name": "HERE Geocoding & Search",
+      "category": "geocoding",
+      "documentation_url": "https://docs.here.com/geocoding-and-search/docs",
+      "service_url": "https://geocode.search.hereapi.com/v1/geocode",
+      "access": "commercial-metered",
+      "authentication": "HERE platform key and plan",
+      "coverage": "Global addresses, POIs, administrative areas",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Commercial/account-plan allowances may include a free tier; verify current plan, billable transactions and rates before use.",
+      "attribution": "HERE and relevant data-owner attribution terms.",
+      "use_cases": [
+        "address geocoding",
+        "autosuggest",
+        "POI search"
+      ],
+      "caveat": "Autosuggest uses a separate HERE endpoint and location context; enterprise features and caching rights are plan-dependent.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "commercial",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "commercial"
+    },
+    {
+      "id": "mapbox-search-box",
+      "name": "Mapbox Search Box API",
+      "category": "geocoding",
+      "documentation_url": "https://docs.mapbox.com/api/search/search-box/",
+      "service_url": "https://api.mapbox.com/search/searchbox/v1/suggest",
+      "access": "commercial-metered",
+      "authentication": "Mapbox access token + billing account",
+      "coverage": "Regional/global POI and address coverage varies",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Commercial metering: /suggest + /retrieve billed by search sessions (free monthly allowance varies by pricing tier); /category and /reverse per request.",
+      "attribution": "Mapbox attribution and search data terms.",
+      "use_cases": [
+        "interactive POI autocomplete",
+        "address and place search"
+      ],
+      "caveat": "Search Box coordinates are temporary-use only without separate agreement; session_token required for suggest/retrieve; do not archive results in GIS datasets as permanent coordinates.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "commercial",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "commercial"
+    },
+    {
+      "id": "tomtom-search",
+      "name": "TomTom Search / Places Search",
+      "category": "geocoding",
+      "documentation_url": "https://docs.tomtom.com/search-api/documentation/product-information/introduction",
+      "service_url": "https://api.tomtom.com/search/2/search/Cairo.json",
+      "access": "commercial-metered",
+      "authentication": "TomTom developer key and plan",
+      "coverage": "Global POIs, roads and addresses; regional differences",
+      "formats": [
+        "JSON"
+      ],
+      "limits": "Free developer allowances and commercial overage depend on the plan; verify current Search/Places pricing and per-second caps.",
+      "attribution": "TomTom Maps data attribution and license.",
+      "use_cases": [
+        "single-line fuzzy geosearch",
+        "POI search",
+        "autocomplete"
+      ],
+      "caveat": "TomTom recommends Places Search API for new applications; legacy Search v2 remains documented. Do not assume new and old API endpoints share quotas.",
+      "verified_on": "2026-10-25",
+      "pricing_group": "commercial",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "commercial"
+    },
+    {
+      "id": "opengeohub-stac-api",
+      "name": "OpenGeoHub STAC API",
+      "category": "satellite-imagery",
+      "documentation_url": "https://opengeohub.org/",
+      "service_url": "https://stac.opengeohub.org/v1/",
+      "access": "public-fair-use",
+      "authentication": "none",
+      "coverage": "global",
+      "formats": [
+        "STAC-JSON",
+        "GeoJSON",
+        "COG",
+        "GeoTIFF"
+      ],
+      "limits": "Open public STAC API without authentication; rate-limit requests responsibly and cache metadata; search queries require POST /v1/cat/{catalog_id}/search.",
+      "attribution": "Attribution to OpenGeoHub Foundation, OpenLandMap and EcoDataCube; licenses vary by dataset (mostly CC BY 4.0, CC BY-SA 4.0, ODbL).",
+      "use_cases": [
+        "STAC catalog search",
+        "global soil properties",
+        "land cover time series",
+        "biomass carbon stock",
+        "cloud-optimized geotiff streaming"
+      ],
+      "caveat": "Interactive browser UI lives at https://stac.opengeohub.org/ while programmatic REST API root is https://stac.opengeohub.org/v1/. Search endpoint /search requires HTTP POST with JSON payload (GET returns 405). Raster assets are hosted as COGs on Ceph S3 storage.",
+      "verified_on": "2026-10-30",
+      "example_url": "https://stac.opengeohub.org/v1/cat",
+      "status": "unknown",
+      "last_checked": null,
+      "tested_by_repository": false,
+      "native_runtime_verified": false,
+      "policy_changed": null,
+      "cost_tier": "free-conditional"
+    }
+  ],
+  "pricing_groups": {
+    "self-hosted-open-source": "Open-source software hosted by the developer; no third-party hosted quota is implied.",
+    "public-fair-use": "Public or no-key service with specific restrictions, rate limits or non-commercial conditions.",
+    "free-with-quota": "Free service allowance under provider-specific account/key, daily/monthly limits and licensing.",
+    "trial-only": "Free for evaluation only; not an ongoing free production entitlement.",
+    "commercial": "Commercial/metered service; some billable SKUs may have free monthly allowances."
+  },
+  "cost_tiers": {
+    "free-self-hosted": "Open-source service that you operate; hosting/resources may cost.",
+    "free-conditional": "Public/registered/noncommercial/quota/terms restricted: verify eligible use.",
+    "restricted": "Public-facing endpoint with strict policy; not default free-only app backend.",
+    "trial": "Temporary/test-only free evaluation; not a durable free service.",
+    "commercial": "Billing or commercial platform; any free allowance is conditional.",
+    "unavailable": "Source reports unavailable; never recommend as active without checking."
+  }
+}

@@ -1,0 +1,682 @@
+{
+  "schema_version": "1.0",
+  "catalog_title": "GIS Code Sources Registry",
+  "note": "Curated starting reference index for GIS code snippets, SDK samples, and cookbooks. External sources remain untrusted inputs requiring license review and spatial validation.",
+  "sources": [
+    {
+      "source_id": "esri-arcgis-pro-sdk-snippets",
+      "source_name": "Esri ArcGIS Pro SDK Snippets",
+      "source_url": "https://github.com/Esri/arcgis-pro-sdk-snippets",
+      "source_type": "official-code-snippets",
+      "organization": "Esri",
+      "official_status": "official",
+      "gis_domains": [
+        "desktop-gis",
+        "add-in-development",
+        "map-authoring"
+      ],
+      "programming_languages": [
+        "C#"
+      ],
+      "frameworks": [
+        "ArcGIS Pro SDK for .NET"
+      ],
+      "supported_versions": [
+        "ArcGIS Pro 3.x",
+        ".NET 8"
+      ],
+      "code_categories": [
+        "map-exploration",
+        "geodatabase",
+        "editing",
+        "layouts",
+        "queued-tasks"
+      ],
+      "license": "Apache-2.0",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "C# only; requires QueuedTask.Run for ArcGIS Pro internal thread affinity. Not usable for ArcPy.",
+      "recommended_use_cases": [
+        "ArcGIS Pro ribbon buttons",
+        "dockpanes",
+        "geodatabase operations in .NET"
+      ]
+    },
+    {
+      "source_id": "esri-arcgis-pro-sdk-community-samples",
+      "source_name": "ArcGIS Pro SDK Community Samples",
+      "source_url": "https://github.com/Esri/arcgis-pro-sdk-community-samples",
+      "source_type": "complete-add-in-examples",
+      "organization": "Esri",
+      "official_status": "official-community",
+      "gis_domains": [
+        "desktop-gis",
+        "add-in-architecture",
+        "geoprocessing-integration"
+      ],
+      "programming_languages": [
+        "C#"
+      ],
+      "frameworks": [
+        "ArcGIS Pro SDK for .NET",
+        "WPF"
+      ],
+      "supported_versions": [
+        "ArcGIS Pro 3.x",
+        ".NET 8"
+      ],
+      "code_categories": [
+        "ribbon-commands",
+        "dockpanes",
+        "map-views",
+        "configurations"
+      ],
+      "license": "Apache-2.0",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Multi-file projects; verify matching target ArcGIS Pro SDK minor version before compilation.",
+      "recommended_use_cases": [
+        "Full add-in architecture",
+        "WPF DockPanes",
+        "complex spatial tool workflows"
+      ]
+    },
+    {
+      "source_id": "esri-arcpy-official-docs",
+      "source_name": "ArcPy Official Documentation",
+      "source_url": "https://pro.arcgis.com/en/pro-app/latest/arcpy/",
+      "source_type": "official-api-reference",
+      "organization": "Esri",
+      "official_status": "official",
+      "gis_domains": [
+        "geoprocessing",
+        "spatial-analyst",
+        "geodatabase",
+        "automation"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "ArcPy"
+      ],
+      "supported_versions": [
+        "ArcGIS Pro 3.x",
+        "Python 3.11+"
+      ],
+      "code_categories": [
+        "geoprocessing",
+        "feature-classes",
+        "raster-analysis",
+        "cartography-automation"
+      ],
+      "license": "Proprietary Documentation",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Requires licensed ArcGIS Pro/Server runtime environment and appropriate license levels (Basic/Standard/Advanced). Do not mix with ArcGIS Pro SDK C#.",
+      "recommended_use_cases": [
+        "Headless spatial data processing",
+        "ArcGIS toolbox geoprocessing scripts"
+      ]
+    },
+    {
+      "source_id": "qgis-pyqgis-developer-cookbook",
+      "source_name": "PyQGIS Developer Cookbook",
+      "source_url": "https://docs.qgis.org/latest/en/docs/pyqgis_developer_cookbook/index.html",
+      "source_type": "official-programming-documentation",
+      "organization": "QGIS Project",
+      "official_status": "official",
+      "gis_domains": [
+        "desktop-gis",
+        "pyqgis",
+        "plugin-development",
+        "processing-algorithms"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "PyQGIS",
+        "Qt"
+      ],
+      "supported_versions": [
+        "QGIS 3.x"
+      ],
+      "code_categories": [
+        "layers",
+        "processing-algorithms",
+        "geometry",
+        "coordinate-transformations",
+        "symbology"
+      ],
+      "license": "CC-BY-SA-3.0",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "PyQGIS requires running within QGIS environment or configured OSGeo4W/QGIS python path.",
+      "recommended_use_cases": [
+        "QGIS plugins",
+        "custom QgsProcessingAlgorithm",
+        "map canvas scripting"
+      ]
+    },
+    {
+      "source_id": "qgis-plugins-repository",
+      "source_name": "QGIS Plugins Repository",
+      "source_url": "https://plugins.qgis.org/",
+      "source_type": "plugin-directory",
+      "organization": "QGIS Community",
+      "official_status": "community",
+      "gis_domains": [
+        "desktop-gis",
+        "plugin-architecture"
+      ],
+      "programming_languages": [
+        "Python",
+        "C++"
+      ],
+      "frameworks": [
+        "PyQGIS"
+      ],
+      "supported_versions": [
+        "QGIS 3.x"
+      ],
+      "code_categories": [
+        "plugins",
+        "extensions",
+        "providers"
+      ],
+      "license": "GPL-2.0-or-later",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "medium",
+      "limitations": "Individual plugins vary in code quality; copyleft licenses require careful architectural isolation.",
+      "recommended_use_cases": [
+        "Discovering existing solutions before reinventing",
+        "studying GUI integration patterns"
+      ]
+    },
+    {
+      "source_id": "intro-gis-programming",
+      "source_name": "Introduction to GIS Programming (giswqs)",
+      "source_url": "https://github.com/giswqs/intro-gispro",
+      "source_type": "practical-python-examples",
+      "organization": "Qiusheng Wu",
+      "official_status": "community",
+      "gis_domains": [
+        "python-gis",
+        "spatial-analysis",
+        "open-source-gis"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "GeoPandas",
+        "Rasterio",
+        "GDAL",
+        "Xarray",
+        "WhiteboxTools"
+      ],
+      "supported_versions": [
+        "Python 3.10+"
+      ],
+      "code_categories": [
+        "rasterio",
+        "geopandas",
+        "gdal",
+        "whiteboxtools",
+        "earth-engine"
+      ],
+      "license": "MIT",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Educational notebooks; code must be hardened for enterprise production error handling.",
+      "recommended_use_cases": [
+        "GeoPandas vector workflows",
+        "Rasterio DEM analysis",
+        "WhiteboxTools hydrology"
+      ]
+    },
+    {
+      "source_id": "opengeos-python-geospatial",
+      "source_name": "OpenGeos Python Geospatial",
+      "source_url": "https://github.com/opengeos/python-geospatial",
+      "source_type": "open-source-collection",
+      "organization": "OpenGeos",
+      "official_status": "community",
+      "gis_domains": [
+        "interactive-mapping",
+        "remote-sensing",
+        "cloud-native-geospatial"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "Leafmap",
+        "Geemap",
+        "Segment-Geospatial"
+      ],
+      "supported_versions": [
+        "Python 3.10+"
+      ],
+      "code_categories": [
+        "interactive-maps",
+        "stac",
+        "cog",
+        "ai-segmentation"
+      ],
+      "license": "MIT",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Rapidly evolving libraries; verify pinning in requirements.",
+      "recommended_use_cases": [
+        "Cloud-native geospatial (COG/STAC)",
+        "Leafmap interactive web mapping"
+      ]
+    },
+    {
+      "source_id": "gdal-python-samples",
+      "source_name": "GDAL Python Samples",
+      "source_url": "https://gdal.org/en/stable/api/python/python_samples.html",
+      "source_type": "official-code-examples",
+      "organization": "OSGeo",
+      "official_status": "official",
+      "gis_domains": [
+        "raster-processing",
+        "vector-processing",
+        "georeferencing"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "GDAL",
+        "OGR",
+        "OSR"
+      ],
+      "supported_versions": [
+        "GDAL 3.x+"
+      ],
+      "code_categories": [
+        "raster-io",
+        "vector-io",
+        "coordinate-transformations",
+        "format-conversion"
+      ],
+      "license": "MIT/X",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Low-level C-bindings; require proper dataset closing (dereferencing) to flush writes.",
+      "recommended_use_cases": [
+        "Fast GeoTIFF raster sampling",
+        "OGR vector conversions",
+        "reprojection pipelines"
+      ]
+    },
+    {
+      "source_id": "geemap-community",
+      "source_name": "Geemap Library & Examples",
+      "source_url": "https://github.com/gee-community/geemap",
+      "source_type": "remote-sensing-and-earth-engine",
+      "organization": "GEE Community",
+      "official_status": "community",
+      "gis_domains": [
+        "remote-sensing",
+        "earth-engine",
+        "satellite-imagery"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "Google Earth Engine",
+        "Geemap"
+      ],
+      "supported_versions": [
+        "Python 3.9+"
+      ],
+      "code_categories": [
+        "satellite-imagery",
+        "land-cover",
+        "time-series",
+        "raster-export"
+      ],
+      "license": "MIT",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Requires Google Earth Engine authentication and active project quota.",
+      "recommended_use_cases": [
+        "Sentinel/Landsat imagery filtering",
+        "cloud masking",
+        "NDVI calculation"
+      ]
+    },
+    {
+      "source_id": "gis-snippets-pechnikov",
+      "source_name": "GIS Snippets (Pechnikov)",
+      "source_url": "https://github.com/AlexeyPechnikov/gis-snippets",
+      "source_type": "specialized-code-examples",
+      "organization": "Alexey Pechnikov",
+      "official_status": "community",
+      "gis_domains": [
+        "scientific-gis",
+        "geology",
+        "mathematical-modeling"
+      ],
+      "programming_languages": [
+        "Python",
+        "Jupyter"
+      ],
+      "frameworks": [
+        "GDAL",
+        "GeoPandas",
+        "Scipy"
+      ],
+      "supported_versions": [
+        "Python 3.x"
+      ],
+      "code_categories": [
+        "elevation-modeling",
+        "spatial-interpolation",
+        "geology"
+      ],
+      "license": "MIT",
+      "license_verified": true,
+      "maintenance_status": "periodically-updated",
+      "last_checked": "2026-10-29",
+      "priority": "medium",
+      "limitations": "Specialized algorithms; verify against current GDAL bindings before reuse.",
+      "recommended_use_cases": [
+        "Non-standard mathematical spatial interpolation",
+        "geological modeling"
+      ]
+    },
+    {
+      "source_id": "awesome-gis",
+      "source_name": "Awesome GIS Directory",
+      "source_url": "https://github.com/sshuair/awesome-gis",
+      "source_type": "source-discovery-directory",
+      "organization": "Community Curated",
+      "official_status": "community",
+      "gis_domains": [
+        "cross-platform-gis",
+        "web-gis",
+        "spatial-databases",
+        "mobile-gis"
+      ],
+      "programming_languages": [
+        "Multi-language"
+      ],
+      "frameworks": [
+        "Any"
+      ],
+      "supported_versions": [
+        "Any"
+      ],
+      "code_categories": [
+        "libraries",
+        "frameworks",
+        "tools",
+        "data-catalogs"
+      ],
+      "license": "CC0-1.0",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "medium",
+      "limitations": "Directory index only, not executable code; each indexed project must be evaluated separately.",
+      "recommended_use_cases": [
+        "Discovering alternative geospatial engines and tools"
+      ]
+    },
+    {
+      "source_id": "gis-stackexchange",
+      "source_name": "GIS Stack Exchange",
+      "source_url": "https://gis.stackexchange.com/",
+      "source_type": "community-problem-solving",
+      "organization": "Stack Exchange",
+      "official_status": "community",
+      "gis_domains": [
+        "troubleshooting",
+        "edge-cases",
+        "crs-debugging"
+      ],
+      "programming_languages": [
+        "Python",
+        "C#",
+        "SQL",
+        "JavaScript"
+      ],
+      "frameworks": [
+        "ArcGIS",
+        "QGIS",
+        "GDAL",
+        "PostGIS",
+        "MapLibre"
+      ],
+      "supported_versions": [
+        "Any"
+      ],
+      "code_categories": [
+        "debugging",
+        "error-remediation",
+        "syntax-edge-cases"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "license_verified": true,
+      "maintenance_status": "actively-maintained",
+      "last_checked": "2026-10-29",
+      "priority": "high",
+      "limitations": "Community answers require attribution and license consideration; code snippets may be dated.",
+      "recommended_use_cases": [
+        "Investigating specific GIS error messages",
+        "CRS transformation quirks"
+      ]
+    },
+    {
+      "source_id": "openlandmap-scikit-map",
+      "source_name": "scikit-map",
+      "source_url": "https://github.com/openlandmap/scikit-map",
+      "source_type": "upstream-research-and-code-reference",
+      "organization": "openlandmap",
+      "official_status": "original-publisher",
+      "gis_domains": [
+        "environmental-gis",
+        "remote-sensing",
+        "spatial-modeling"
+      ],
+      "programming_languages": [
+        "Python"
+      ],
+      "frameworks": [
+        "Verify per upstream module"
+      ],
+      "supported_versions": [
+        "Inspect release and dependencies"
+      ],
+      "code_categories": [
+        "research-methods",
+        "processing-examples"
+      ],
+      "license": "MIT",
+      "license_verified": true,
+      "license_scope": "Root repository; external data/files excluded",
+      "license_checked_on": "2026-10-30",
+      "license_evidence_url": "https://github.com/openlandmap/scikit-map/blob/main/LICENSE",
+      "license_caveat": "Review independent files and dependency licenses.",
+      "maintenance_status": "unverified",
+      "last_checked": "2026-10-30",
+      "priority": "medium",
+      "limitations": "Reference only; check code, dataset and dependencies separately.",
+      "recommended_use_cases": [
+        "Spatial machine learning library"
+      ]
+    },
+    {
+      "source_id": "openlandmap-soildb",
+      "source_name": "soildb",
+      "source_url": "https://github.com/openlandmap/soildb",
+      "source_type": "upstream-research-and-code-reference",
+      "organization": "openlandmap",
+      "official_status": "original-publisher",
+      "gis_domains": [
+        "environmental-gis",
+        "remote-sensing",
+        "spatial-modeling"
+      ],
+      "programming_languages": [
+        "Verify per module"
+      ],
+      "frameworks": [
+        "Verify per upstream module"
+      ],
+      "supported_versions": [
+        "Inspect release and dependencies"
+      ],
+      "code_categories": [
+        "research-methods",
+        "processing-examples"
+      ],
+      "license": "unknown",
+      "license_verified": false,
+      "maintenance_status": "unverified",
+      "last_checked": "2026-10-30",
+      "priority": "medium",
+      "limitations": "Root LICENSE not found; conceptual reference only, no copying.",
+      "recommended_use_cases": [
+        "Soil databases, methods and source examples"
+      ]
+    },
+    {
+      "source_id": "openlandmap-GEDTM30",
+      "source_name": "GEDTM30",
+      "source_url": "https://github.com/openlandmap/GEDTM30",
+      "source_type": "upstream-research-and-code-reference",
+      "organization": "openlandmap",
+      "official_status": "original-publisher",
+      "gis_domains": [
+        "environmental-gis",
+        "remote-sensing",
+        "spatial-modeling"
+      ],
+      "programming_languages": [
+        "Verify per module"
+      ],
+      "frameworks": [
+        "Verify per upstream module"
+      ],
+      "supported_versions": [
+        "Inspect release and dependencies"
+      ],
+      "code_categories": [
+        "research-methods",
+        "processing-examples"
+      ],
+      "license": "unknown",
+      "license_verified": false,
+      "maintenance_status": "unverified",
+      "last_checked": "2026-10-30",
+      "priority": "medium",
+      "limitations": "Root LICENSE not found; conceptual reference only, no copying.",
+      "recommended_use_cases": [
+        "Global elevation and terrain product reference"
+      ]
+    },
+    {
+      "source_id": "opengeohub-spatial-prediction-eml",
+      "source_name": "spatial-prediction-eml",
+      "source_url": "https://github.com/opengeohub/spatial-prediction-eml",
+      "source_type": "upstream-research-and-code-reference",
+      "organization": "opengeohub",
+      "official_status": "original-publisher",
+      "gis_domains": [
+        "environmental-gis",
+        "remote-sensing",
+        "spatial-modeling"
+      ],
+      "programming_languages": [
+        "R"
+      ],
+      "frameworks": [
+        "Verify per upstream module"
+      ],
+      "supported_versions": [
+        "Inspect release and dependencies"
+      ],
+      "code_categories": [
+        "research-methods",
+        "processing-examples"
+      ],
+      "license": "CC-BY-SA-4.0",
+      "license_verified": true,
+      "license_scope": "Root repository; external data/files excluded",
+      "license_checked_on": "2026-10-30",
+      "license_evidence_url": "https://github.com/opengeohub/spatial-prediction-eml/blob/master/LICENSE",
+      "license_caveat": "Review independent files and dependency licenses.",
+      "maintenance_status": "unverified",
+      "last_checked": "2026-10-30",
+      "priority": "medium",
+      "limitations": "Reference only; check code, dataset and dependencies separately.",
+      "recommended_use_cases": [
+        "Educational ensemble spatial prediction material"
+      ]
+    },
+    {
+      "source_id": "openlandmap-spatial-layers",
+      "source_name": "spatial-layers",
+      "source_url": "https://github.com/openlandmap/spatial-layers",
+      "source_type": "upstream-research-and-code-reference",
+      "organization": "openlandmap",
+      "official_status": "original-publisher",
+      "gis_domains": [
+        "environmental-gis",
+        "remote-sensing",
+        "spatial-modeling"
+      ],
+      "programming_languages": [
+        "Mixed"
+      ],
+      "frameworks": [
+        "Verify per upstream module"
+      ],
+      "supported_versions": [
+        "Inspect release and dependencies"
+      ],
+      "code_categories": [
+        "research-methods",
+        "processing-examples"
+      ],
+      "license": "GPL-3.0",
+      "license_verified": true,
+      "license_scope": "Root repository; external data/files excluded",
+      "license_checked_on": "2026-10-30",
+      "license_evidence_url": "https://github.com/openlandmap/spatial-layers/blob/main/LICENSE",
+      "license_caveat": "Review independent files and dependency licenses.",
+      "maintenance_status": "unverified",
+      "last_checked": "2026-10-30",
+      "priority": "medium",
+      "limitations": "Reference only; check code, dataset and dependencies separately.",
+      "recommended_use_cases": [
+        "GIS layer definitions and map style sources"
+      ]
+    }
+  ]
+}

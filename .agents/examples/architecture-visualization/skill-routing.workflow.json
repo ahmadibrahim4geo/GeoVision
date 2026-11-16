@@ -1,0 +1,177 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "GIS Skills: Optional Visual Explanation",
+    "subtitle": "Authored integration workflow; not a live agent trace",
+    "quality_profile": "showcase",
+    "visual_preset": "signal-flow",
+    "output": "examples/architecture-visualization/skill-routing.html"
+  },
+  "lanes": [
+    {
+      "id": "agent",
+      "label": "Intent and domain ownership"
+    },
+    {
+      "id": "visual",
+      "label": "Conditional visualization"
+    },
+    {
+      "id": "report",
+      "label": "Evidence and project history"
+    },
+    {
+      "id": "memory",
+      "label": "Project history"
+    }
+  ],
+  "mainPath": [
+    "request",
+    "router",
+    "owner",
+    "findings",
+    "archify",
+    "html",
+    "proof",
+    "journal"
+  ],
+  "nodes": [
+    {
+      "id": "request",
+      "lane": "agent",
+      "col": 0,
+      "type": "external",
+      "label": "User request",
+      "sublabel": "goal and question",
+      "width": 170
+    },
+    {
+      "id": "router",
+      "lane": "agent",
+      "col": 1,
+      "type": "backend",
+      "label": "GIS router",
+      "sublabel": "select accountable owner",
+      "width": 170
+    },
+    {
+      "id": "owner",
+      "lane": "agent",
+      "col": 2,
+      "type": "backend",
+      "label": "Domain owner",
+      "sublabel": "inspect relevant project",
+      "width": 170
+    },
+    {
+      "id": "findings",
+      "lane": "agent",
+      "col": 3,
+      "type": "database",
+      "label": "Reviewed findings",
+      "sublabel": "code, traces and limits",
+      "width": 170
+    },
+    {
+      "id": "archify",
+      "lane": "visual",
+      "col": 3,
+      "type": "backend",
+      "label": "Archify",
+      "sublabel": "selected visual explanation",
+      "width": 170
+    },
+    {
+      "id": "html",
+      "lane": "visual",
+      "col": 4,
+      "type": "frontend",
+      "label": "Interactive HTML",
+      "sublabel": "editable JSON alongside",
+      "width": 170
+    },
+    {
+      "id": "proof",
+      "lane": "report",
+      "col": 4,
+      "type": "security",
+      "label": "DoneProof",
+      "sublabel": "inspect actual checks",
+      "width": 170
+    },
+    {
+      "id": "journal",
+      "lane": "memory",
+      "col": 4,
+      "type": "database",
+      "label": "Project journal",
+      "sublabel": "record artifacts and gaps",
+      "width": 170
+    }
+  ],
+  "edges": [
+    {
+      "id": "request-to-router",
+      "from": "request",
+      "to": "router",
+      "variant": "default"
+    },
+    {
+      "id": "router-to-owner",
+      "from": "router",
+      "to": "owner",
+      "variant": "default"
+    },
+    {
+      "id": "owner-to-findings",
+      "from": "owner",
+      "to": "findings",
+      "variant": "default"
+    },
+    {
+      "id": "findings-to-archify",
+      "from": "findings",
+      "to": "archify",
+      "variant": "emphasis",
+      "label": "when useful"
+    },
+    {
+      "id": "archify-to-html",
+      "from": "archify",
+      "to": "html",
+      "variant": "default"
+    },
+    {
+      "id": "html-to-proof",
+      "from": "html",
+      "to": "proof",
+      "variant": "default"
+    },
+    {
+      "id": "proof-to-journal",
+      "from": "proof",
+      "to": "journal",
+      "variant": "default"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "Invocation",
+      "items": [
+        "Selected for explanations, multi-component designs, diagnosis or structural changes.",
+        "Ordinary isolated edits skip this optional diagram path."
+      ]
+    },
+    {
+      "dot": "rose",
+      "title": "Evidence limits",
+      "items": [
+        "Host permissions and the domain owner remain authoritative.",
+        "A diagram or browser check does not prove GIS execution.",
+        "Missing runtime: report blocked HTML and continue optional domain work."
+      ]
+    }
+  ]
+}

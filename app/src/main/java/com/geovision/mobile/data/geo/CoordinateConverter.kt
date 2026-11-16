@@ -3,7 +3,7 @@ package com.geovision.mobile.data.geo
 import kotlin.math.*
 import java.util.Locale
 
-object CoordinateConverter {
+object GeoCoordinateMath {
 
     private const val A = 6378137.0
     private const val F = 1.0 / 298.257223563

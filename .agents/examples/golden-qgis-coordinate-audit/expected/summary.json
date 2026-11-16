@@ -1,0 +1,27 @@
+{
+  "accepted_feature_count": 2,
+  "artifact_file": "audited_points.geojson",
+  "artifact_sha256": "64a252d87cb217fff31a1da2f93c14061d606bd4386b23ac9ea7c2fcaa3cd0fa",
+  "declared_crs": "EPSG:4326",
+  "evidence_tier": "T1",
+  "input_feature_count": 5,
+  "native_qgis_status": "NOT RUN",
+  "rejected": [
+    {
+      "feature_index": 2,
+      "reason": "duplicate-id"
+    },
+    {
+      "feature_index": 3,
+      "reason": "coordinates-out-of-range"
+    },
+    {
+      "feature_index": 4,
+      "reason": "geometry-not-point"
+    }
+  ],
+  "rejected_feature_count": 3,
+  "schema_version": "1.0",
+  "source_file": "points.geojson",
+  "source_sha256": "5da2c7d2ba22e610b9887b14a8ccebf76cafefaeae564f7a70f638afaeb9d065"
+}

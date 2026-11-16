@@ -39,42 +39,44 @@ object WkbParser {
         val bo = if (buf.get() == 0.toByte()) ByteOrder.BIG_ENDIAN else ByteOrder.LITTLE_ENDIAN
         buf.order(bo)
         val raw = buf.getInt()
-        val hasZ = (raw and 0x20000) != 0
-        val geomType = raw and 0xFF
+        val hasZ = (raw in 1001..1006) || (raw in 3001..3006) || (raw and 0x80000000.toInt() != 0) || (raw and 0x20000 != 0)
+        val hasM = (raw in 2001..2006) || (raw in 3001..3006) || (raw and 0x40000000 != 0)
+        val geomType = if (raw in 1001..3999) raw % 1000 else (raw and 0xFF)
         return when (geomType) {
-            1 -> { val (x, y) = readPoint(buf, hasZ); Triple("Point", "[$x,$y]", "") }
-            2 -> parseLineString(buf, hasZ)
-            3 -> parsePolygon(buf, hasZ)
-            4 -> parseMulti(buf, hasZ) { parseGeometry(it) }
-            5 -> parseMulti(buf, hasZ) { parseGeometry(it) }
-            6 -> parseMulti(buf, hasZ) { parseGeometry(it) }
+            1 -> { val (x, y) = readPoint(buf, hasZ, hasM); Triple("Point", "[$x,$y]", "") }
+            2 -> parseLineString(buf, hasZ, hasM)
+            3 -> parsePolygon(buf, hasZ, hasM)
+            4 -> parseMulti(buf, hasZ, hasM) { parseGeometry(it) }
+            5 -> parseMulti(buf, hasZ, hasM) { parseGeometry(it) }
+            6 -> parseMulti(buf, hasZ, hasM) { parseGeometry(it) }
             else -> null
         }
     }
 
-    private fun readPoint(buf: ByteBuffer, hasZ: Boolean): Pair<Double, Double> {
+    private fun readPoint(buf: ByteBuffer, hasZ: Boolean, hasM: Boolean = false): Pair<Double, Double> {
         val x = buf.getDouble(); val y = buf.getDouble()
         if (hasZ) buf.getDouble()
+        if (hasM) buf.getDouble()
         return x to y
     }
 
-    private fun parseLineString(buf: ByteBuffer, hasZ: Boolean): Triple<String, String, String>? {
+    private fun parseLineString(buf: ByteBuffer, hasZ: Boolean, hasM: Boolean = false): Triple<String, String, String>? {
         val n = buf.getInt(); val arr = JSONArray()
-        repeat(n) { val (x, y) = readPoint(buf, hasZ); arr.put(JSONArray(doubleArrayOf(x, y))) }
+        repeat(n) { val (x, y) = readPoint(buf, hasZ, hasM); arr.put(JSONArray(doubleArrayOf(x, y))) }
         return Triple("LineString", arr.toString(), "")
     }
 
-    private fun parsePolygon(buf: ByteBuffer, hasZ: Boolean): Triple<String, String, String>? {
+    private fun parsePolygon(buf: ByteBuffer, hasZ: Boolean, hasM: Boolean = false): Triple<String, String, String>? {
         val nRings = buf.getInt(); val rings = JSONArray()
         repeat(nRings) {
             val nPts = buf.getInt(); val ring = JSONArray()
-            repeat(nPts) { val (x, y) = readPoint(buf, hasZ); ring.put(JSONArray(doubleArrayOf(x, y))) }
+            repeat(nPts) { val (x, y) = readPoint(buf, hasZ, hasM); ring.put(JSONArray(doubleArrayOf(x, y))) }
             rings.put(ring)
         }
         return Triple("Polygon", rings.toString(), "")
     }
 
-    private fun parseMulti(buf: ByteBuffer, hasZ: Boolean, parser: (ByteBuffer) -> Triple<String, String, String>?): Triple<String, String, String>? {
+    private fun parseMulti(buf: ByteBuffer, hasZ: Boolean, hasM: Boolean = false, parser: (ByteBuffer) -> Triple<String, String, String>?): Triple<String, String, String>? {
         val n = buf.getInt(); val items = JSONArray()
         var subType = ""
         repeat(n) {

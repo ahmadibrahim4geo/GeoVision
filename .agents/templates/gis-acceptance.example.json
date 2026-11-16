@@ -1,0 +1,28 @@
+{
+  "target": "Sample GeoJSON processing verification (synthetic fixture)",
+  "os": "Linux CI or local Python",
+  "application_version": "Python stdlib example; no native GIS app",
+  "python_runtime": "Python 3.11",
+  "crs_units": "EPSG:4326; coordinates in degrees (no metric operations)",
+  "evidence_tier": "T1",
+  "commands_executed": [
+    "python -m unittest discover -s tests -v"
+  ],
+  "fixtures_used": [
+    "examples/network-topology/fixtures/network.geojson"
+  ],
+  "expected_result": "3 unique lines, 1 duplicate and 4 dangling endpoints",
+  "observed_result": "Deterministic offline unit-test expectations; verify current CI run for actual pass",
+  "not_tested": [
+    "Native ArcGIS and QGIS",
+    "True topological noding"
+  ],
+  "known_limitations": [
+    "Endpoint-only screening"
+  ],
+  "source_changes": "none",
+  "provenance_licensing": "Synthetic fixture bundled in MIT repository",
+  "status": "partial",
+  "native_runtime_verified": false,
+  "evidence_links": []
+}

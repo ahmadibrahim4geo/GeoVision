@@ -316,7 +316,7 @@ fun MapScreen(
                 android.widget.FrameLayout(c).apply {
                     val osmd = MapView(c).apply {
                         val savedSource = tileSources.find { it.key == prefs.defaultMapType }?.source ?: TileSourceFactory.MAPNIK
-                        try { setTileSource(if (prefs.showBasemap) savedSource else EMPTY_TILE_SOURCE) } catch (e: Exception) { AppLogger.e(AppLogger.Tags.MAP, "tile src fail", e); setTileSource(TileSourceFactory.MAPNIK) }; setMultiTouchControls(true); setBuiltInZoomControls(false)
+                        try { setTileSource(if (prefs.showBasemap) savedSource else EMPTY_TILE_SOURCE) } catch (e: Exception) { AppLogger.e(AppLogger.Tags.MAP, "tile src fail", e); setTileSource(TileSourceFactory.MAPNIK) }; setMultiTouchControls(true); zoomController.setVisibility(org.osmdroid.views.CustomZoomButtonsController.Visibility.NEVER)
                         setHorizontalMapRepetitionEnabled(true); setVerticalMapRepetitionEnabled(false)
                         val savedLat = prefs.mapCenterLat; val savedLon = prefs.mapCenterLon; val savedZ = prefs.mapZoom
                         controller.setZoom(savedZ); controller.setCenter(GeoPoint(savedLat, savedLon)); minZoomLevel = 3.0; maxZoomLevel = 25.0

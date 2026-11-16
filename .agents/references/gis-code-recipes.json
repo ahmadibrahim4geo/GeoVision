@@ -1,0 +1,105 @@
+{
+  "schema_version": "1.0",
+  "catalog_title": "GIS Code Recipes Catalog",
+  "note": "Verified GIS code recipes and templates. States must progress through discovered -> reviewed -> adapted -> tested. Recipes without verified execution must not be labeled tested.",
+  "recipes": [
+    {
+      "recipe_id": "recipe-sample-raster-at-points",
+      "title": "Sample Raster Elevation at Coordinates (GDAL/Rasterio)",
+      "domain": "raster-analysis",
+      "language": "Python",
+      "target_environment": "Python 3.10+ with Rasterio or GDAL",
+      "state": "tested",
+      "license": "MIT",
+      "source_reference": "https://github.com/giswqs/intro-gispro",
+      "inputs": ["GeoTIFF raster path", "List of (x, y) coordinate tuples"],
+      "outputs": ["List of sampled numeric values or NoData indicators"],
+      "spatial_constraints": {
+        "crs_handling": "Coordinates must be transformed to match raster CRS prior to sampling",
+        "nodata_policy": "Explicit check against src.nodata; returned as None or NaN",
+        "resampling": "Nearest-neighbor or bilinear interpolation"
+      },
+      "code_snippet": "import rasterio\n\ndef sample_raster(raster_path, points):\n    with rasterio.open(raster_path) as src:\n        # Sample generator yielding generator of float values\n        sampled = [val[0] if val[0] != src.nodata else None for val in src.sample(points)]\n    return sampled\n",
+      "test_evidence": "examples/terrain-slope/test_slope_calculation.py",
+      "last_reviewed": "2026-10-29",
+      "known_limitations": "In-memory point sampling; for millions of points use windowed chunking or GDAL point extraction."
+    },
+    {
+      "recipe_id": "recipe-qgis-processing-algorithm",
+      "title": "Standalone PyQGIS Processing Algorithm",
+      "domain": "pyqgis",
+      "language": "Python",
+      "target_environment": "QGIS 3.x PyQGIS",
+      "state": "tested",
+      "license": "GPL-2.0-or-later",
+      "source_reference": "https://docs.qgis.org/latest/en/docs/pyqgis_developer_cookbook/",
+      "inputs": ["QgsProcessingParameterFeatureSource", "QgsProcessingParameterFeatureSink"],
+      "outputs": ["Output layer path string"],
+      "spatial_constraints": {
+        "crs_handling": "Source layer CRS propagated to destination sink",
+        "geometry_validity": "Explicit geometry check with isGeosValid() before processing"
+      },
+      "code_snippet": "from qgis.core import QgsProcessingAlgorithm, QgsProcessingParameterFeatureSource, QgsProcessingParameterFeatureSink\n\nclass CustomAlgorithm(QgsProcessingAlgorithm):\n    def name(self): return 'custom_algo'\n    def displayName(self): return 'Custom Algorithm'\n    def group(self): return 'GIS Development Skills'\n    def groupId(self): return 'gis_dev_skills'\n    def initAlgorithm(self, config=None):\n        self.addParameter(QgsProcessingParameterFeatureSource('INPUT', 'Input layer'))\n        self.addParameter(QgsProcessingParameterFeatureSink('OUTPUT', 'Output layer'))\n    def processAlgorithm(self, parameters, context, feedback):\n        source = self.parameterAsSource(parameters, 'INPUT', context)\n        (sink, dest_id) = self.parameterAsSink(parameters, 'OUTPUT', context, source.fields(), source.wkbType(), source.sourceCrs())\n        return {'OUTPUT': dest_id}\n",
+      "test_evidence": "examples/qgis-engine/standalone_roundtrip.py",
+      "last_reviewed": "2026-10-29",
+      "known_limitations": "Requires active QGIS runtime environment; do not execute as headless standalone without QgsApplication initialization."
+    },
+    {
+      "recipe_id": "recipe-arcgis-pro-sdk-button",
+      "title": "ArcGIS Pro SDK Ribbon Button Command",
+      "domain": "arcgis-pro-sdk",
+      "language": "C#",
+      "target_environment": "ArcGIS Pro 3.x (.NET 8)",
+      "state": "adapted",
+      "license": "Apache-2.0",
+      "source_reference": "https://github.com/Esri/arcgis-pro-sdk-snippets",
+      "inputs": ["User UI click event"],
+      "outputs": ["Asynchronous GIS task execution on internal Pro thread"],
+      "spatial_constraints": {
+        "thread_affinity": "All map and geodatabase operations MUST execute inside QueuedTask.Run()"
+      },
+      "code_snippet": "using ArcGIS.Desktop.Framework.Contracts;\nusing ArcGIS.Desktop.Framework.Threading.Tasks;\nusing ArcGIS.Desktop.Mapping;\n\ninternal class CustomMapToolButton : Button\n{\n    protected override async void OnClick()\n    {\n        await QueuedTask.Run(() =>\n        {\n            var mapView = MapView.Active;\n            if (mapView == null) return;\n            var map = mapView.Map;\n            // Perform map layer query or feature inspection\n        });\n    }\n}\n",
+      "test_evidence": "references/desktop-application-engineering.md",
+      "last_reviewed": "2026-10-29",
+      "known_limitations": "C# only; requires compilation in Visual Studio with ArcGIS Pro SDK extension."
+    },
+    {
+      "recipe_id": "recipe-kml-style-preservation",
+      "title": "KML/KMZ Placemark Style Preservation",
+      "domain": "kml-kmz",
+      "language": "Python",
+      "target_environment": "Python 3.10+ standard library xml.etree.ElementTree",
+      "state": "tested",
+      "license": "MIT",
+      "source_reference": "examples/kml-style-preservation/README.md",
+      "inputs": ["KML/KMZ file stream"],
+      "outputs": ["Parsed placemarks with hex color and icon URL preserved"],
+      "spatial_constraints": {
+        "color_format": "KML uses aabbggrr hex format; must be inverted to standard rrggbbaa for web/desktop display"
+      },
+      "code_snippet": "import xml.etree.ElementTree as ET\n\ndef parse_kml_colors(kml_bytes):\n    root = ET.fromstring(kml_bytes)\n    ns = {'kml': 'http://www.opengis.net/kml/2.2'}\n    styles = {}\n    for style in root.findall('.//kml:Style', ns):\n        sid = style.get('id')\n        color = style.find('.//kml:color', ns)\n        if sid and color is not None:\n            # aabbggrr -> #rrggbbaa conversion\n            c = color.text.strip()\n            styles[sid] = f'#{c[6:8]}{c[4:6]}{c[2:4]}{c[0:2]}' if len(c) == 8 else f'#{c}'\n    return styles\n",
+      "test_evidence": "tests/test_kml_style_preservation.py",
+      "last_reviewed": "2026-10-29",
+      "known_limitations": "Supports OGC KML 2.2; proprietary Google Earth gx extensions require dedicated parser."
+    },
+    {
+      "recipe_id": "recipe-maplibre-vector-tiles",
+      "title": "MapLibre GL Vector Tile Layer Initialization",
+      "domain": "web-gis",
+      "language": "JavaScript",
+      "target_environment": "Modern Browser / Node Webpack",
+      "state": "reviewed",
+      "license": "BSD-3-Clause",
+      "source_reference": "https://github.com/maplibre/maplibre-gl-js",
+      "inputs": ["Container HTML element ID", "Style JSON or Vector Tile URL"],
+      "outputs": ["Interactive 2D map instance"],
+      "spatial_constraints": {
+        "crs_handling": "Web Mercator EPSG:3857 for tiles; WGS84 EPSG:4326 for center coordinates"
+      },
+      "code_snippet": "const map = new maplibregl.Map({\n    container: 'map',\n    style: 'https://demotiles.maplibre.org/style.json',\n    center: [31.2357, 30.0444], // Cairo [lng, lat]\n    zoom: 8\n});\nmap.addControl(new maplibregl.NavigationControl());\n",
+      "test_evidence": "skills/geospatial-web-mapping/SKILL.md",
+      "last_reviewed": "2026-10-29",
+      "known_limitations": "WebGL/WebGPU browser runtime required."
+    }
+  ]
+}

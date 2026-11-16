@@ -1,0 +1,41 @@
+{
+  "type": "FeatureCollection",
+  "crs": {
+    "type": "name",
+    "properties": {
+      "name": "EPSG:4326"
+    }
+  },
+  "features": [
+    {
+      "type": "Feature",
+      "id": "cairo",
+      "geometry": {"type": "Point", "coordinates": [31.2357, 30.0444]},
+      "properties": {"name": "Cairo"}
+    },
+    {
+      "type": "Feature",
+      "id": "alexandria",
+      "geometry": {"type": "Point", "coordinates": [29.9187, 31.2001]},
+      "properties": {"name": "Alexandria"}
+    },
+    {
+      "type": "Feature",
+      "id": "cairo",
+      "geometry": {"type": "Point", "coordinates": [31.24, 30.05]},
+      "properties": {"name": "Duplicate Cairo"}
+    },
+    {
+      "type": "Feature",
+      "id": "bad-latitude",
+      "geometry": {"type": "Point", "coordinates": [32.0, 98.0]},
+      "properties": {"name": "Invalid latitude"}
+    },
+    {
+      "type": "Feature",
+      "id": "not-a-point",
+      "geometry": {"type": "LineString", "coordinates": [[31.0, 30.0], [32.0, 31.0]]},
+      "properties": {"name": "Wrong geometry"}
+    }
+  ]
+}
